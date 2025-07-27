@@ -22,4 +22,4 @@ const ParametrizacaoFuncionarioService = {
     }
 }
 
-module.exports = ServicoService
+module.exports = ParametrizacaoFuncionarioService
