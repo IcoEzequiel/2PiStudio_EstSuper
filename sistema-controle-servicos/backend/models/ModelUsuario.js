@@ -5,7 +5,7 @@ const Funcionario = require('./ModelFuncionario')
 const Usuario = sequelize.define("Usuario",{
     id:{
         type: DataTypes.INTEGER,
-        autoIncremet: true,
+        autoIncrement: true,
         primaryKey:true
     },
     id_funcionario: DataTypes.INTEGER,

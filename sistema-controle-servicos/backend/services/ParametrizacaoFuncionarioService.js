@@ -1,4 +1,5 @@
 const repo = require('../repositories/ParametrizacaoFuncionarioRepository')
+const FuncionarioRepo = require('../repositories/FuncionarioRepository')
 
 const ParametrizacaoFuncionarioService = {
     getAll: async () => {
@@ -10,10 +11,14 @@ const ParametrizacaoFuncionarioService = {
     },
 
     create: async (dados) => {
+        const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+        if (!Funcionario) throw Error("Equipamento Não Existe")
         return await repo.save(dados)
     },
 
     update: async (id, dados) => {
+        const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+        if (!Funcionario) throw Error("Equipamento Não Existe")
         return await repo.update(id, dados)
     },
 

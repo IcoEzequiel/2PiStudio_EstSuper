@@ -32,7 +32,7 @@ const FeedbackController = {
     update: async (req, res) => {
         try {
             const edit = await service.update(req.params.id, req.body)
-            if (!edit) return res.status(404).json({ error: 'Serviço não encontrado'}),
+            if (!edit) return res.status(404).json({ error: 'Serviço não encontrado'})
             res.json(edit)
         } catch (err) {
             res.status(500).json({ error: err.message})

@@ -1,4 +1,6 @@
 const repo = require('../repositories/AlocacaoEquipamentoRepository')
+const ServicoRepo = require('../repositories/ServicoRepository')
+const EquipamentoRepo = require('../repositories/EquipamentoRepository')
 
 const AlocacaoEquipamentoService = {
     getAll: async () => {
@@ -10,10 +12,26 @@ const AlocacaoEquipamentoService = {
     },
 
     create: async (dados) => {
+        const Servico = await ServicoRepo.getById(dados.id_servico)
+        const Equipamento = await EquipamentoRepo.getById(dados.id_equipamento)
+        if (!Servico){
+            throw Error("Serviço Não Existe")
+        }    
+        if (!Equipamento){
+            throw Error("Fucionario Não Existe")
+        } 
         return await repo.save(dados)
     },
 
     update: async (id, dados) => {
+        const Servico = await ServicoRepo.getById(dados.id_servico)
+        const Equipamento = await EquipamentoRepo.getById(dados.id_equipamento)
+        if (!Servico){
+            throw Error("Serviço Não Existe")
+        }    
+        if (!Equipamento){
+            throw Error("Fucionario Não Existe")
+        } 
         return await repo.update(id, dados)
     },
 

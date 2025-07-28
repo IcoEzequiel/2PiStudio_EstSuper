@@ -32,8 +32,8 @@ const ClienteController = {
     update: async (req, res) => {
         try {
             const edit = await service.update(req.params.id, req.body)
-            if (!edit) return res.status(404).json({ error: 'Cliente não encontrado'}),
-            res.json(edit)
+            if (!edit) return res.status(404).json({ error: 'Cliente não encontrado'})
+            res.status(200).json(edit)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }
