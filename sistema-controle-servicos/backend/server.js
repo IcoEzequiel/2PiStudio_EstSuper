@@ -1,7 +1,18 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const app = express();
 const PORT = 3000;
+
+
+app.use(cors());
+app.use(express.json());
+
+// Servir o HTML e arquivos estáticos
+app.use(express.static(path.join(__dirname, '../frontend')));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
 
 //Const das Rotas
 const AlocacaoEquipamentoRoutes = require('./routes/AlocacaoEquipamentoRoutes')
@@ -15,8 +26,6 @@ const ParametrizacaoFuncionariosRoutes = require('./routes/ParametrizacaoFuncion
 const ServicoRoutes = require('./routes/ServicoRoutes')
 const UsuarioRoutes = require('./routes/UsuarioRoutes')
 
-app.use(cors());
-app.use(express.json());
 
 // Rotas
 
@@ -31,9 +40,6 @@ app.use('/ParametrizacaoFuncionario',ParametrizacaoFuncionariosRoutes)
 app.use('/Servico',ServicoRoutes)
 app.use('/Usuario',UsuarioRoutes)
 
-app.get('/', (req, res) => {
-  res.send('API funcionando!');
-});
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
