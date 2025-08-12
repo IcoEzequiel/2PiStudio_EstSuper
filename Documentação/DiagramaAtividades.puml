@@ -1,0 +1,48 @@
+@startuml
+
+:Login no sistema;
+
+:Cadastro de entidades
+(Funcionários, Equipamentos);
+
+:Criação de serviço;
+
+:Alocação de recursos
+(Funcionários e Equipamentos);
+
+partition "Funcionário" {
+  :Consulta agenda;
+  :Execução do serviço;
+  :Envio de feedback/relatório;
+}
+
+partition "Administrador" {
+  :Recebe feedback;
+  :Análise de dashboards e relatórios;
+  :Encerramento do serviço;
+}
+
+@enduml
+
+@startuml
+
+
+:Cadastro de Entidades
+(Funcionários, Equipamentos);
+
+:Criação de Serviço;
+
+:Alocação de Recursos
+(Funcionários e Equipamentos);
+
+fork
+  :Funcionário acessa Agenda;
+  :Executa Serviço;
+  :Envia Feedback;
+fork again
+  :Administrador acompanha Dashboard;
+end fork
+
+:Finalização do Serviço;
+
+@enduml

@@ -24,6 +24,7 @@ rectangle "Sistema de Controle de Serviços" {
   usecase "Agendar Serviços" as RF4
   usecase "Controlar Acesso" as RF5
   usecase "Enviar Feedback" as RF6
+  usecase "Consultar Agenda" as RF7
 
 }
 
@@ -34,6 +35,7 @@ Admin --> RF4
 Admin --> RF5
 
 Func --> RF6
+Func --> RF7
 
 RF1 ..> RF2 : <<include>>
 RF3 ..> RF4 : <<include>>

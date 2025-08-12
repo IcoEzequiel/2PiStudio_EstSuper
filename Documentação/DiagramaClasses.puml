@@ -1,0 +1,228 @@
+
+' Diagrama de Classes definitivo:
+@startuml
+
+class Administrador {
+  - id : int
+  - nome : string
+  - email : string
+  - telefone : string
+  + cadastrarFuncionario()
+  + cadastrarEquipamento()
+  + cadastrarCliente()
+  + criarServico()
+  + alocarRecursos()
+  + gerarRelatorio()
+}
+
+class Funcionario {
+  - id : int
+  - nome : string
+  - cpf : string
+  - email : string
+  - numTelefone : string
+  - cargo : string
+  - status : string
+  + cadastrar()
+  + atualizar()
+  + desativar()
+}
+
+class Equipamento {
+  - id : int
+  - nome : string
+  - tipo : string
+  - descricao : string
+  - status : string
+  + cadastrar()
+  + atualizar()
+  + desativar()
+}
+
+class ParametrizacaoFuncionario {
+  - id : int
+  - idFuncionario : int
+  - valorDiaria : double
+  + definirValor()
+}
+
+class ParametrizacaoEquipamento {
+  - id : int
+  - idEquipamento : int
+  - valorHora : double
+  + definirValor()
+}
+
+class Cliente {
+  - nome : string
+  - cpfCnpj : string
+  - email : string
+  - telefone : string
+  + atualizar()
+}
+
+class Servico {
+  - id : int
+  - idCliente : int
+  - descricao : string
+  - dataInicio : date
+  - dataFim : date
+  - tempoExpediente : string
+  - status : string
+  - orcamento : double
+  + iniciar()
+  + finalizar()
+  + atualizarStatus()
+}
+
+class AlocacaoFuncionario {
+  - id : int
+  - idFuncionario : int
+  - idServico : int
+  - data : date
+  - hora : time
+  - valorDiaAlocado : double
+  + registrar()
+}
+
+class AlocacaoEquipamento {
+  - id : int
+  - idEquipamento : int
+  - idServico : int
+  - data : date
+  - hora : time
+  - valorHoraAlocado : double
+  + registrar()
+}
+
+class Feedback {
+  - id : int
+  - idServico : int
+  - idFuncionario : int
+  - comentario : string
+  - data : date
+  + registrar()
+}
+
+class Usuario {
+  - id : int
+  - idFuncionario : int
+  - papel : string
+  - login : string
+  - senha : string
+  + autenticar()
+}
+
+'Relacionamentos principais
+Administrador "1" -- "N" Funcionario
+Administrador "1" -- "N" Equipamento
+Administrador "1" -- "N" Cliente
+Administrador "1" -- "N" Servico
+
+Funcionario "1" -- "N" ParametrizacaoFuncionario
+Funcionario "1" -- "N" AlocacaoFuncionario
+Funcionario "1" -- "N" Feedback
+Funcionario "1" -- "1" Usuario
+
+Equipamento "1" -- "N" AlocacaoEquipamento
+Equipamento "1" -- "N" ParametrizacaoEquipamento
+
+Cliente "1" -- "N" Servico
+
+Servico "1" -- "N" AlocacaoFuncionario
+Servico "1" -- "N" AlocacaoEquipamento
+Servico "1" -- "N" Feedback
+
+@enduml
+
+
+
+' @startuml
+' class Administrador {
+'   - id : int
+'   - nome : string
+'   - email : string
+'   - telefone : string
+'   + cadastrarFuncionario()
+'   + cadastrarEquipamento()
+'   + cadastrarCliente()
+'   + criarServico()
+'   + alocarRecursos()
+'   + gerarRelatorio()
+' }
+
+' class Funcionario {
+'   - id : int
+'   - nome : string
+'   - cpf : string
+'   - email : string
+'   - numTelefone : string
+'   - cargo : string
+'   - status : string
+'   + executarServico()
+'   + registrarFeedback()
+' }
+
+' class Equipamento {
+'   - id : int
+'   - nome : string
+'   - tipo : string
+'   - descricao : string
+'   - status : string
+' }
+
+' class Cliente {
+'   - id : int
+'   - tipoCliente : string
+'   - nome : string
+'   - cpfCnpj : string
+'   - email : string
+'   - telefone : string
+' }
+
+' class Servico {
+'   - id : int
+'   - descricao : string
+'   - dataInicio : date
+'   - dataFim : date
+'   - status : string
+'   - orcamento : double
+' }
+
+' class AlocacaoFuncionario {
+'   - id : int
+'   - funcionario : Funcionario
+'   - servico : Servico
+' }
+
+' class AlocacaoEquipamento {
+'   - id : int
+'   - equipamento : Equipamento
+'   - servico : Servico
+' }
+
+' class Feedback {
+'   - id : int
+'   - servico : Servico
+'   - funcionario : Funcionario
+'   - comentario : string
+'   - data : date
+' }
+
+' class Usuario {
+'   - id : int
+'   - login : string
+'   - senha : string
+'   - papel : string
+' }
+
+' 'Relacionamentos
+' Administrador "1" -- "N" Funcionario
+' Administrador "1" -- "N" Equipamento
+' Administrador "1" -- "N" Cliente
+' Cliente "1" -- "N" Servico
+' Servico "1" -- "N" AlocacaoFuncionario
+' Servico "1" -- "N" AlocacaoEquipamento
+' Servico "1" -- "N" Feedback
+' Usuario "N" -- "1" Funcionario
+' @enduml
