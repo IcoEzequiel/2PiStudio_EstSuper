@@ -28,6 +28,6 @@ const Servico = sequelize.define('Servico',{
     }
 )
 
-Servico.belongsTo(Cliente, {foreignKey: 'id_cliente'});
+Servico.belongsTo(Cliente, {foreignKey: 'id_cliente', as:'cliente'});
 
 module.exports = Servico;

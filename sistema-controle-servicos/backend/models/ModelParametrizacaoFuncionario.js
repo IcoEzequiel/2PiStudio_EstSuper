@@ -19,6 +19,6 @@ const ParametrizacaoFuncionario = sequelize.define('ParametrizacaoFuncionario',{
     timestamps:false
 })
 
-ParametrizacaoFuncionario.belongsTo(Funcionario, {foreignKey:'id_funcionario'})
+ParametrizacaoFuncionario.belongsTo(Funcionario, {foreignKey:'id_funcionario', as: 'funcionario'})
 
 module.exports = ParametrizacaoFuncionario

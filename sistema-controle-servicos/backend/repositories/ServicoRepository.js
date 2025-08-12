@@ -1,12 +1,17 @@
+const { Cliente } = require('../models')
 const Servico = require('../models/ModelServico')
 
 const ServicoRepository = {
     getAll: async () => {
-        return await Servico.findAll()
+        return await Servico.findAll({
+            include: [{ model: Cliente, as: 'cliente'}]
+        })
     },
 
     getById: async (id) => {
-        return await Servico.findByPk(id)
+        return await Servico.findByPk(id,{
+            include: [{ model: Cliente, as: 'cliente'}]
+        })
     },
 
     save: async (dados) => {

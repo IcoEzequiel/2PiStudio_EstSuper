@@ -1,12 +1,21 @@
+const { Servico, Funcionario } = require('../models')
 const AlocacaoFuncionario = require('../models/ModelAlocacaoFuncionario')
 
 const AlocacaoFuncionarioRepository = {
     getAll: async () => {
-        return await AlocacaoFuncionario.findAll()
+        return await AlocacaoFuncionario.findAll({
+            include:[{model: Servico, as:'servico'},
+                {model: Funcionario, as:'funcionario'}
+            ]
+        })
     },
 
     getById: async (id) => {
-        return await AlocacaoFuncionario.findByPk(id)
+        return await AlocacaoFuncionario.findByPk(id,{
+            include:[{model: Servico, as:'servico'},
+                {model: Funcionario, as:'funcionario'}
+            ]
+        })
     },
 
     save: async (dados) => {

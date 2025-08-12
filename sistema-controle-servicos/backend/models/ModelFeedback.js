@@ -26,7 +26,7 @@ const Feedback = sequelize.define('Feedback',{
 }
 )
 
-Feedback.belongsTo(Servico, {foreignKey: 'id_servico'})
-Feedback.belongsTo(Funcionario, {foreignKey:'id_funcionario'})
+Feedback.belongsTo(Servico, {foreignKey: 'id_servico', as: 'servico'})
+Feedback.belongsTo(Funcionario, {foreignKey:'id_funcionario',as: 'funcionario'})
 
 module.exports = Feedback

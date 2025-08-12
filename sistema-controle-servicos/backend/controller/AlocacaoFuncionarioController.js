@@ -1,10 +1,12 @@
 const service = require('../services/AlocacaoFuncionarioService')
+const AlocacaoFuncionarioMapper = require('../mappers/AlocacaoFuncionarioMapper')
 
 const AlocacaoFuncionarioController = {
     getAll: async (req, res) => {
         try {
             const AlocacaoFuncionarios = await service.getAll()
-            res.json(AlocacaoFuncionarios)
+            const AlocFuncDTO = AlocacaoFuncionarios.map(a => AlocacaoFuncionarioMapper.toDTO(a))
+            res.json(AlocFuncDTO)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }
@@ -14,7 +16,8 @@ const AlocacaoFuncionarioController = {
         try {
             const AlocacaoFuncionario = await service.getById(req.params.id)
             if (!AlocacaoFuncionario) return res.status(404).json({ error: "Alocaçao não encontrado"})
-            res.json(AlocacaoFuncionario)
+            const AlocFuncDTO = AlocacaoFuncionarioMapper.toDTO(AlocacaoFuncionario)
+            res.json(AlocFuncDTO)
         } catch (err) {
             res.status(500).json({ error: err.message })
         }
@@ -23,7 +26,8 @@ const AlocacaoFuncionarioController = {
     create: async (req, res) => {
         try {
             const novo = await service.create(req.body)
-            res.status(201).json(novo)
+            const novoDTO = AlocacaoFuncionarioMapper.toDTO(novo)
+            res.status(201).json(novoDTO)
         } catch (err) {
             res.status(400).json({ error: err.message})
         }
@@ -33,7 +37,8 @@ const AlocacaoFuncionarioController = {
         try {
             const edit = await service.update(req.params.id, req.body)
             if (!edit) return res.status(404).json({ error: 'Alocaçao não encontrado'})
-            res.json(edit)
+            const editDTO = AlocacaoFuncionarioMapper.toDTO(edit)
+            res.json(editDTO)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }

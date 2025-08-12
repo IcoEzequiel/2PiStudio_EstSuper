@@ -26,7 +26,7 @@ const AlocacaoFuncionario = sequelize.define('AlocacaoFuncionario',{
     timestamps: false
 })
 
-AlocacaoFuncionario.belongsTo(Funcionario, {foreignKey:'id_funcionario'})
-AlocacaoFuncionario.belongsTo(Servico, {foreignKey:'id_servico'})
+AlocacaoFuncionario.belongsTo(Funcionario, {foreignKey:'id_funcionario',as: 'funcionario'})
+AlocacaoFuncionario.belongsTo(Servico, {foreignKey:'id_servico', as: 'servico'})
 
 module.exports = AlocacaoFuncionario

@@ -1,12 +1,21 @@
+const { Servico, Funcionario } = require('../models')
 const Feedback = require('../models/ModelFeedback')
 
 const FeedbackRepository = {
     getAll: async () => {
-        return await Feedback.findAll()
+        return await Feedback.findAll({
+            include:[{model: Servico, as: 'servico'},
+                    {model: Funcionario, as: 'funcionario'}
+            ]
+        })
     },
 
     getById: async (id) => {
-        return await Feedback.findByPk(id)
+        return await Feedback.findByPk(id,{
+            include:[{model: Servico, as: 'servico'},
+                    {model: Funcionario, as: 'funcionario'}
+            ]
+        })
     },
 
     save: async (dados) => {

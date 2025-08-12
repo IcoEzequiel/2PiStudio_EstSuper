@@ -1,12 +1,17 @@
+const { Funcionario } = require('../models')
 const ParametrizacaoFuncionario = require('../models/ModelParametrizacaoFuncionario')
 
 const ParametrizacaoFuncionarioRepository = {
     getAll: async () => {
-        return await ParametrizacaoFuncionario.findAll()
+        return await ParametrizacaoFuncionario.findAll({
+            include:[{model: Funcionario, as: 'funcionario'}]
+        })
     },
 
     getById: async (id) => {
-        return await ParametrizacaoFuncionario.findByPk(id)
+        return await ParametrizacaoFuncionario.findByPk(id,{
+            include:[{ model: Funcionario, as: 'funcionario'}]
+        })
     },
 
     save: async (dados) => {

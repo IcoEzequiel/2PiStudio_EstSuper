@@ -9,6 +9,7 @@ const nomeInput = document.getElementById('nome')
 const descricaoInput = document.getElementById('descricao')
 const dataInicioInput = document.getElementById('data_inicio')
 const dataFimInput = document.getElementById('data_fim')
+const tempo_expedienteInput = document.getElementById('tempo_expediente')
 const statusInput = document.getElementById('status')
 const orcamentoInput = document.getElementById('orcamento')
 const tabela = document.getElementById('tabela-servicos')
@@ -43,6 +44,7 @@ form.addEventListener('submit',async(e)=>{
         descricao: descricaoInput.value,
         data_inicio: dataInicioInput.value,
         data_fim: dataFimInput.value,
+        tempo_expediente: tempo_expedienteInput.value,
         status: statusInput.value,
         orcamento: orcamentoInput.value
         }
@@ -86,6 +88,7 @@ function renderServicos(lista) {
             <td>${s.descricao || ''}</td>
             <td>${s.data_inicio || ''}</td>
             <td>${s.data_fim || ''}</td>
+            <td>${s.tempo_expediente || ''}</td>
             <td>${s.status || ''}</td>
             <td>${s.orcamento || ''}</td>
             <td>
@@ -111,6 +114,7 @@ async function carregarParaEdicao(id) {
         descricaoInput.value = servico.descricao || ''
         dataInicioInput.value = servico.data_inicio || ''
         dataFimInput.value = servico.data_fim || ''
+        tempo_expedienteInput.value = servico.tempo_expediente || ''
         statusInput.value = servico.status || ''
         orcamentoInput.value = servico.orcamento || ''
         btnCancel.style.display = 'inline-block'

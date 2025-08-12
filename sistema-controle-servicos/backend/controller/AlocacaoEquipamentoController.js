@@ -1,10 +1,12 @@
 const service = require('../services/AlocacaoEquipamentoService')
+const AlocacaoEquipamentoMapper = require('../mappers/AlocacaoEquipamentoMapper')
 
 const AlocacaoEquipamentoController = {
     getAll: async (req, res) => {
         try {
             const AlocacaoEquipamentos = await service.getAll()
-            res.json(AlocacaoEquipamentos)
+            const AlocEquipDTO = AlocacaoEquipamentos.map(a => AlocacaoEquipamentoMapper.toDTO(a))
+            res.json(AlocEquipDTO)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }
@@ -14,7 +16,8 @@ const AlocacaoEquipamentoController = {
         try {
             const AlocacaoEquipamento = await service.getById(req.params.id)
             if (!AlocacaoEquipamento) return res.status(404).json({ error: "Alocação não encontrado"})
-            res.json(AlocacaoEquipamento)
+            const AlocEquipDTO = AlocacaoEquipamentoMapper.toDTO(AlocacaoEquipamento)
+            res.json(AlocEquipDTO)
         } catch (err) {
             res.status(500).json({ error: err.message })
         }
@@ -23,7 +26,8 @@ const AlocacaoEquipamentoController = {
     create: async (req, res) => {
         try {
             const novo = await service.create(req.body)
-            res.status(201).json(novo)
+            const novoDTO = AlocacaoEquipamentoMapper.toDTO(novo)
+            res.status(201).json(novoDTO)
         } catch (err) {
             res.status(400).json({ error: err.message})
         }
@@ -33,7 +37,8 @@ const AlocacaoEquipamentoController = {
         try {
             const edit = await service.update(req.params.id, req.body)
             if (!edit) return res.status(404).json({ error: 'Alocação não encontrado'})
-            res.json(edit)
+            const editDTO = AlocacaoEquipamentoMapper.toDTO(edit)
+            res.json(editDTO)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }

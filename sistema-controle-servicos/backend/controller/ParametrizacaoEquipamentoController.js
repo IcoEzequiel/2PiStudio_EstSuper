@@ -1,10 +1,12 @@
 const service = require('../services/ParametrizacaoEquipamentoService')
+const ParametrizacaoEquipamentoMapper = require('../mappers/ParametrizacaoEquipamentoMapper')
 
 const ParametrizacaoEquipamentoController = {
     getAll: async (req, res) => {
         try {
             const ParametrizacaoEquipamentos = await service.getAll()
-            res.json(ParametrizacaoEquipamentos)
+            const paraEquiDTO = ParametrizacaoEquipamentos.map(p => ParametrizacaoEquipamentoMapper.toDTO(p))
+            res.json(paraEquiDTO)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }
@@ -14,7 +16,8 @@ const ParametrizacaoEquipamentoController = {
         try {
             const ParametrizacaoEquipamento = await service.getById(req.params.id)
             if (!ParametrizacaoEquipamento) return res.status(404).json({ error: "Parametrização não encontrado"})
-            res.json(ParametrizacaoEquipamento)
+            const paraEquiDTO = ParametrizacaoEquipamentoMapper.toDTO(ParametrizacaoEquipamento)
+            res.json(paraEquiDTO)
         } catch (err) {
             res.status(500).json({ error: err.message })
         }
@@ -23,7 +26,8 @@ const ParametrizacaoEquipamentoController = {
     create: async (req, res) => {
         try {
             const novo = await service.create(req.body)
-            res.status(201).json(novo)
+            const novoDTO = ParametrizacaoEquipamentoMapper.toDTO(novo)
+            res.status(201).json(novoDTO)
         } catch (err) {
             res.status(400).json({ error: err.message})
         }
@@ -33,7 +37,8 @@ const ParametrizacaoEquipamentoController = {
         try {
             const edit = await service.update(req.params.id, req.body)
             if (!edit) return res.status(404).json({ error: 'Parametrização não encontrado'})
-            res.json(edit)
+            const editDTO = ParametrizacaoEquipamentoMapper.toDTO(edit)
+            res.json(editDTO)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }

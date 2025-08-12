@@ -20,6 +20,6 @@ const ParametrizacaoEquipamento = sequelize.define('ParametrizacaoEquipamento',{
 }
 )
 
-ParametrizacaoEquipamento.belongsTo(Equipamento, { foreignKey: 'id_equipamento'});
+ParametrizacaoEquipamento.belongsTo(Equipamento, { foreignKey: 'id_equipamento', as: 'equipamento'});
 
 module.exports = ParametrizacaoEquipamento
