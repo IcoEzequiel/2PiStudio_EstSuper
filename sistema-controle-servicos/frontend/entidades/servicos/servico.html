@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Serviço - Sistema</title>
+        <link rel="stylesheet" href="../../styles.css">
+    </head>
+    <body>
+        <header><a href="../../index.html"> Voltar</a><h2>Serviços</h2></header>
+
+        <section>
+            <form id="form-servico">
+                <label>Cliente:</label>
+                <select id="id_cliente" required></select>
+
+                <label>Nome: </label>
+                <input id="nome">
+
+                <label>Descrição</label>
+                <textarea id="descricao"></textarea>
+
+                <label>Data Inicio:</label>
+                <input id="data_inicio" type="date">
+
+                <label>Data Fim:</label>
+                <input id="data_fim" type="date">
+
+                <label>Status:</label>
+                <select id="status">
+                    <option value="agendado">Agendado</option>
+                    <option value="em execução">Em execução</option>
+                    <option value="concluido">concluido</option>
+                </select>
+
+                <label>Orçamento:</label>
+                <input type="number" id="orcamento" step="0.01">
+
+                <button type="submit">Salvar</button>
+                <button type="button" id="btn-cancel" style="display:none">Cancelar</button>
+            </form>
+
+            <h2>Lista de Serviços</h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Data_inicio</th>
+                        <th>Data_Fim</th>
+                        <th>Status</th>
+                        <th>orcamento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-servicos"></tbody>
+            </table>
+        </section>
+        <script type="module" src="./servico.js"></script>
+    </body>
+</html>

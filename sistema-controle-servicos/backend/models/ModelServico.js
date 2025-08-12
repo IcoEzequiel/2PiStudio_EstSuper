@@ -12,6 +12,7 @@ const Servico = sequelize.define('Servico',{
         type: DataTypes.INTEGER,
         allowNull: false
     },
+    nome:DataTypes.STRING,
     descricao: DataTypes.TEXT,
     data_inicio:DataTypes.DATEONLY,
     data_fim: DataTypes.DATEONLY,

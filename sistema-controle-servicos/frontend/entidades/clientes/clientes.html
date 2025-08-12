@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Clientes - Sistema</title>
+        <link rel="stylesheet" href="../../styles.css">
+    </head>
+    <body>
+        <header><a href="../../index.html"> Voltar</a><h2>Clientes</h2></header>
+
+        <section>
+            <form id="form-cliente">
+                <label>Nome:</label>
+                <input id="nome" placeholder="Nome" required />
+                <input id="tipo" placeholder="Tipo" required />
+                <input id="cpf_cnpj" placeholder="CPF/CNPJ" required />
+                <input id="email" placeholder="Email"/>
+                <input id="telefone" placeholder="Telefone"/>
+                <button type="submit">Salvar</button>
+                <button type="button" id="btn-cancel" style="display:none">Cancelar</button>
+            </form>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>CPF/CNPJ</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-clientes"></tbody>
+            </table>
+        </section>
+        <script type="module" src="./clientes.js"></script>
+    </body>
+</html>

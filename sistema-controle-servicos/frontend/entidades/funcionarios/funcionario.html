@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Funcionarios - Sistema</title>
+        <link rel="stylesheet" href="../../styles.css">
+    </head>
+    <body>
+        <header><a href="../../index.html"> Voltar</a><h2>Funcionarios</h2></header>
+
+        <section>
+            <form id="form-funcionario">
+                <!-- <input id="nome" placeholder="Nome" required /> -->
+                <label>Nome:</label>
+                <input id="nome" required>
+
+                <label>CPF:</label>
+                <input id="cpf">
+
+                <label>Email:</label>
+                <input id="email">
+
+                <label>Telefone:</label>
+                <input id="telefone">
+
+                <label>Cargo:</label>
+                <input id="cargo">
+
+                <label>Status:</label>
+                <select id="status">
+                    <option value="operacional">operacional</option>
+                    <option value="ferias">Ferias</option>
+                </select>
+
+                <button type="submit">Salvar</button>
+                <button type="button" id="btn-cancel" style="display:none">Cancelar</button>
+            </form>
+
+            <h2>Lista de Funcionarios</h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>CPF</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>Cargo</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-funcionario"></tbody>
+            </table>
+        </section>
+        <script type="module" src="./funcionario.js"></script>
+    </body>
+</html>
