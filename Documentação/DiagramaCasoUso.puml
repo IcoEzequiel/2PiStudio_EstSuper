@@ -1,0 +1,40 @@
+@startuml
+
+'Atores
+left to right direction
+skinparam actorStyle awesome
+actor "Administrador" as Admin
+actor "Funcionário" as Func
+
+' rectangle "Sistema de Controle de Serviços" {
+'     Administrador -- (Cadastrar Entidades)
+'     Administrador -- (Criar Projetos)
+'     Administrador -- (Alocar Recursos)
+'     Administrador -- (Agendar Serviços)
+'     Administrador -- (Controlar Acesso)
+'     Funcionário -- (Enviar Feedback)
+' }
+
+'Verbos
+rectangle "Sistema de Controle de Serviços" {
+  
+  usecase "Cadastrar Entidades" as RF1
+  usecase "Criar Serviços" as RF2
+  usecase "Alocar Recursos" as RF3
+  usecase "Agendar Serviços" as RF4
+  usecase "Controlar Acesso" as RF5
+  usecase "Enviar Feedback" as RF6
+
+}
+
+Admin --> RF1
+Admin --> RF2
+Admin --> RF3
+Admin --> RF4
+Admin --> RF5
+
+Func --> RF6
+
+RF1 ..> RF2 : <<include>>
+RF3 ..> RF4 : <<include>>
+@enduml
