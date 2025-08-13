@@ -2,145 +2,63 @@
 <html lang="pt-br">
 
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Studio Manager</title>
-  <link rel="stylesheet" href="styles.css" />
-  <!-- <style>
-    /* body {
-      background: linear-gradient(160deg, #0d1117, #1f2937);
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px;
-      background-color: transparent;
-    }
-
-    header h1 {
-      font-size: 24px;
-      background: linear-gradient(to right, #00ffc3, #a259ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    nav {
-      display: flex;
-      gap: 20px;
-    }
-
-    nav a {
-      color: #ccc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    nav a.active {
-      color: white;
-      border-bottom: 2px solid white;
-    }
-
-    .cards {
-      display: flex;
-      justify-content: space-around;
-      margin: 20px;
-      flex-wrap: wrap;
-    }
-
-    .card {
-      background-color: #1e293b;
-      border-radius: 10px;
-      padding: 20px;
-      width: 220px;
-      margin: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-    }
-
-    .card h3 {
-      margin: 0;
-      font-size: 14px;
-      color: #ccc;
-    }
-
-    .card p {
-      font-size: 24px;
-      margin-top: 5px;
-    }
-
-    .novo-projeto {
-      background-color: #22c55e;
-      color: white;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .projetos-recentes {
-      margin: 20px;
-      color: #22c55e;
-      font-weight: bold;
-    } */
-
-  </style> -->
+  <link rel="stylesheet" href="styles.css">
 </head>
+<!-- </body>
+
+<div class="container">
+  <nav>
+    <ul>
+      <li onclick="mostrarTela('dashboard')">Dashboard</li>
+      <li onclick="mostrarTela('projetos')">Projetos</li>
+      <li onclick="mostrarTela('configuracoes')">Configurações</li>
+    </ul>
+  </nav>
+
+  <main>
+    <section id="dashboard" class="tela ativa">
+      <h2>Dashboard</h2>
+      <p>Aqui você verá os principais indicadores e estatísticas do seu estúdio.</p>
+    </section>
+
+    <section id="projetos" class="tela">
+      <h2>Projetos</h2>
+      <p>Lista dos projetos em andamentos.</p>
+    </section>
+
+    <section id="configuracoes" class="tela">
+      <h2>Configurações</h2>
+      <p>Gerencie as configurações do sistema.</p>
+    </section>
+  </main>
+</div> -->
+
 
 <body>
+  <header>
     <div class="header-title">STUDIO MANAGER</div>
     <div class="navbar">
       <nav class="nav-left">
-        <a href="#" class="active">Dashboard</a>
-        <a href="#">Projetos</a>
-        <a href="#">Configurações</a>
+        <a onclick="carregarTela('dashboard/dashboard.html')">Dashboard</a>
+        <a onclick="carregarTela('projetos/projetos.html')">Projetos</a>
+        <a onclick="carregarTela('configuracoes/configuracoes.html')">Configurações</a>
+        <a href="./entidades/clientes/clientes.html">Clientes</a>
+        <a href="./entidades/servicos/servico.html">Serviços</a>
+        <a href="./entidades/equipamentos/equipamento.html">Equipamentos</a>
+        <a href="./entidades/funcionarios/funcionario.html">Funcionários</a>
       </nav>
-      <button class="novo-projeto">+ Novo Projeto</button>
+      <button id="novoProjetoBtn">+ Novo Projeto</button>
     </div>
   </header>
-  <!-- <header>
-    <h1>STUDIO MANAGER</h1>
-    <nav>
-      <a href="#" class="active">Dashboard</a>
-      <a href="#">Projetos</a>
-      <a href="#">Configurações</a>
-      <a href="./entidades/clientes/clientes.html"> Clientes </a>
-      <a href="./entidades/servicos/servico.html"> Servicos </a>
-      <a href="./entidades/equipamentos/equipamento.html"> Equipamento </a>
-      <a href="./entidades/funcionarios/funcionario.html"> Funcionarios </a>
-    </nav>
-    <button class="novo-projeto">+ Novo Projeto</button>
-  </header>
 
-  <section class="cards">
-    <div class="card">
-      <h3>Projetos Ativos</h3>
-      <p>0</p>
-    </div>
-    <div class="card">
-      <h3>Receita Total (Concluídos)</h3>
-      <p>R$ 0,00</p>
-    </div>
-    <div class="card">
-      <h3>Lucro Total (Concluídos)</h3>
-      <p>R$ 0,00</p>
-    </div>
-    <div class="card">
-      <h3>Projetos Concluídos</h3>
-      <p>0</p>
-    </div>
-  </section>
-
-  <section class="projetos-recentes">
-    Projetos Recentes
-  </section> -->
+  <main id="conteudo"></main>
 </body>
 
-<script>
+
+<script src="scripts.js">
   fetch('http://localhost:3000/')
     .then(response => response.text())
     .then(data => console.log('Resposta do backend:', data))
