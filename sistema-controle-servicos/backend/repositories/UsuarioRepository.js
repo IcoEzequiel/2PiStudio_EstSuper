@@ -1,12 +1,18 @@
+const { Funcionario } = require('../models')
 const Usuario = require('../models/ModelUsuario')
 
 const UsuarioRepository = {
     getAll: async () => {
-        return await Usuario.findAll()
+        return await Usuario.findAll({
+            include: [{model: Funcionario, as: 'funcionario'}]
+        })
     },
 
     getById: async (id) => {
-        return await Usuario.findByPk(id)
+        return await Usuario.findByPk(id,{
+            include: [{model: Funcionario, as: 'funcionario'}]
+        }
+        )
     },
 
     save: async (dados) => {
