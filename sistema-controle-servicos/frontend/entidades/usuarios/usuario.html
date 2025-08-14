@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Usuario - Sistema</title>
+        <link rel="stylesheet" href="../../styles.css">
+    </head>
+    <body>
+        <header><a href="../../index.html"> Voltar</a><h2>Usuario</h2></header>
+
+        <section>
+            <form id="form-usuario">
+                <label>Funcionario:</label>
+                <select id="id_funcionario" required></select>
+                
+                <label>Papel:</label>
+                <select id="papel">
+                    <option value="funcionario">Funcionario</option>
+                    <option value="administrador">Administrador</option>
+                </select>
+
+                <label>Login: </label>
+                <input id="login">
+
+                <label>Senha:</label>
+                <input id="senha">
+
+                
+                <button type="submit">Salvar</button>
+                <button type="button" id="btn-cancel" style="display:none">Cancelar</button>
+            </form>
+
+            <h2>Lista de Usuarios</h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Funcionario</th>
+                        <th>Papel</th>
+                        <th>Login</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-usuarios"></tbody>
+            </table>
+        </section>
+        <script type="module" src="./usuario.js"></script>
+    </body>
+</html>

@@ -11,14 +11,14 @@ const UsuarioService = {
     },
 
     create: async (dados) => {
-        const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
-        if (!Funcionario) throw new Error('Funcionario Não Existe');
+        // const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+        // if (!Funcionario) throw new Error('Funcionario Não Existe');
         return await repo.save(dados)
     },
 
     update: async (id, dados) => {
-        const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
-        if (!Funcionario) throw new Error('Funcionario Não Existe');
+        // const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+        // if (!Funcionario) throw new Error('Funcionario Não Existe');
         return await repo.update(id, dados)
     },
 

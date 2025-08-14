@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Alocação Funcionario - Sistema</title>
+        <link rel="stylesheet" href="../../styles.css">
+    </head>
+    <body>
+        <header><a href="../../index.html"> Voltar</a><h2>Alocação Funcionario</h2></header>
+
+        <section>
+            <form id="form-alocacaoFunc">
+                <label>Servico:</label>
+                <select id="id_servico" required></select>
+
+                <label>Funcionario: </label>
+                <select id="id_funcionario" required></select>
+
+                <label>Data:</label>
+                <input type="date" id="data" required>
+
+                <label>Horas: </label>
+                <input id="horas">
+
+                <label>Valor dia Alocado: </label>
+                <input id="valor_dia_alocado" type="number", step="0.01">
+
+                <button type="submit">Salvar</button>
+                <button type="button" id="btn-cancel" style="display:none">Cancelar</button>
+            </form>
+
+            <h2>Lista de Alocações de Funcionarios</h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Servico</th>
+                        <th>Funcionario</th>
+                        <th>Data</th>
+                        <th>Hora</th>
+                        <th>Valor dia Alocado</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-alocacaoFunc"></tbody>
+            </table>
+        </section>
+        <script type="module" src="./alocacaoFuncionario.js"></script>
+    </body>
+</html>

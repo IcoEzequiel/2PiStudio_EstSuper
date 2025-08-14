@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Feedback - Sistema</title>
+        <link rel="stylesheet" href="../../styles.css">
+    </head>
+    <body>
+        <header><a href="../../index.html"> Voltar</a><h2>Feedback</h2></header>
+
+        <section>
+            <form id="form-feedback">
+                <label>Servico:</label>
+                <select id="id_servico" required></select>
+
+                <label>Funcionario: </label>
+                <select id="id_funcionario" required></select>
+
+                <label>Comentario: </label>
+                <textarea id="comentario"></textarea>
+
+                <label>Data:</label>
+                <input type="date" id="data" required>
+
+                <button type="submit">Salvar</button>
+                <button type="button" id="btn-cancel" style="display:none">Cancelar</button>
+            </form>
+
+            <h2>Lista de Parametrizações</h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Servico</th>
+                        <th>Funcionario</th>
+                        <th>Comentario</th>
+                        <th>Data</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-feedback"></tbody>
+            </table>
+        </section>
+        <script type="module" src="./feedback.js"></script>
+    </body>
+</html>

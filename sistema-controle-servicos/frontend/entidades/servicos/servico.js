@@ -17,19 +17,17 @@ const btnCancel = document.getElementById('btn-cancel')
 
 let editingId = null
 
-let clientes = []
 
 async function carregarClientes() {
     const resp = await request(API_CLIENTES)
-    clientes =  resp
     selectCliente.innerHTML = resp
     .map(c => `<option value="${c.id}">${c.nome}</option>`).join('')
 }
 
-function getClienteNome(idCliente){
-    const cliente = clientes.find(c => c.id === idCliente)
-    return cliente ? cliente.nome : ''
-}
+// function getClienteNome(idCliente){
+//     const cliente = clientes.find(c => c.id === idCliente)
+//     return cliente ? cliente.nome : ''
+// }
 
 document.addEventListener('DOMContentLoaded', async() => {
     await carregarClientes()
@@ -83,7 +81,7 @@ function renderServicos(lista) {
     tabela.innerHTML = lista.map(s => `
         <tr>
             <td>${s.id}</td>
-            <td>${getClienteNome(s.id_cliente) || ''}</td>
+            <td>${s.cliente.nome || ''}</td>
             <td>${s.nome || ''}</td>
             <td>${s.descricao || ''}</td>
             <td>${s.data_inicio || ''}</td>
@@ -109,8 +107,8 @@ async function carregarParaEdicao(id) {
         const servico = await request(`${API_SERVICOS}/${id}`)
         editingId = id
 
-        selectCliente.value = servico.id_cliente || ''
-        nomeInput = servico.nome || ''
+        selectCliente.value = servico.cliente.id || ''
+        nomeInput.value = servico.nome || ''
         descricaoInput.value = servico.descricao || ''
         dataInicioInput.value = servico.data_inicio || ''
         dataFimInput.value = servico.data_fim || ''
