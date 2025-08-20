@@ -11,7 +11,6 @@ body {
     height: 100vh;
 }
 
-/* Cabeçalho principal com título centralizado */
 .header-title {
     text-align: center;
     font-size: 32px;
@@ -22,16 +21,13 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* Barra de navegação logo abaixo do título */
 .navbar {
     display: flex;
     justify-content: space-between;
-    /* Links à esquerda, botão à direita */
     align-items: center;
     padding: 10px 40px;
 }
 
-/* Links de navegação */
 .nav-left {
     display: flex;
     gap: 20px;
@@ -49,7 +45,6 @@ body {
     border-bottom: 2px solid white;
 }
 
-/* Botão "+ Novo Projeto" */
 #novoProjetoBtn {
     background-color: #22c55e;
     color: white;
@@ -65,9 +60,15 @@ body {
     background-color: #16a34a;
 }
 
-/* Esconde o botão quando precisar */
 .hidden {
     display: none;
+}
+
+/* body {
+    background: linear-gradient(160deg, #0d1117, #1f2937);
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+    height: 100vh;
 }
 
 .container {
@@ -85,3 +86,52 @@ body {
     max-width: 80rem;
     margin: 0 auto;
 }
+
+.caixa-principal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.caixa-icone {
+    font-size: 2.25rem;
+    animation: flutuar 3s ease-in-out infinite;
+}
+
+.titulo {
+    font-size: 2.25rem;
+    font-weight: bold;
+    background: linear-gradient(to right, #00ffc3, #a259ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@media (min-width: 1024px) {
+    .titulo {
+        font-size: 3rem;
+    }
+}
+    
+.subtitulo {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.125rem;
+    max-width: 42rem;
+    margin: 0 auto;
+}
+
+.area-extra {
+    opacity: 1;
+    transform: none;
+}
+
+.notificacoes {
+    pointer-events: none;
+}
+
+@keyframes flutuar {
+    0%, 100% { transform: translateY(0);}
+    50% { transform: translateY(-10px); }
+} */
