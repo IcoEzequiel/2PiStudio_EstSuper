@@ -1,19 +1,9 @@
 @startuml
 
 'Atores
-left to right direction
 skinparam actorStyle awesome
 actor "Administrador" as Admin
 actor "Funcionário" as Func
-
-' rectangle "Sistema de Controle de Serviços" {
-'     Administrador -- (Cadastrar Entidades)
-'     Administrador -- (Criar Projetos)
-'     Administrador -- (Alocar Recursos)
-'     Administrador -- (Agendar Serviços)
-'     Administrador -- (Controlar Acesso)
-'     Funcionário -- (Enviar Feedback)
-' }
 
 'Verbos
 rectangle "Sistema de Controle de Serviços" {
@@ -25,6 +15,9 @@ rectangle "Sistema de Controle de Serviços" {
   usecase "Controlar Acesso" as RF5
   usecase "Enviar Feedback" as RF6
   usecase "Consultar Agenda" as RF7
+  usecase "Gerenciar Funcionário" as RF8
+  usecase "Gerenciar Equipamento" as RF9
+
 
 }
 
@@ -37,6 +30,11 @@ Admin --> RF5
 Func --> RF6
 Func --> RF7
 
+RF1 --> RF8
+RF1 --> RF9
+
 RF1 ..> RF2 : <<include>>
 RF3 ..> RF4 : <<include>>
+RF3 ..> RF8 : <<include>>
+RF3 ..> RF9 : <<include>>
 @enduml

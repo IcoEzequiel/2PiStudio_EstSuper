@@ -69,3 +69,19 @@ body {
 .hidden {
     display: none;
 }
+
+.container {
+    min-height: 100vh;
+    padding: 16px;
+}
+
+@media (min-width: 1024px) {
+    .container {
+        padding: 32px;
+    }
+}
+
+.conteudo {
+    max-width: 80rem;
+    margin: 0 auto;
+}

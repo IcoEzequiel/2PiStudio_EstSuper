@@ -1,18 +1,17 @@
-
-' Diagrama de Classes definitivo:
 @startuml
+left to right direction
 
 class Administrador {
-  - id : int
-  - nome : string
-  - email : string
-  - telefone : string
-  + cadastrarFuncionario()
-  + cadastrarEquipamento()
-  + cadastrarCliente()
-  + criarServico()
-  + alocarRecursos()
-  + gerarRelatorio()
+    - id : int
+    - nome : string
+    - email : string
+    - telefone : string
+    + cadastrarFuncionario()
+    + cadastrarEquipamento()
+    + cadastrarCliente()
+    + criarServico()
+    + alocarRecursos()
+    + gerarRelatorio()
 }
 
 class Funcionario {
@@ -116,10 +115,9 @@ class Usuario {
 'Relacionamentos principais
 Administrador "1" -- "N" Funcionario
 Administrador "1" -- "N" Equipamento
-Administrador "1" -- "N" Cliente
 Administrador "1" -- "N" Servico
 
-Funcionario "1" -- "N" ParametrizacaoFuncionario
+Funcionario "1" -- "1" ParametrizacaoFuncionario
 Funcionario "1" -- "N" AlocacaoFuncionario
 Funcionario "1" -- "N" Feedback
 Funcionario "1" -- "1" Usuario
@@ -132,97 +130,4 @@ Cliente "1" -- "N" Servico
 Servico "1" -- "N" AlocacaoFuncionario
 Servico "1" -- "N" AlocacaoEquipamento
 Servico "1" -- "N" Feedback
-
 @enduml
-
-
-
-' @startuml
-' class Administrador {
-'   - id : int
-'   - nome : string
-'   - email : string
-'   - telefone : string
-'   + cadastrarFuncionario()
-'   + cadastrarEquipamento()
-'   + cadastrarCliente()
-'   + criarServico()
-'   + alocarRecursos()
-'   + gerarRelatorio()
-' }
-
-' class Funcionario {
-'   - id : int
-'   - nome : string
-'   - cpf : string
-'   - email : string
-'   - numTelefone : string
-'   - cargo : string
-'   - status : string
-'   + executarServico()
-'   + registrarFeedback()
-' }
-
-' class Equipamento {
-'   - id : int
-'   - nome : string
-'   - tipo : string
-'   - descricao : string
-'   - status : string
-' }
-
-' class Cliente {
-'   - id : int
-'   - tipoCliente : string
-'   - nome : string
-'   - cpfCnpj : string
-'   - email : string
-'   - telefone : string
-' }
-
-' class Servico {
-'   - id : int
-'   - descricao : string
-'   - dataInicio : date
-'   - dataFim : date
-'   - status : string
-'   - orcamento : double
-' }
-
-' class AlocacaoFuncionario {
-'   - id : int
-'   - funcionario : Funcionario
-'   - servico : Servico
-' }
-
-' class AlocacaoEquipamento {
-'   - id : int
-'   - equipamento : Equipamento
-'   - servico : Servico
-' }
-
-' class Feedback {
-'   - id : int
-'   - servico : Servico
-'   - funcionario : Funcionario
-'   - comentario : string
-'   - data : date
-' }
-
-' class Usuario {
-'   - id : int
-'   - login : string
-'   - senha : string
-'   - papel : string
-' }
-
-' 'Relacionamentos
-' Administrador "1" -- "N" Funcionario
-' Administrador "1" -- "N" Equipamento
-' Administrador "1" -- "N" Cliente
-' Cliente "1" -- "N" Servico
-' Servico "1" -- "N" AlocacaoFuncionario
-' Servico "1" -- "N" AlocacaoEquipamento
-' Servico "1" -- "N" Feedback
-' Usuario "N" -- "1" Funcionario
-' @enduml
