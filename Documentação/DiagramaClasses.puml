@@ -113,21 +113,21 @@ class Usuario {
 }
 
 'Relacionamentos principais
-Administrador "1" -- "N" Funcionario
-Administrador "1" -- "N" Equipamento
-Administrador "1" -- "N" Servico
+Administrador "1" -- "1..*" Funcionario
+Administrador "1" -- "1..*" Equipamento
+Administrador "1" -- "1..*" Servico
 
 Funcionario "1" -- "1" ParametrizacaoFuncionario
-Funcionario "1" -- "N" AlocacaoFuncionario
-Funcionario "1" -- "N" Feedback
+Funcionario "1" -- "1..*" AlocacaoFuncionario
+Funcionario "1" -- "1..*" Feedback
 Funcionario "1" -- "1" Usuario
 
-Equipamento "1" -- "N" AlocacaoEquipamento
-Equipamento "1" -- "N" ParametrizacaoEquipamento
+Equipamento "1" -- "1..*" AlocacaoEquipamento
+Equipamento "1" -- "1..*" ParametrizacaoEquipamento
 
-Cliente "1" -- "N" Servico
+Cliente "1" -- "1..*" Servico
 
-Servico "1" -- "N" AlocacaoFuncionario
-Servico "1" -- "N" AlocacaoEquipamento
-Servico "1" -- "N" Feedback
+Servico "1" -- "1..*" AlocacaoFuncionario
+Servico "1" -- "1..*" AlocacaoEquipamento
+Servico "1" -- "1..*" Feedback
 @enduml

@@ -114,7 +114,7 @@ body {
         font-size: 3rem;
     }
 }
-    
+
 .subtitulo {
     color: rgba(255, 255, 255, 0.8);
     font-size: 1.125rem;
@@ -122,7 +122,7 @@ body {
     margin: 0 auto;
 }
 
-.area-extra {
+.area-informacao {
     opacity: 1;
     transform: none;
 }
@@ -132,6 +132,108 @@ body {
 }
 
 @keyframes flutuar {
-    0%, 100% { transform: translateY(0);}
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.area-nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+}
+
+@media (min-width: 640px) {
+    .area-nav {
+        flex-direction: row;
+    }
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3 ease;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-btn.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-btn .icon {
+    width: 20px;
+    height: 20px;
+}
+
+.nav-label {
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .nav-label {
+        display: inline;
+    }
+}
+
+.btn-novo-projeto {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(to right, #22c55e, #3b82f6);
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-novo-projeto:hover {
+    background: linear-gradient(to right, #16a34a, #2563eb);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25);
+}
+
+.btn-novo-projeto:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-novo-projeto .icon {
+    width: 20px;
+    height: 20px;
 } */
