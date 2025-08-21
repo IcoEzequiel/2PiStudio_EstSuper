@@ -1,12 +1,10 @@
 const service = require('../services/FeedbackService')
-const FeedbackMapper = require('../mappers/FeedbackMapper')
 
 const FeedbackController = {
     getAll: async (req, res) => {
         try {
             const Feedbacks = await service.getAll()
-            const FeedbacksDTO = Feedbacks.map(f => FeedbackMapper.toDTO(f))
-            res.json(FeedbacksDTO)
+            res.json(Feedbacks)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }
@@ -16,8 +14,7 @@ const FeedbackController = {
         try {
             const Feedback = await service.getById(req.params.id)
             if (!Feedback) return res.status(404).json({ error: "Feedback não encontrado"})
-            const FeedbackDTO = FeedbackMapper.toDTO(Feedback)
-            res.json(FeedbackDTO)
+            res.json(Feedback)
         } catch (err) {
             res.status(500).json({ error: err.message })
         }
@@ -26,8 +23,7 @@ const FeedbackController = {
     create: async (req, res) => {
         try {
             const novo = await service.create(req.body)
-            const novoDTO = FeedbackMapper.toDTO(novo)
-            res.status(201).json(novoDTO)
+            res.status(201).json(novo)
         } catch (err) {
             res.status(400).json({ error: err.message})
         }
@@ -37,8 +33,7 @@ const FeedbackController = {
         try {
             const edit = await service.update(req.params.id, req.body)
             if (!edit) return res.status(404).json({ error: 'Serviço não encontrado'})
-            const editDTO = FeedbackMapper.toDTO(edit)
-            res.json(editDTO)
+            res.json(edit)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }

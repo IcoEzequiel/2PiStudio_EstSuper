@@ -1,14 +1,22 @@
 const repo = require('../repositories/AlocacaoEquipamentoRepository')
 const ServicoRepo = require('../repositories/ServicoRepository')
 const EquipamentoRepo = require('../repositories/EquipamentoRepository')
+const AlocEquipMapper = require('../mappers/AlocacaoEquipamentoMapper')
 
 const AlocacaoEquipamentoService = {
     getAll: async () => {
-        return await repo.getAll()
+        const AlocEquips = await repo.getAll()
+        const AlocEquipsDTO = AlocEquips.map(A=> AlocEquipMapper.toDTO(A))
+        return AlocEquipsDTO
     },
 
     getById: async (id) => {
-        return await repo.getById(id)
+        const AlocEquip = await repo.getById(id)
+        if(!AlocEquip) {
+            return null
+        }
+        const AlocEquipDTO = AlocEquipMapper.toDTO(AlocEquip)
+        return AlocEquipDTO
     },
 
     create: async (dados) => {
@@ -20,7 +28,9 @@ const AlocacaoEquipamentoService = {
         if (!Equipamento){
             throw Error("Fucionario Não Existe")
         } 
-        return await repo.save(dados)
+        const novo = await repo.save(dados)
+        const novoDTO = AlocEquipMapper.toDTO(novo)
+        return novoDTO
     },
 
     update: async (id, dados) => {
@@ -32,7 +42,12 @@ const AlocacaoEquipamentoService = {
         if (!Equipamento){
             throw Error("Fucionario Não Existe")
         } 
-        return await repo.update(id, dados)
+        const edit = await repo.update(id,dados)
+        if(!edit){
+            return null
+        }
+        const editDTO = AlocEquipMapper.toDTO(edit)
+        return editDTO
     },
 
     delete: async (id) => {

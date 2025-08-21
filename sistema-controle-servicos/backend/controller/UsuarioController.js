@@ -1,12 +1,10 @@
 const service = require('../services/UsuarioService')
-const UsuarioMapper = require('../mappers/UsuarioMapper')
 
 const UsuarioController = {
     getAll: async (req, res) => {
         try {
             const Usuarios = await service.getAll()
-            const UsuariosDTO = Usuarios.map(U => UsuarioMapper.toDTO(U))
-            res.json(UsuariosDTO)
+            res.json(Usuarios)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }
@@ -16,8 +14,7 @@ const UsuarioController = {
         try {
             const Usuario = await service.getById(req.params.id)
             if (!Usuario) return res.status(404).json({ error: "Usuario não encontrado"})
-            const UsuarioDTO = UsuarioMapper.toDTO(Usuario)
-            res.json(UsuarioDTO)
+            res.json(Usuario)
         } catch (err) {
             res.status(500).json({ error: err.message })
         }
@@ -26,8 +23,7 @@ const UsuarioController = {
     create: async (req, res) => {
         try {
             const novo = await service.create(req.body)
-            const novoDTO = UsuarioMapper.toDTO(novo)
-            res.status(201).json(novoDTO)
+            res.status(201).json(novo)
         } catch (err) {
             res.status(400).json({ error: err.message})
         }
@@ -37,8 +33,7 @@ const UsuarioController = {
         try {
             const edit = await service.update(req.params.id, req.body)
             if (!edit) return res.status(404).json({ error: 'Usuario não encontrado'})
-            const editDTO = UsuarioMapper.toDTO(edit)
-            res.json(editDTO)
+            res.json(edit)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }

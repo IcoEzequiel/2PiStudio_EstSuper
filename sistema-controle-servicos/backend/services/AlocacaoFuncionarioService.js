@@ -1,14 +1,22 @@
 const repo = require('../repositories/AlocacaoFuncionarioRepository')
 const ServicoRepo = require('../repositories/ServicoRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
+const AlocFuncMapper = require('../mappers/AlocacaoFuncionarioMapper')
 
 const AlocacaoFuncionarioService = {
     getAll: async () => {
-        return await repo.getAll()
+        const AlocFuncs = await repo.getAll()
+        const AlocFuncsDTO = AlocFuncs.map(A=>AlocFuncMapper.toDTO(A))
+        return AlocFuncsDTO
     },
 
     getById: async (id) => {
-        return await repo.getById(id)
+        const AlocFunc = await repo.getById(id)
+        if(!AlocFunc){
+            return null
+        }
+        const AlocFuncDTO = AlocFuncMapper.toDTO(AlocFunc)
+        return AlocFuncDTO
     },
 
     create: async (dados) => {
@@ -20,7 +28,9 @@ const AlocacaoFuncionarioService = {
         if (!Funcionario){
             throw Error("Fucionario Não Existe")
         } 
-        return await repo.save(dados)
+        const novo = await repo.save(dados)
+        const novoDTO = AlocFuncMapper.toDTO(novo)
+        return novoDTO
     },
 
     update: async (id, dados) => {
@@ -32,7 +42,12 @@ const AlocacaoFuncionarioService = {
         if (!Funcionario){
             throw Error("Fucionario Não Existe")
         } 
-        return await repo.update(id, dados)
+        const edit = await repo.update(id,dados)
+        if(!edit){
+            return null
+        }
+        const editDTO = AlocFuncMapper.toDTO(edit)
+        return editDTO 
     },
 
     delete: async (id) => {

@@ -1,14 +1,22 @@
 const repo = require('../repositories/FeedbackRepository')
 const ServicoRepo = require('../repositories/ServicoRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
+const FeedbackMapper = require('../mappers/FeedbackMapper')
 
 const FeedbackService = {
     getAll: async () => {
-        return await repo.getAll()
+        const Feedbacks = await repo.getAll()
+        const FeedbacksDTO = Feedbacks.map(F => FeedbackMapper.toDTO(F))
+        return FeedbacksDTO
     },
 
     getById: async (id) => {
-        return await repo.getById(id)
+        const Feedback = await repo.getById(id)
+        if(!Feedback){
+            return null
+        }
+        const FeedbackDTO = FeedbackMapper.toDTO(Feedback)
+        return FeedbackDTO
     },
 
     create: async (dados) => {
@@ -20,7 +28,9 @@ const FeedbackService = {
         if (!Funcionario){
             throw Error("Fucionario Não Existe")
         } 
-        return await repo.save(dados)
+        const novo = await repo.save(dados)
+        const novoDTO = FeedbackMapper.toDTO(novo)
+        return novoDTO
     },
 
     update: async (id, dados) => {
@@ -32,7 +42,12 @@ const FeedbackService = {
         if (!Funcionario){
             throw new Error("Fucionario Não Existe");
         } 
-        return await repo.update(id, dados)
+        const edit = await repo.update(id, dados)
+        if(!edit){
+            return null
+        }
+        const editDTO = FeedbackMapper.toDTO(edit)
+        return editDTO
     },
 
     delete: async (id) => {

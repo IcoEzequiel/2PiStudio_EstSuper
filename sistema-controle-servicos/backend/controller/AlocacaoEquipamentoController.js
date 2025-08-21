@@ -1,12 +1,10 @@
 const service = require('../services/AlocacaoEquipamentoService')
-const AlocacaoEquipamentoMapper = require('../mappers/AlocacaoEquipamentoMapper')
 
 const AlocacaoEquipamentoController = {
     getAll: async (req, res) => {
         try {
-            const AlocacaoEquipamentos = await service.getAll()
-            const AlocEquipDTO = AlocacaoEquipamentos.map(a => AlocacaoEquipamentoMapper.toDTO(a))
-            res.json(AlocEquipDTO)
+            const AlocEquip = await service.getAll()
+            res.json(AlocEquip)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }
@@ -14,10 +12,9 @@ const AlocacaoEquipamentoController = {
 
     getById: async (req, res) => {
         try {
-            const AlocacaoEquipamento = await service.getById(req.params.id)
-            if (!AlocacaoEquipamento) return res.status(404).json({ error: "Alocação não encontrado"})
-            const AlocEquipDTO = AlocacaoEquipamentoMapper.toDTO(AlocacaoEquipamento)
-            res.json(AlocEquipDTO)
+            const AlocEquip = await service.getById(req.params.id)
+            if (!AlocEquip) return res.status(404).json({ error: "Alocação não encontrado"})
+            res.json(AlocEquip)
         } catch (err) {
             res.status(500).json({ error: err.message })
         }
@@ -26,8 +23,7 @@ const AlocacaoEquipamentoController = {
     create: async (req, res) => {
         try {
             const novo = await service.create(req.body)
-            const novoDTO = AlocacaoEquipamentoMapper.toDTO(novo)
-            res.status(201).json(novoDTO)
+            res.status(201).json(novo)
         } catch (err) {
             res.status(400).json({ error: err.message})
         }
@@ -37,8 +33,7 @@ const AlocacaoEquipamentoController = {
         try {
             const edit = await service.update(req.params.id, req.body)
             if (!edit) return res.status(404).json({ error: 'Alocação não encontrado'})
-            const editDTO = AlocacaoEquipamentoMapper.toDTO(edit)
-            res.json(editDTO)
+            res.json(edit)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }

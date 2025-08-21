@@ -1,12 +1,10 @@
 const service = require('../services/ServicoService')
-const ServicoMapper = require('../mappers/servicoMapper')
 
 const ServicoController = {
     getAll: async (req, res) => {
         try {
             const servicos = await service.getAll()
-            const servicosDTO = servicos.map(s => ServicoMapper.toDTO(s))
-            res.json(servicosDTO)
+            res.json(servicos)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }
@@ -16,8 +14,7 @@ const ServicoController = {
         try {
             const servico = await service.getById(req.params.id)
             if (!servico) return res.status(404).json({ error: "Serviço não encontrado"})
-            const servicoDTO = ServicoMapper.toDTO(servico)
-            res.json(servicoDTO)
+            res.json(servico)
         } catch (err) {
             res.status(500).json({ error: err.message })
         }
@@ -26,8 +23,7 @@ const ServicoController = {
     create: async (req, res) => {
         try {
             const novo = await service.create(req.body)
-            const novoDTO = ServicoMapper.toDTO(novo)
-            res.status(201).json(novoDTO)
+            res.status(201).json(novo)
         } catch (err) {
             res.status(400).json({ error: err.message})
         }
@@ -36,9 +32,8 @@ const ServicoController = {
     update: async (req, res) => {
         try {
             const edit = await service.update(req.params.id, req.body)
-            const editDTO = ServicoMapper.toDTO(edit)
             if (!edit) return res.status(404).json({ error: 'Serviço não encontrado'})
-            res.json(editDTO)
+            res.json(edit)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }

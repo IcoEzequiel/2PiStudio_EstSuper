@@ -1,12 +1,10 @@
 const service = require('../services/ParametrizacaoEquipamentoService')
-const ParametrizacaoEquipamentoMapper = require('../mappers/ParametrizacaoEquipamentoMapper')
 
 const ParametrizacaoEquipamentoController = {
     getAll: async (req, res) => {
         try {
-            const ParametrizacaoEquipamentos = await service.getAll()
-            const paraEquiDTO = ParametrizacaoEquipamentos.map(p => ParametrizacaoEquipamentoMapper.toDTO(p))
-            res.json(paraEquiDTO)
+            const ParaEquips = await service.getAll()
+            res.json(ParaEquips)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }
@@ -14,10 +12,9 @@ const ParametrizacaoEquipamentoController = {
 
     getById: async (req, res) => {
         try {
-            const ParametrizacaoEquipamento = await service.getById(req.params.id)
-            if (!ParametrizacaoEquipamento) return res.status(404).json({ error: "Parametrização não encontrado"})
-            const paraEquiDTO = ParametrizacaoEquipamentoMapper.toDTO(ParametrizacaoEquipamento)
-            res.json(paraEquiDTO)
+            const ParaEquip = await service.getById(req.params.id)
+            if (!ParaEquip) return res.status(404).json({ error: "Parametrização não encontrado"})
+            res.json(ParaEquip)
         } catch (err) {
             res.status(500).json({ error: err.message })
         }
@@ -26,8 +23,7 @@ const ParametrizacaoEquipamentoController = {
     create: async (req, res) => {
         try {
             const novo = await service.create(req.body)
-            const novoDTO = ParametrizacaoEquipamentoMapper.toDTO(novo)
-            res.status(201).json(novoDTO)
+            res.status(201).json(novo)
         } catch (err) {
             res.status(400).json({ error: err.message})
         }
@@ -37,8 +33,7 @@ const ParametrizacaoEquipamentoController = {
         try {
             const edit = await service.update(req.params.id, req.body)
             if (!edit) return res.status(404).json({ error: 'Parametrização não encontrado'})
-            const editDTO = ParametrizacaoEquipamentoMapper.toDTO(edit)
-            res.json(editDTO)
+            res.json(edit)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }
