@@ -1,7 +1,5 @@
-const DataTypes = require('sequelize')
-const sequelize = require('../db')
-const Servico = require('./ModelServico')
-const Funcionario = require('./ModelFuncionario')
+const {sequelize, Sequelize} = require('../db')
+const {DataTypes} = Sequelize
 
 const Feedback = sequelize.define('Feedback',{
     id:{
@@ -25,8 +23,5 @@ const Feedback = sequelize.define('Feedback',{
     timestamps:false
 }
 )
-
-Feedback.belongsTo(Servico, {foreignKey: 'id_servico', as: 'servico'})
-Feedback.belongsTo(Funcionario, {foreignKey:'id_funcionario',as: 'funcionario'})
 
 module.exports = Feedback

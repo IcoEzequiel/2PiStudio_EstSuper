@@ -1,6 +1,7 @@
 const repo = require('../repositories/ParametrizacaoEquipamentoRepository')
 const EquipamentoRepo = require('../repositories/EquipamentoRepository')
 const ParaEquiMapper = require('../mappers/ParametrizacaoEquipamentoMapper')
+const { sequelize } = require('../db'); 
 
 const ParametrizacaoEquipamentoService = {
     getAll: async () => {

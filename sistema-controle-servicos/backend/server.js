@@ -4,15 +4,17 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
-
-app.use(cors());
-app.use(express.json());
-
-// Servir o HTML e arquivos estáticos
-app.use(express.static(path.join(__dirname, '../frontend')));
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
-});
+// Consts dos Models
+const AlocEquip = require('./models/ModelAlocacaoEquipamento')
+const AlocFunc = require('./models/ModelAlocacaoFuncionario')
+const Cliente = require('./models/ModelCliente')
+const Equipamento = require('./models/ModelEquipamento')
+const Feedback = require('./models/ModelFeedback')
+const Funcionario = require('./models/ModelFuncionario')
+const ParaEquip = require('./models/ModelParametrizacaoEquipamento')
+const ParaFunc = require('./models/ModelParametrizacaoFuncionario')
+const Servico = require('./models/ModelServico')
+const Usuario = require('./models/ModelUsuario')
 
 //Const das Rotas
 const AlocacaoEquipamentoRoutes = require('./routes/AlocacaoEquipamentoRoutes')
@@ -26,6 +28,63 @@ const ParametrizacaoFuncionariosRoutes = require('./routes/ParametrizacaoFuncion
 const ServicoRoutes = require('./routes/ServicoRoutes')
 const UsuarioRoutes = require('./routes/UsuarioRoutes')
 
+app.use(cors());
+app.use(express.json());
+
+// Servir o HTML e arquivos estáticos
+app.use(express.static(path.join(__dirname, '../frontend')));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+AlocEquip.belongsTo(Equipamento,{
+    foreignKey:"id_equipamento",
+    as: 'equipamento'
+})
+AlocEquip.belongsTo(Servico,{
+    foreignKey:"id_servico",
+    as: "servico"
+})
+AlocFunc.belongsTo(Funcionario,{
+    foreignKey:'id_funcionario',
+    as: "funcionario"
+})
+AlocFunc.belongsTo(Servico, {
+    foreignKey:'id_servico',
+    as: "servico"
+})
+
+Feedback.belongsTo(Servico,{
+    foreignKey:'id_servico',
+    as: 'servico'
+})
+Feedback.belongsTo(Funcionario,{
+    foreignKey:'id_funcionario',
+    as: 'funcionario'
+})
+Funcionario.hasOne(ParaFunc, {
+    foreignKey: 'id_funcionario',
+    as: 'parametrizacao'
+})
+
+ParaEquip.belongsTo(Equipamento, {
+    foreignKey:'id_equipamento',
+    as: 'equipamento'
+})
+ParaFunc.belongsTo(Funcionario, {
+    foreignKey: 'id_funcionario',
+    as: 'funcionario'
+})
+
+Servico.belongsTo(Cliente,{
+    foreignKey: 'id_cliente',
+    as:'cliente'
+})
+
+Usuario.belongsTo(Funcionario, {
+    foreignKey: 'id_funcionario',
+    as: 'funcionario'
+})
 
 // Rotas
 

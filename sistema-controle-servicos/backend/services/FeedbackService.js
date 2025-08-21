@@ -2,6 +2,7 @@ const repo = require('../repositories/FeedbackRepository')
 const ServicoRepo = require('../repositories/ServicoRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
 const FeedbackMapper = require('../mappers/FeedbackMapper')
+const { sequelize } = require('../db'); 
 
 const FeedbackService = {
     getAll: async () => {

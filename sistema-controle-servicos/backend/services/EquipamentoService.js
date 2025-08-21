@@ -1,4 +1,5 @@
 const repo = require('../repositories/EquipamentoRepository')
+const { sequelize } = require('../db'); 
 
 const EquipamentoService = {
     getAll: async () => {

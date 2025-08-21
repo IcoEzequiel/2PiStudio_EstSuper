@@ -14,20 +14,21 @@ const ParametrizacaoFuncionarioRepository = {
         })
     },
 
-    save: async (dados) => {
-        return await ParametrizacaoFuncionario.create(dados)
+    // Com opção options para poder criar um funcionario e sua parametrização ao mesmo tempo
+    save: async (dados, options = {}) => {
+        return await ParametrizacaoFuncionario.create(dados,options)
     },
 
-    update: async (id, dados) => {
-        const arqui = await ParametrizacaoFuncionario.findByPk(id)
+    update: async (id, dados, options = {}) => {
+        const arqui = await ParametrizacaoFuncionario.findByPk(id,options)
         if (!arqui) return null
-        return await arqui.update(dados)
+        return await arqui.update(dados,options)
     },
 
-    delete: async (id) => {
-        const arqui = await ParametrizacaoFuncionario.findByPk(id)
+    delete: async (id, options = {}) => {
+        const arqui = await ParametrizacaoFuncionario.findByPk(id, options)
         if (!arqui) return null
-        await arqui.destroy()
+        await arqui.destroy(options)
         return true
     }
 }

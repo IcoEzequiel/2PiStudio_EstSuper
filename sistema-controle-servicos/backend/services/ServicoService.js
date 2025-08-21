@@ -1,6 +1,7 @@
 const repo = require('../repositories/ServicoRepository')
 const ClienteRepo = require('../repositories/ClienteRepository')
 const ServicoMapper = require('../mappers/servicoMapper')
+const { sequelize } = require('../db'); 
 
 const ServicoService = {
     getAll: async () => {

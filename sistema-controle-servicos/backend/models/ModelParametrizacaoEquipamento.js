@@ -1,6 +1,5 @@
-const DataTypes = require('sequelize')
-const sequelize = require('../db')
-const Equipamento = require('./ModelEquipamento')
+const {sequelize, Sequelize} = require('../db')
+const {DataTypes} = Sequelize
 
 const ParametrizacaoEquipamento = sequelize.define('ParametrizacaoEquipamento',{
     id: {
@@ -19,7 +18,5 @@ const ParametrizacaoEquipamento = sequelize.define('ParametrizacaoEquipamento',{
     timestamps:false
 }
 )
-
-ParametrizacaoEquipamento.belongsTo(Equipamento, { foreignKey: 'id_equipamento', as: 'equipamento'});
 
 module.exports = ParametrizacaoEquipamento

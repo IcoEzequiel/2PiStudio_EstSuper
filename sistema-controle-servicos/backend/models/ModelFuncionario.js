@@ -1,5 +1,6 @@
-const DataTypes = require('sequelize')
-const sequelize = require('../db')
+const {sequelize, Sequelize} = require('../db')
+const {DataTypes} = Sequelize
+
 
 const Funcionario = sequelize.define('Funcionario',{
     id:{
@@ -25,5 +26,6 @@ const Funcionario = sequelize.define('Funcionario',{
     timestamps:false
 }
 )
+// Necessario para quando o service chama uma parametrização junto com o funcionario
 
 module.exports = Funcionario

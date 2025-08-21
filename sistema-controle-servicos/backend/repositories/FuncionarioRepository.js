@@ -1,28 +1,32 @@
 const Funcionario = require('../models/ModelFuncionario')
 
 const FuncionarioRepository = {
-    getAll: async () => {
-        return await Funcionario.findAll()
+    getAll: async (options = {}) => {
+        return await Funcionario.findAll(options)
     },
 
-    getById: async (id) => {
-        return await Funcionario.findByPk(id)
+    /// Options usado para quando for editar, pegar a parametrização
+    getById: async (id, options = {}) => {
+        return await Funcionario.findByPk(id, options)
     },
 
-    save: async (dados) => {
-        return await Funcionario.create(dados)
+    // O options permite que, uma requizição que envie também uma parametrização
+    // seja salva apenas quando as duas estiverem ok, evitendo inconsistencia de dados.
+    save: async (dados, options = {}) => {
+        return await Funcionario.create(dados, options)
     },
 
-    update: async (id, dados) => {
-        const arqui = await Funcionario.findByPk(id)
+    // Options: poder editar e pegar a parametrização
+    update: async (id, dados, options= {}) => {
+        const arqui = await Funcionario.findByPk(id,options)
         if (!arqui) return null
-        return await arqui.update(dados)
+        return await arqui.update(dados, options)
     },
 
-    delete: async (id) => {
-        const arqui = await Funcionario.findByPk(id)
+    delete: async (id, options= {}) => {
+        const arqui = await Funcionario.findByPk(id,options)
         if (!arqui) return null
-        await arqui.destroy()
+        await arqui.destroy(options)
         return true
     }
 }

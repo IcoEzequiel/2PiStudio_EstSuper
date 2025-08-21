@@ -1,6 +1,7 @@
 const repo = require('../repositories/ParametrizacaoFuncionarioRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
 const ParaFuncMapper = require('../mappers/ParametrizacaoFuncionarioMapper')
+const { sequelize } = require('../db'); 
 
 const ParametrizacaoFuncionarioService = {
     getAll: async () => {
