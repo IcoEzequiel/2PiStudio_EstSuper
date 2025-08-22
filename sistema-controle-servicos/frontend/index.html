@@ -8,50 +8,20 @@
   <link rel="stylesheet" href="styles.css">
   <meta name="description" content="Gerencie projetos, orçamentos, custos e lucratividade do seu estúdio de publicidade de forma fácil e visual." data-react-helmet="true">
 </head>
-</body>
 
-<!-- <div class="container">
-  <nav>
-    <ul>
-      <li onclick="mostrarTela('dashboard')">Dashboard</li>
-      <li onclick="mostrarTela('projetos')">Projetos</li>
-      <li onclick="mostrarTela('configuracoes')">Configurações</li>
-    </ul>
-  </nav>
-
-  <main>
-    <section id="dashboard" class="tela ativa">
-      <h2>Dashboard</h2>
-      <p>Aqui você verá os principais indicadores e estatísticas do seu estúdio.</p>
-    </section>
-
-    <section id="projetos" class="tela">
-      <h2>Projetos</h2>
-      <p>Lista dos projetos em andamentos.</p>
-    </section>
-
-    <section id="configuracoes" class="tela">
-      <h2>Configurações</h2>
-      <p>Gerencie as configurações do sistema.</p>
-    </section>
-  </main>
-</div> -->
-
-<!-- <div id="root">
+<body>
   <div class="container">
-    <div class="conteudo">
+    <div class="caixa-titulo">
       <div class="caixa-principal">
-        <div class="caixa-icone">
-
-        </div>
+        <div class="caixa-icone"></div>
         <h1 class="titulo">STUDIO MANAGER</h1>
       </div>
     </div>
 
-    <div class="area-informacao">
+    <nav class="navbar">
       <div class="area-nav">
         <div class="nav-item">
-          <button type="button" class="nav-btn active">
+          <button data-page="dashboard.html" type="button" class="nav-btn active">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
              viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -64,7 +34,7 @@
             </svg>
             <span class="nav-label">Dashboard</span>
           </button>
-          <button type="button" class="nav-btn active">
+          <button data-page="projetos.html" type="button" class="nav-btn active">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
              viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -79,7 +49,7 @@
             </svg>
             <span class="nav-label">Projetos</span>
           </button>
-          <button type="button" class="nav-btn active">
+          <button data-page="configuracoes.html" type="button" class="nav-btn active">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
              viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -98,16 +68,22 @@
             <path d="M8 12h8"></path>
             <path d="M12 8v8"></path>
           </svg>
-          "Novo Projeto"
+          Novo Projeto
         </button>
       </div>
-    </div>
+    </nav>
+
     <div class="notificacoes" role="region" aria-label="Notifications"></div>
+
+    <main class="conteudo">
+
+    </main>
+
   </div>
-</div> -->
+</body>
 
 
-<body>
+<!-- <body>
   <header>
     <div class="header-title">STUDIO MANAGER</div>
     <div class="navbar">
@@ -131,7 +107,7 @@
   </header>
 
   <main id="conteudo"></main>
-</body>
+</body> -->
 
 
 <script src="scripts.js">

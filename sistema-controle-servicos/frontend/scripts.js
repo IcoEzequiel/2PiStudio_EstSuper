@@ -5,13 +5,41 @@ function carregarTela(arquivo) {
       return response.text();
     })
     .then(html => {
-      document.getElementById("conteudo").innerHTML = html;
+      document.addEventListener("DOMContentLoaded", () => {
+        const links = document.querySelectorAll(".nav button");
 
-      // Mostra botão "+ Novo Projeto" apenas na aba de projetos
-      //document.getElementById('novoProjetoBtn').classList.toggle(
-      //  'hidden', 
-      //  !arquivo.includes('projetos')
-      //);
+        links.forEach(link => {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const pagina = e.target.getAttribute("data-page");
+            carregarPagina(pagina);
+          });
+        });
+      });
+
+      async function carregarPagina(pagina) {
+        try {
+          const resposta = await fetch(pagina);
+          const html = await resposta.text();
+          document.getElementById("conteudo").innerHTML = html;
+
+          // remove CSS extra anterior (se existir)
+          const linkCSS = document.querySelector("#extra-css");
+          if (linkCSS) linkCSS.remove();
+
+          // adiciona CSS extra se necessário
+          if (pagina === "dashboard.html") {
+            let css = document.createElement("link");
+            css.rel = "stylesheet";
+            css.href = "dashboard.css";
+            css.id = "extra-css";
+            document.head.appendChild(css);
+          }
+        } catch (err) {
+          document.getElementById("conteudo").innerHTML = "<p>Erro ao carregar página</p>";
+        }
+      }
+
     })
     .catch(err => console.error(err));
 }
