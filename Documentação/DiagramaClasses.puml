@@ -119,7 +119,6 @@ Administrador "1" -- "1..*" Servico
 
 Funcionario "1" -- "1" ParametrizacaoFuncionario
 Funcionario "1" -- "1..*" AlocacaoFuncionario
-Funcionario "1" -- "1..*" Feedback
 Funcionario "1" -- "1" Usuario
 
 Equipamento "1" -- "1..*" AlocacaoEquipamento
@@ -129,5 +128,6 @@ Cliente "1" -- "1..*" Servico
 
 Servico "1" -- "1..*" AlocacaoFuncionario
 Servico "1" -- "1..*" AlocacaoEquipamento
-Servico "1" -- "1..*" Feedback
+
+AlocacaoFuncionario "1" -- "1..*" Feedback
 @enduml

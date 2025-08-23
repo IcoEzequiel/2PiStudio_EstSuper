@@ -8,10 +8,8 @@ actor "Funcionário" as Func
 'Verbos
 rectangle "Sistema de Controle de Serviços" {
   
-  usecase "Cadastrar Entidades" as RF1
-  usecase "Criar Serviços" as RF2
-  usecase "Alocar Recursos" as RF3
-  usecase "Agendar Serviços" as RF4
+  usecase "Gerenciar Entidades" as RF1
+  usecase "Alocar Recursos com Serviços" as RF3
   usecase "Controlar Acesso" as RF5
   usecase "Enviar Feedback" as RF6
   usecase "Consultar Agenda" as RF7
@@ -22,9 +20,7 @@ rectangle "Sistema de Controle de Serviços" {
 }
 
 Admin --> RF1
-Admin --> RF2
 Admin --> RF3
-Admin --> RF4
 Admin --> RF5
 
 Func --> RF6
@@ -33,8 +29,6 @@ Func --> RF7
 RF1 --> RF8
 RF1 --> RF9
 
-RF1 ..> RF2 : <<include>>
-RF3 ..> RF4 : <<include>>
 RF3 ..> RF8 : <<include>>
 RF3 ..> RF9 : <<include>>
 @enduml
