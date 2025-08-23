@@ -67,10 +67,16 @@ Funcionario.hasOne(ParaFunc, {
     as: 'parametrizacao'
 })
 
+Equipamento.hasOne(ParaEquip,{
+    foreignKey: 'id_equipamento',
+    as: 'parametrizacao'
+})
+
 ParaEquip.belongsTo(Equipamento, {
     foreignKey:'id_equipamento',
     as: 'equipamento'
 })
+
 ParaFunc.belongsTo(Funcionario, {
     foreignKey: 'id_funcionario',
     as: 'funcionario'
