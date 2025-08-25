@@ -1,5 +1,6 @@
-const { Servico, Funcionario } = require('../models')
 const AlocacaoFuncionario = require('../models/ModelAlocacaoFuncionario')
+const Servico = require('../models/ModelServico')
+const Funcionario = require('../models/ModelFuncionario')
 
 const AlocacaoFuncionarioRepository = {
     getAll: async () => {
@@ -18,20 +19,20 @@ const AlocacaoFuncionarioRepository = {
         })
     },
 
-    save: async (dados) => {
-        return await AlocacaoFuncionario.create(dados)
+    save: async (dados, options = {}) => {
+        return await AlocacaoFuncionario.create(dados, options)
     },
 
-    update: async (id, dados) => {
-        const arqui = await AlocacaoFuncionario.findByPk(id)
+    update: async (id, dados, options = {}) => {
+        const arqui = await AlocacaoFuncionario.findByPk(id, options)
         if (!arqui) return null
-        return await arqui.update(dados)
+        return await arqui.update(dados, options)
     },
 
-    delete: async (id) => {
-        const arqui = await AlocacaoFuncionario.findByPk(id)
+    delete: async (id, options = {}) => {
+        const arqui = await AlocacaoFuncionario.findByPk(id, options)
         if (!arqui) return null
-        await arqui.destroy()
+        await arqui.destroy(options)
         return true
     }
 }

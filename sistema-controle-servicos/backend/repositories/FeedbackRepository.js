@@ -1,4 +1,5 @@
-const { Servico, Funcionario } = require('../models')
+const Servico = require('../models/ModelServico')
+const Funcionario = require('../models/ModelFuncionario')
 const Feedback = require('../models/ModelFeedback')
 
 const FeedbackRepository = {

@@ -1,4 +1,4 @@
-const { Equipamento } = require('../models/ModelEquipamento')
+const Equipamento = require('../models/ModelEquipamento')
 const ParametrizacaoEquipamento = require('../models/ModelParametrizacaoEquipamento')
 
 const ParametrizacaoEquipamentoRepository = {

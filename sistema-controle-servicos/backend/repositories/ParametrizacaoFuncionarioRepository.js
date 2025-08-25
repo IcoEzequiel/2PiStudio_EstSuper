@@ -1,4 +1,4 @@
-const { Funcionario } = require('../models/ModelFuncionario')
+const Funcionario = require('../models/ModelFuncionario')
 const ParametrizacaoFuncionario = require('../models/ModelParametrizacaoFuncionario')
 
 const ParametrizacaoFuncionarioRepository = {

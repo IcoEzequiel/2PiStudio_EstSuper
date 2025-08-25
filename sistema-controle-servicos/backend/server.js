@@ -37,35 +37,67 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-AlocEquip.belongsTo(Equipamento,{
-    foreignKey:"id_equipamento",
-    as: 'equipamento'
-})
-AlocEquip.belongsTo(Servico,{
-    foreignKey:"id_servico",
-    as: "servico"
-})
-AlocFunc.belongsTo(Funcionario,{
-    foreignKey:'id_funcionario',
-    as: "funcionario"
-})
-AlocFunc.belongsTo(Servico, {
-    foreignKey:'id_servico',
-    as: "servico"
+
+// Relação Cliente <-> Servico (Um cliente tem Muitos Serviços)
+Cliente.hasMany(Servico, {
+    foreignKey: 'id_cliente', as: 'servicos'
 })
 
-Feedback.belongsTo(Servico,{
-    foreignKey:'id_servico',
-    as: 'servico'
+Servico.belongsTo(Cliente,{
+    foreignKey: 'id_cliente', as:'cliente'
 })
-Feedback.belongsTo(Funcionario,{
-    foreignKey:'id_funcionario',
-    as: 'funcionario'
+
+// Relação Servico <-> AlocaçãoFuncionario (Um servico tem muitas Alocações de Funcionarios)
+
+Servico.hasMany(AlocFunc,{
+    foreignKey: 'id_servico', as: 'alocacoesFuncionario'
 })
+
+AlocFunc.belongsTo(Servico, {
+    foreignKey:'id_servico', as: "servico"
+})
+
+// Relação Servico <-> AlocaçãoEquipamento (Um servico tem muitas alocações de Equipamento)
+
+Servico.hasMany(AlocEquip,{
+    foreignKey: 'id_servico', as: 'alocacoesEquipamento'
+})
+
+AlocEquip.belongsTo(Servico,{
+    foreignKey:"id_servico", as: "servico"
+})
+
+// Relação Funcionario <-> AlocacaoFuncionario (Um Funcionario pode estar em muitas Alocações)
+
+Funcionario.hasMany(AlocFunc, {
+    foreignKey: 'id_funcionario', as: 'alocacoes'
+})
+
+AlocFunc.belongsTo(Funcionario,{
+    foreignKey:'id_funcionario', as: "funcionario"
+})
+
+// Relação Equipamento <-> alocacaoEquipamento (Um equipamento pode estar em Muitas Alocacoes)
+
+Equipamento.hasMany(AlocEquip, {
+    foreignKey: 'id_equipamento', as: 'alocacoes'
+})
+
+AlocEquip.belongsTo(Equipamento,{
+    foreignKey:"id_equipamento", as: 'equipamento'
+})
+
+// Relação Funcionario <-> ParametrizacaoFuncionario (Um funcionario tem Uma Parametrização)
+
 Funcionario.hasOne(ParaFunc, {
-    foreignKey: 'id_funcionario',
-    as: 'parametrizacao'
+    foreignKey: 'id_funcionario', as: 'parametrizacao'
 })
+
+ParaFunc.belongsTo(Funcionario, {
+    foreignKey: 'id_funcionario', as: 'funcionario'
+})
+
+// Relação Equipamento <-> ParametrizacaoEquipamento (Um equipamento tem uma Parametrização)
 
 Equipamento.hasOne(ParaEquip,{
     foreignKey: 'id_equipamento',
@@ -77,16 +109,17 @@ ParaEquip.belongsTo(Equipamento, {
     as: 'equipamento'
 })
 
-ParaFunc.belongsTo(Funcionario, {
-    foreignKey: 'id_funcionario',
+// Outras relações, talves sejam mudadas.
+
+Feedback.belongsTo(Servico,{
+    foreignKey:'id_servico',
+    as: 'servico'
+})
+Feedback.belongsTo(Funcionario,{
+    foreignKey:'id_funcionario',
     as: 'funcionario'
 })
-
-Servico.belongsTo(Cliente,{
-    foreignKey: 'id_cliente',
-    as:'cliente'
-})
-
+ 
 Usuario.belongsTo(Funcionario, {
     foreignKey: 'id_funcionario',
     as: 'funcionario'
