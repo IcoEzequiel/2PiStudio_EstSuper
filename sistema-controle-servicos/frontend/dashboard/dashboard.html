@@ -1,22 +1,111 @@
-<body>
-  <div class="dashboard-grid">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="dashboard/dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
 
-    <div class="card">
-      <div class="card-header"></div>
-      <div class="card-body">
-        <div class="card-title">
-          <h3>Projetos Ativos</h3>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-               viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               class="icon">
-            <rect width="20" height="14" x="2" y="7" rx="2"></rect>
-            <path d="M16 21V5a2 2 0 0 0-2-2H4"></path>
-          </svg>
+<body>
+  <div class="dashboard-container">
+    
+    <!-- Cards -->
+    <div class="grade-cards">
+      <div class="card">
+        <div class="barra-card azul"></div>
+        <div class="cabecalho-card">
+          <h3 class="titulo-card">Projetos Ativos</h3>
+          <span class="icone">📂</span>
         </div>
-        <div class="card-value">0</div>
+        <div class="card-conteudo">
+          <p class="valor-card">3</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="barra-card verde"></div>
+        <div class="cabecalho-card">
+          <h3 class="titulo-card">Receita Total (Concluídos)</h3>
+          <span class="icone">💰</span>
+        </div>
+        <div class="card-conteudo">
+          <p class="valor-card">R$ 25.000</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="barra-card roxo"></div>
+        <div class="cabecalho-card">
+          <h3 class="titulo-card">Lucro Total (Concluídos)</h3>
+          <span class="icone">📊</span>
+        </div>
+        <div class="card-conteudo">
+          <p class="valor-card">R$ 15.000</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="barra-card laranja"></div>
+        <div class="cabecalho-card">
+          <h3 class="titulo-card">Projetos Concluídos</h3>
+          <span class="icone">✅</span>
+        </div>
+        <div class="card-conteudo">
+          <p class="valor-card">7</p>
+        </div>
       </div>
     </div>
 
+    <!-- Projetos Recentes -->
+    <div class="projetos-recentes">
+      <h2 class="titulo-secao">Projetos Recentes</h2>
+
+      <div class="projeto">
+        <div>
+          <p class="nome-projeto">Website Loja Online</p>
+          <p class="cliente-projeto">Cliente: João Silva</p>
+        </div>
+        <div class="status-projeto">
+          <span class="etiqueta azul">em andamento</span>
+          <p class="orcamento-projeto">R$ 12.000</p>
+        </div>
+      </div>
+
+      <div class="projeto">
+        <div>
+          <p class="nome-projeto">Aplicativo Mobile</p>
+          <p class="cliente-projeto">Cliente: Maria Souza</p>
+        </div>
+        <div class="status-projeto">
+          <span class="etiqueta verde">concluído</span>
+          <p class="orcamento-projeto">R$ 8.000</p>
+        </div>
+      </div>
+
+      <div class="projeto">
+        <div>
+          <p class="nome-projeto">Painel Interno</p>
+          <p class="cliente-projeto">Cliente: Empresa ACME</p>
+        </div>
+        <div class="status-projeto">
+          <span class="etiqueta amarelo">em orçamento</span>
+          <p class="orcamento-projeto">R$ 5.000</p>
+        </div>
+      </div>
+
+      <div class="projeto">
+        <div>
+          <p class="nome-projeto">E-commerce Moderno</p>
+          <p class="cliente-projeto">Cliente: Startup XYZ</p>
+        </div>
+        <div class="status-projeto">
+          <span class="etiqueta vermelho">cancelado</span>
+          <p class="orcamento-projeto">R$ 2.500</p>
+        </div>
+      </div>
+    </div>
   </div>
 </body>
+</html>
