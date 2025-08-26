@@ -1,38 +1,28 @@
-const Servico = require('../models/ModelServico')
-const Funcionario = require('../models/ModelFuncionario')
 const Feedback = require('../models/ModelFeedback')
 
 const FeedbackRepository = {
-    getAll: async () => {
-        return await Feedback.findAll({
-            include:[{model: Servico, as: 'servico'},
-                    {model: Funcionario, as: 'funcionario'}
-            ]
-        })
+    getAll: async (options = {}) => {
+        return await Feedback.findAll(options)
     },
 
-    getById: async (id) => {
-        return await Feedback.findByPk(id,{
-            include:[{model: Servico, as: 'servico'},
-                    {model: Funcionario, as: 'funcionario'}
-            ]
-        })
+    getById: async (id, options = {}) => {
+        return await Feedback.findByPk(id, options)
     },
 
-    save: async (dados) => {
-        return await Feedback.create(dados)
+    save: async (dados, options = {}) => {
+        return await Feedback.create(dados, options)
     },
 
-    update: async (id, dados) => {
-        const arqui = await Feedback.findByPk(id)
+    update: async (id, dados, options = {}) => {
+        const arqui = await Feedback.findByPk(id, options)
         if (!arqui) return null
-        return await arqui.update(dados)
+        return await arqui.update(dados, options)
     },
 
-    delete: async (id) => {
-        const arqui = await Feedback.findByPk(id)
+    delete: async (id, options = {}) => {
+        const arqui = await Feedback.findByPk(id, options)
         if (!arqui) return null
-        await arqui.destroy()
+        await arqui.destroy(options)
         return true
     }
 }

@@ -2,16 +2,12 @@ const Equipamento = require('../models/ModelEquipamento')
 const ParametrizacaoEquipamento = require('../models/ModelParametrizacaoEquipamento')
 
 const ParametrizacaoEquipamentoRepository = {
-    getAll: async () => {
-        return await ParametrizacaoEquipamento.findAll({
-            include: [{model: Equipamento, as: 'equipamento'}]
-        })
+    getAll: async (options = {}) => {
+        return await ParametrizacaoEquipamento.findAll(options)
     },
 
-    getById: async (id) => {
-        return await ParametrizacaoEquipamento.findByPk(id,{
-            include:[{model: Equipamento, as: 'equipamento'}]
-        })
+    getById: async (id, options = {}) => {
+        return await ParametrizacaoEquipamento.findByPk(id, options)
     },
 
     save: async (dados, options = {}) => {

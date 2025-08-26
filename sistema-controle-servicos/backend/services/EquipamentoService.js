@@ -23,7 +23,7 @@ const EquipamentoService = {
                 nome: dados.nome,
                 tipo: dados.tipo,
                 descricao: dados.descricao,
-                status: dados.status || 'operacional'
+                status: dados.status || 'ativo'
             }
 
             const novoEquipamento = await repo.save(dadosEquipamento, {transaction: t})
@@ -59,7 +59,7 @@ const EquipamentoService = {
                 nome: dados.nome,
                 tipo: dados.tipo,
                 descricao: dados.descricao,
-                status: dados.status || 'operacional'
+                status: dados.status || 'ativo'
             }
             await repo.update(id, dadosEquipamento, {transaction: t})
 
@@ -83,7 +83,43 @@ const EquipamentoService = {
     },
 
     delete: async (id) => {
-        return await repo.delete(id)
+        const t = await sequelize.transaction()
+
+        try {
+            const equipamento = await repo.getById(id, {
+                include: [
+                    {model: require('../models/ModelParametrizacaoEquipamento'), as: 'parametrizacao'},
+                    {model: require('../models/ModelAlocacaoEquipamento'), as: 'alocacoes'}
+                ],
+                transaction: t
+            })
+
+            if (!equipamento){
+                throw new Error('Equipamento Não Existe')
+            }
+
+            if (equipamento.parametrizacao){
+                await ParaEquipRepo.delete(equipamento.parametrizacao.id, {transaction: t})
+            }
+
+            if(equipamento.alocacoes != [] && equipamento.alocacoes.length != 0){
+                const dadosEquipamento = {
+                nome: equipamento.nome,
+                tipo: equipamento.tipo,
+                descricao: equipamento.descricao,
+                status: "inativo"
+            }
+                await repo.update(id, dadosEquipamento, {transaction: t})
+            } else {
+                await repo.delete(id, {transaction: t})
+            }
+
+            await t.commit()
+            return true;
+        }catch (error){
+            await t.rollback()
+            throw new Error('Erro ao inativar equipamento: ' + error.message)
+        }
     }
 }
 

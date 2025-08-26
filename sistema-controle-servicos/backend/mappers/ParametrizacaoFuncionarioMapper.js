@@ -1,9 +1,9 @@
 const ParametrizacaoFuncionarioDTO = require('../DTOs/ParametrizacaoFuncionarioDTO')
 
 class ParametrizacaoFuncionarioMapper {
-    static toDTO(parametrizacaoFuncionario){
-        const parametrizacaoFuncionarioData = parametrizacaoFuncionario.get()
-        return new ParametrizacaoFuncionarioDTO(parametrizacaoFuncionarioData, parametrizacaoFuncionarioData.funcionario)
+    static toDTO(ParaFunc){
+        const ParaFuncData = ParaFunc.get()
+        return new ParametrizacaoFuncionarioDTO(ParaFuncData, ParaFuncData.funcionario)
     }
 }
 

@@ -13,7 +13,7 @@ const Equipamento = sequelize.define('Equipamentos', {
     },
     tipo: DataTypes.STRING,
     descricao: DataTypes.TEXT,
-    status: DataTypes.ENUM('operacional','quebrado')
+    status: DataTypes.ENUM('ativo','inativo')
 },
 {
     tableName: 'Equipamentos',

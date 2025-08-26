@@ -6,13 +6,23 @@ const { sequelize } = require('../db');
 
 const AlocacaoEquipamentoService = {
     getAll: async () => {
-        const AlocEquips = await repo.getAll()
+        const AlocEquips = await repo.getAll({
+            include:[
+                {model: require('../models/ModelServico'), as: 'servico'},
+                {model: require('../models/ModelEquipamento'), as: 'equipamento'}
+            ]
+        })
         const AlocEquipsDTO = AlocEquips.map(A=> AlocEquipMapper.toDTO(A))
         return AlocEquipsDTO
     },
 
     getById: async (id) => {
-        const AlocEquip = await repo.getById(id)
+        const AlocEquip = await repo.getById(id,{
+            include:[
+                {model: require('../models/ModelServico'), as: 'servico'},
+                {model: require('../models/ModelEquipamento'), as: 'equipamento'}
+            ]
+        })
         if(!AlocEquip) {
             return null
         }

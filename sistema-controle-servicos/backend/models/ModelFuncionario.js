@@ -19,7 +19,7 @@ const Funcionario = sequelize.define('Funcionario',{
     email: DataTypes.STRING,
     telefone: DataTypes.STRING,
     cargo: DataTypes.STRING,
-    status: DataTypes.ENUM('ferias','operacional')
+    status: DataTypes.ENUM('ativo','inativo')
 },
 {
     tableName: "funcionarios",

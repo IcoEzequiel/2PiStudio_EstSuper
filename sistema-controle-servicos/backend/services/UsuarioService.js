@@ -5,13 +5,17 @@ const { sequelize } = require('../db');
 
 const UsuarioService = {
     getAll: async () => {
-            const Usuarios = await repo.getAll()
+            const Usuarios = await repo.getAll({
+                include: [{model: require('../models/ModelFuncionario'), as: 'funcionario'}]
+            })
             const UsaurioDTO = Usuarios.map(U => UsuarioMapper.toDTO(U))
             return UsaurioDTO
     },
 
     getById: async (id) => {
-            const Usuario = await repo.getById(id)
+            const Usuario = await repo.getById(id, {
+                include: [{model: require('../models/ModelFuncionario'), as: 'funcionario'}]
+            })
             if(!Usuario){
                 return null
             }

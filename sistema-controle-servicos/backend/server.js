@@ -109,17 +109,25 @@ ParaEquip.belongsTo(Equipamento, {
     as: 'equipamento'
 })
 
-// Outras relações, talves sejam mudadas.
+// Relação Feedback <-> Alocação Funcionario (Uma alocação tem um Feedback).
 
-Feedback.belongsTo(Servico,{
-    foreignKey:'id_servico',
+Feedback.belongsTo(AlocFunc,{
+    foreignKey:'id_alocacaoFuncionario',
     as: 'servico'
 })
-Feedback.belongsTo(Funcionario,{
-    foreignKey:'id_funcionario',
-    as: 'funcionario'
+
+AlocFunc.hasOne(Feedback,{
+    foreignKey:'id_alocacaoFuncionario',
+    as: 'feedback'
 })
  
+// Relação Usuario <-> Funcionario (Um funcionario tem Um Usuario)
+
+Funcionario.hasOne(Usuario, {
+    foreignKey: 'id_funcionario',
+    as: 'funcionario'
+})
+
 Usuario.belongsTo(Funcionario, {
     foreignKey: 'id_funcionario',
     as: 'funcionario'

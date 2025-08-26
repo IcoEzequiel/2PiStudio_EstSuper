@@ -27,7 +27,7 @@ const FuncionarioService = {
                 email: dados.email,
                 numero_telefone: dados.numero_telefone,
                 cargo: dados.cargo,
-                status: dados.status || 'operacional'
+                status: dados.status || 'ativo'
             }
 
             const novoFuncionario = await repo.save(dadosFuncionario, {transaction: t})
@@ -91,8 +91,46 @@ const FuncionarioService = {
         }
     },
 
+    // O delete não vai deletar de foto um funcionario, vai deixa-lo inativo e apagar seu usuario e sua parametrização do banco de dados
     delete: async (id) => {
-        return await repo.delete(id)
+        const t = await sequelize.transaction()
+
+        try {
+            const funcionario = await repo.getById(id, {
+                include: [
+                    { model: require('../models/ModelParametrizacaoFuncionario'), as: 'parametrizacao'},
+                    { model: require('../models/ModelAlocacaoFuncionario'), as: 'alocacoes'}
+                ]
+            })
+
+            if (!funcionario){
+                throw new Error('Funcionário não existe')
+            }
+            if(funcionario.parametrizacao){
+                await ParaFuncRepo.delete(funcionario.parametrizacao.id, {transaction: t})
+            }
+            await require('../models/ModelUsuario').destroy({
+                where: { id_funcionario: id}, transaction: t
+            })
+            if(funcionario.alocacoes != [] && funcionario.alocacoes.length != 0){
+                const dadosFuncionario = {
+                nome: funcionario.nome,
+                cpf: funcionario.cpf,
+                email: funcionario.email,
+                numero_telefone: funcionario.numero_telefone,
+                cargo: funcionario.cargo,
+                status: "inativo"
+            }
+                await repo.update(id,dadosFuncionario,{transaction: t})
+            } else {
+                await repo.delete(id, {transaction: t})
+            }
+            await t.commit()
+            return true
+        }catch (error) {
+            await t.rollback()
+            throw new Error('Erro ao inativar Funcionario: ' + error.message)
+        }
     }
 }
 

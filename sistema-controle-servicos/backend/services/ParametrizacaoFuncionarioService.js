@@ -5,13 +5,17 @@ const { sequelize } = require('../db');
 
 const ParametrizacaoFuncionarioService = {
     getAll: async () => {
-        const ParaFuncs = await repo.getAll()
+        const ParaFuncs = await repo.getAll({
+            include: [{model: require('../models/ModelFuncionario'), as: 'funcionario'}]
+        })
         const ParaFuncsDTO = ParaFuncs.map(P => ParaFuncMapper.toDTO(P))
         return ParaFuncsDTO
     },
 
     getById: async (id) => {
-        const ParaFunc = await repo.getById(id)
+        const ParaFunc = await repo.getById(id,{
+            include: [{model: require('../models/ModelFuncionario'), as: 'funcionario'}]
+        })
         if (!ParaFunc){
             return null
         }

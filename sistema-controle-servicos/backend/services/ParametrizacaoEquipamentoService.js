@@ -5,13 +5,17 @@ const { sequelize } = require('../db');
 
 const ParametrizacaoEquipamentoService = {
     getAll: async () => {
-        const ParaEquips = await repo.getAll()
+        const ParaEquips = await repo.getAll({
+            include: [{model: require('../models/ModelEquipamento'), as: 'equipamento'}]
+        })
         const ParaEquipsDTO = ParaEquips.map(P => ParaEquiMapper.toDTO(P))
         return ParaEquipsDTO
     },
 
     getById: async (id) => {
-        const ParaEquip = await repo.getById(id)
+        const ParaEquip = await repo.getById(id,{
+            include: [{model: require('../models/ModelEquipamento'), as: 'equipamento'}]
+        })
         if(!ParaEquip){
             return null
         }

@@ -58,6 +58,14 @@ const ServicoService = {
                 orcamento: dados.orcamento
             }
 
+            if (dadosServico.data_fim < dadosServico.data_inicio){
+                throw new Error('A data final não pode ser anterior a data de inicio')
+            }
+
+            if (dadosServico.orcamento < 0){
+                throw new Error('O orcamento não pode ser negativo')
+            }
+
             const novoServico = await ServicoRepo.save(dadosServico, {transaction: t})
 
             // Criação Alocações
@@ -71,9 +79,18 @@ const ServicoService = {
                         for (const alocFunc of dia.funcionarios){
 
                             // Validação funcionario
-                            const funcionario = await FuncionarioRepo.getById(alocFunc.id_funcionario)
+                            const funcionario = await FuncionarioRepo.getById(alocFunc.id_funcionario,
+                                {include: [{model: require('../models/ModelAlocacaoFuncionario'), as: "alocacoes"}]}
+                            )
                             if(!funcionario){
                                 throw new Error('Funcionario Não Existe')
+                            }
+                            if(!funcionario.status === 'inativo'){
+                                throw new Error('O funcionario ' + funcionario.nome + ' está inativo e não pode ser alocado para serviço')
+                            }
+                            const conflito = await AlocacaoFuncRepo.findByFuncionarioData(alocFunc.id_funcionario, data)
+                            if (conflito){
+                                throw new Error('O Funcionario ' + funcionario.nome + ' já está alocado em outro serviço no dia ' + data)
                             }
 
                             const dadosAlocFunc = {
@@ -82,6 +99,9 @@ const ServicoService = {
                                 data: data,
                                 hora: horasTrabalhadas,
                                 valor_dia_alocado: alocFunc.valor_dia_alocado
+                            }
+                            if(dadosAlocFunc.valor_dia_alocado < 0){
+                                throw new Error('O valor da Diaria não pode ser negativo')
                             }
                             await AlocacaoFuncRepo.save(dadosAlocFunc, { transaction: t})
                         }
@@ -96,12 +116,22 @@ const ServicoService = {
                             if(!equipamento){
                                 throw new Error('Equipamento Não Existe')
                             }
+                            if(equipamento.status === "inativo"){
+                                throw new Error('Equipamento ' + equipamento.nome +' está inativo e não pode ser alocado para serviço')
+                            }
+                            const conflito = await AlocacaoEquipRepo.findByEquipamentoData(alocEquip.id_equipamento, data)
+                            if (conflito){
+                                throw new Error('O Equipamento ' + equipamento.nome + ' já está alocado em outro serviço no dia ' + data)
+                            }
                             const dadosAlocEquip = {
                                 id_servico: novoServico.id,
                                 id_equipamento: alocEquip.id_equipamento,
                                 data: data,
                                 hora: horasTrabalhadas,
                                 valor_hora_alocada: alocEquip.valor_hora_alocada
+                            }
+                            if(dadosAlocEquip.valor_hora_alocada < 0){
+                                throw new Error('O valor da hora do equipamento não pode ser negativo')
                             }
                             await AlocacaoEquipRepo.save(dadosAlocEquip, { transaction: t})
                         }
@@ -164,6 +194,13 @@ const ServicoService = {
                             if(!funcionario){
                                 throw new Error('Funcionario Não Existe')
                             }
+                            if(funcionario.status === "inativo"){
+                                throw new Error('Funcionario ' + funcionario.nome + ' está inativo e não pode ser alocado para serviço')
+                            }
+                            const conflito = await AlocacaoFuncRepo.findByFuncionarioData(alocFunc.id_funcionario, data)
+                            if (conflito){
+                                throw new Error('O Funcionario ' + funcionario.nome + ' já está alocado em outro serviço no dia ' + data)
+                            }
 
                             const dadosAlocFunc = {
                                 id_servico: id,
@@ -171,6 +208,9 @@ const ServicoService = {
                                 data: data,
                                 hora: horasTrabalhadas,
                                 valor_dia_alocado: alocFunc.valor_dia_alocado
+                            }
+                            if(dadosAlocFunc.valor_dia_alocado < 0){
+                                throw new Error('O valor da diaria do funcionario não pode ser negativo')
                             }
                             await AlocacaoFuncRepo.save(dadosAlocFunc, { transaction: t})
                         }
@@ -185,12 +225,22 @@ const ServicoService = {
                             if(!equipamento){
                                 throw new Error('Equipamento Não Existe')
                             }
+                            if(equipamento.status === "inativo"){
+                                throw new Error('Equipamento: ' + equipamento.nome + "está inaivo e não pode ser alocado para serviço")
+                            }
+                            const conflito = await AlocacaoEquipRepo.findByEquipamentoData(alocEquip.id_equipamento, data)
+                            if (conflito){
+                                throw new Error('O Equipamento ' + equipamento.nome + ' já está alocado em outro serviço no dia ' + data)
+                            }
                             const dadosAlocEquip = {
                                 id_servico: id,
                                 id_equipamento: alocEquip.id_equipamento,
                                 data: data,
                                 hora: horasTrabalhadas,
                                 valor_hora_alocada: alocEquip.valor_hora_alocada
+                            }
+                            if(dadosAlocEquip.valor_hora_alocada < 0){
+                                throw new Error('O valor da hora do equipamento não pode ser negativo')
                             }
                             await AlocacaoEquipRepo.save(dadosAlocEquip, { transaction: t})
                         }
@@ -206,6 +256,14 @@ const ServicoService = {
                 data_fim: dados.data_fim,
                 status: dados.status,
                 orcamento: dados.orcamento
+            }
+
+            if (dadosServico.data_fim < dadosServico.data_inicio){
+                throw new Error('A data final não pode ser anterior a data de inicio')
+            }
+
+            if (dadosServico.orcamento < 0){
+                throw new Error('O orcamento não pode ser negativo')
             }
 
             const servicoEdit = await ServicoRepo.update(id, dadosServico, {transaction: t})

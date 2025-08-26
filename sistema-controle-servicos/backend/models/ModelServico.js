@@ -15,7 +15,6 @@ const Servico = sequelize.define('Servico',{
     descricao: DataTypes.TEXT,
     data_inicio:DataTypes.DATEONLY,
     data_fim: DataTypes.DATEONLY,
-    tempo_expediente: DataTypes.INTEGER,
     status: {
         type: DataTypes.ENUM('agendado','em execução','concluido')
     },

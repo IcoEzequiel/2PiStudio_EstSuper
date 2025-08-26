@@ -1,22 +1,21 @@
 const AlocacaoFuncionario = require('../models/ModelAlocacaoFuncionario')
-const Servico = require('../models/ModelServico')
-const Funcionario = require('../models/ModelFuncionario')
 
 const AlocacaoFuncionarioRepository = {
-    getAll: async () => {
-        return await AlocacaoFuncionario.findAll({
-            include:[{model: Servico, as:'servico'},
-                {model: Funcionario, as:'funcionario'}
-            ]
-        })
+    getAll: async (options = {}) => {
+        return await AlocacaoFuncionario.findAll(options)
     },
 
-    getById: async (id) => {
-        return await AlocacaoFuncionario.findByPk(id,{
-            include:[{model: Servico, as:'servico'},
-                {model: Funcionario, as:'funcionario'}
-            ]
-        })
+    getById: async (id, options = {}) => {
+        return await AlocacaoFuncionario.findByPk(id, options)
+    },
+
+    findByFuncionarioData: async (id_funcionario, data, options = {}) => {
+        return await AlocacaoFuncionario.findOne({
+            where: {
+                id_funcionario: id_funcionario,
+                data: data
+            }
+        }, options)
     },
 
     save: async (dados, options = {}) => {

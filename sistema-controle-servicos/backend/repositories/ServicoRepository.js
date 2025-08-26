@@ -1,4 +1,3 @@
-const Cliente  = require('../models/ModelCliente')
 const Servico = require('../models/ModelServico')
 
 const ServicoRepository = {

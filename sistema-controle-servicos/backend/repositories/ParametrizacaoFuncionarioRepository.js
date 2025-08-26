@@ -1,17 +1,12 @@
-const Funcionario = require('../models/ModelFuncionario')
 const ParametrizacaoFuncionario = require('../models/ModelParametrizacaoFuncionario')
 
 const ParametrizacaoFuncionarioRepository = {
-    getAll: async () => {
-        return await ParametrizacaoFuncionario.findAll({
-            include:[{model: Funcionario, as: 'funcionario'}]
-        })
+    getAll: async (options = {}) => {
+        return await ParametrizacaoFuncionario.findAll(options)
     },
 
-    getById: async (id) => {
-        return await ParametrizacaoFuncionario.findByPk(id,{
-            include:[{ model: Funcionario, as: 'funcionario'}]
-        })
+    getById: async (id, options = {}) => {
+        return await ParametrizacaoFuncionario.findByPk(id, options)
     },
 
     // Com opção options para poder criar um funcionario e sua parametrização ao mesmo tempo

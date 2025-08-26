@@ -1,8 +1,8 @@
 class FeedbackDTO {
-    constructor(feedback, servico, funcionario){
+    constructor(feedback, alocacaoFuncionario){
         this.id = feedback.id
-        this.servico = servico
-        this.funcionario = funcionario
+        this.servico = alocacaoFuncionario.servico
+        this.funcionario = alocacaoFuncionario.funcionario
         this.comentario = feedback.comentario
         this.data = feedback.data
     }

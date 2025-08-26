@@ -7,11 +7,7 @@ const Feedback = sequelize.define('Feedback',{
         autoIncrement:true,
         primaryKey:true
     },
-    id_servico:{
-        type: DataTypes.INTEGER,
-        allowNull:false
-    },
-    id_funcionario:{
+    id_alocacaoFuncionario:{
         type: DataTypes.INTEGER,
         allowNull:false
     },

@@ -6,13 +6,23 @@ const { sequelize } = require('../db');
 
 const AlocacaoFuncionarioService = {
     getAll: async () => {
-        const AlocFuncs = await repo.getAll()
+        const AlocFuncs = await repo.getAll({
+            include:[
+                {model: require('../models/ModelServico'), as: 'servico'},
+                {model: require('../models/ModelFuncionario'), as: 'funcionario'}
+            ]
+        })
         const AlocFuncsDTO = AlocFuncs.map(A=>AlocFuncMapper.toDTO(A))
         return AlocFuncsDTO
     },
 
     getById: async (id) => {
-        const AlocFunc = await repo.getById(id)
+        const AlocFunc = await repo.getById(id,{
+            include:[
+                {model: require('../models/ModelServico'), as: 'servico'},
+                {model: require('../models/ModelFuncionario'), as: 'funcionario'}
+            ]
+        })
         if(!AlocFunc){
             return null
         }

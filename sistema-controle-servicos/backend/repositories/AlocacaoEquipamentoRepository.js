@@ -1,22 +1,21 @@
 const AlocacaoEquipamento = require('../models/ModelAlocacaoEquipamento')
-const Servico = require('../models/ModelServico')
-const Equipamento = require('../models/ModelEquipamento')
 
 const AlocacaoEquipamentoRepository = {
-    getAll: async () => {
-        return await AlocacaoEquipamento.findAll({
-            include:[{model: Servico, as:'servico'},
-                {model: Equipamento, as:'equipamento'}
-            ]
-        })
+    getAll: async (options = {}) => {
+        return await AlocacaoEquipamento.findAll(options)
     },
 
-    getById: async (id) => {
-        return await AlocacaoEquipamento.findByPk(id,{
-            include:[{model: Servico, as:'servico'},
-                {model: Equipamento, as:'equipamento'}
-            ]
-        })
+    getById: async (id, options = {}) => {
+        return await AlocacaoEquipamento.findByPk(id, options)
+    },
+
+    findByEquipamentoData: async (id_equipamento, data, options = {}) => {
+        return await AlocacaoEquipamento.findOne({
+            where: {
+                id_equipamento: id_equipamento,
+                data: data
+            }
+        }, options)
     },
 
     save: async (dados, options = {}) => {
