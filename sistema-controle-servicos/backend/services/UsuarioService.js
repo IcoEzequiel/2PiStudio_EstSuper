@@ -1,7 +1,9 @@
+const bcrypt = require('bcrypt')
+
 const repo = require('../repositories/UsuarioRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
 const UsuarioMapper = require('../mappers/UsuarioMapper')
-const { sequelize } = require('../db'); 
+
 
 const UsuarioService = {
     getAll: async () => {
@@ -30,9 +32,18 @@ const UsuarioService = {
                 throw new Error('O Funcionario Não Existe')
             }
         }
-            const novo = await repo.save(dados)
-            const novoDTO = UsuarioMapper.toDTO(novo)
-            return novoDTO
+        const salt = await bcrypt.genSalt(10)
+        const senhaHash = await bcrypt.hash(dados.senha, salt)
+
+        const dadosCrip = {
+            id_funcionario: dados.id_funcionario,
+            papel: dados.papel,
+            login: dados.login,
+            senha: senhaHash
+        }
+        const novo = await repo.save(dadosCrip)
+        const novoDTO = UsuarioMapper.toDTO(novo)
+        return novoDTO
         
     },
 
@@ -43,7 +54,18 @@ const UsuarioService = {
                 throw new Error('O Funcionario Não Existe')
             }
         }
-        const edit = await repo.update(id, dados)
+        const dadosCrip = {
+            id_funcionario: dados.id_funcionario,
+            papel: dados.papel,
+            login: dados.login,
+            senha: dados.senha || null
+        }
+        if (dados.senha){
+            const salt = await bcrypt.genSalt(10)
+            const senhaHash = await bcrypt.hash(dados.senha, salt)
+            dadosCrip.senha = senhaHash
+        }
+        const edit = await repo.update(id, dadosCrip)
 
         if (!edit){
             return null

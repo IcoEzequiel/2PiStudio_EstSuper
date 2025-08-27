@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -27,6 +29,7 @@ const ParametrizacaoEquipamentoRoutes = require('./routes/ParametrizacaoEquipame
 const ParametrizacaoFuncionariosRoutes = require('./routes/ParametrizacaoFuncionariosRoutes')
 const ServicoRoutes = require('./routes/ServicoRoutes')
 const UsuarioRoutes = require('./routes/UsuarioRoutes')
+const authRoutes = require('./routes/AuthRoutes')
 
 app.use(cors());
 app.use(express.json());
@@ -145,6 +148,7 @@ app.use('/ParametrizacaoEquipamento',ParametrizacaoEquipamentoRoutes)
 app.use('/ParametrizacaoFuncionario',ParametrizacaoFuncionariosRoutes)
 app.use('/Servico',ServicoRoutes)
 app.use('/Usuario',UsuarioRoutes)
+app.use('/auth', authRoutes)
 
 
 app.listen(PORT, () => {

@@ -9,6 +9,10 @@ const UsuarioRepository = {
         return await Usuario.findByPk(id, options)
     },
 
+    findByLogin: async (login) => {
+        return await Usuario.findOne({ where: {login: login}})
+    },
+
     save: async (dados, options = {}) => {
         return await Usuario.create(dados, options)
     },
