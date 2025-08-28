@@ -40,7 +40,7 @@ const ServicoService = {
             ]}
         )
         const ServicosStatusAtt = Servicos.map(servico => {
-            const servicoData = servico.get({ plain: true})
+            const servicoData = servico
             servicoData.status = calcularStatus(servicoData)
             return servicoData
         })
@@ -58,7 +58,7 @@ const ServicoService = {
             return null
         }
 
-        const servicoData = servico.get({ plain: true})
+        const servicoData = servico
         servicoData.status = calcularStatus(servicoData)
         const ServicoDTO = ServicoMapper.toDTO(servicoData)
         return ServicoDTO
