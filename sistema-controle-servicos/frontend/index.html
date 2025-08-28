@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Studio Manager - Gestão para Estúdios Criativos</title>
   <link rel="stylesheet" href="styles.css">
-  <meta name="description" content="Gerencie projetos, orçamentos, custos e lucratividade do seu estúdio de publicidade de forma fácil e visual." data-react-helmet="true">
+  <meta name="description"
+    content="Gerencie projetos, orçamentos, custos e lucratividade do seu estúdio de publicidade de forma fácil e visual."
+    data-react-helmet="true">
 </head>
 
 <body>
@@ -22,48 +24,40 @@
       <div class="area-nav">
         <div class="nav-item">
           <button data-page="dashboard/dashboard.html" type="button" class="nav-btn active">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-             viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-             class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
               <rect width="7" height="9" x="3" y="3" rx="1"></rect>
               <rect width="7" height="5" x="14" y="3" rx="1"></rect>
               <rect width="7" height="9" x="14" y="12" rx="1"></rect>
               <rect width="7" height="5" x="3" y="16" rx="1"></rect>
-             <path d="M4 12h16M4 6h16M4 18h16"></path>
+              <path d="M4 12h16M4 6h16M4 18h16"></path>
             </svg>
             <span class="nav-label">Dashboard</span>
           </button>
           <button data-page="projetos/projetos.html" type="button" class="nav-btn active">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-             viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-             class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
               <line x1="8" x2="21" y1="6" y2="6"></line>
               <line x1="8" x2="21" y1="12" y2="12"></line>
               <line x1="8" x2="21" y1="18" y2="18"></line>
               <line x1="3" x2="3.01" y1="6" y2="6"></line>
               <line x1="3" x2="3.01" y1="12" y2="12"></line>
               <line x1="3" x2="3.01" y1="18" y2="18"></line>
-             <path d="M4 12h16M4 6h16M4 18h16"></path>
+              <path d="M4 12h16M4 6h16M4 18h16"></path>
             </svg>
             <span class="nav-label">Projetos</span>
           </button>
           <button data-page="configuracoes/configuracoes.html" type="button" class="nav-btn active">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-             viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-             class="icon">
-             <path d="M4 12h16M4 6h16M4 18h16"></path>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+              <path d="M4 12h16M4 6h16M4 18h16"></path>
             </svg>
             <span class="nav-label">Configurações</span>
           </button>
         </div>
-        <button type="button" class="btn-novo-projeto">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-            class="icon">
+        <button class="nav-btn" data-page="novoprojeto/novoprojeto.html">Novo Projeto</button>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M8 12h8"></path>
             <path d="M12 8v8"></path>
@@ -77,9 +71,12 @@
 
     <main id="conteudo" class="conteudo"></main>
 
-    </main>
+    <footer class="footer">
+      <p>&copy; 2025 Studio Manager. Todos os direitos reservados.</p>
+    </footer>
 
   </div>
+
 </body>
 
 

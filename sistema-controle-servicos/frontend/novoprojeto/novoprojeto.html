@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -83,5 +83,57 @@
     <div id="message-box" class="message-box"></div>
 
     <script src="novoprojeto.js"></script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Projetos</title>
+  <link rel="stylesheet" href="novoprojeto.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <h2>Novo Projeto</h2>
+
+  <form id="projectForm" class="form">
+
+    <label>Nome do Cliente:</label>
+    <input type="text" id="clientName" required>
+
+    <label>Nome do Projeto:</label>
+    <input type="text" id="projectName" required>
+
+    <label>Equipamentos:</label>
+    <select id="equipmentSelect" multiple></select>
+
+    <label>Mão de Obra:</label>
+    <select id="laborSelect" multiple></select>
+
+    <label>Horas:</label>
+    <input type="number" id="hours" value="1" min="1">
+
+    <label>Orçamento (R$):</label>
+    <input type="number" id="quote" step="0.01">
+
+    <label>
+      <input type="checkbox" id="invoice"> Emitir Nota Fiscal
+    </label>
+
+    <div class="summary">
+      <p><strong>Custo Total:</strong> <span id="totalCosts">R$ 0,00</span></p>
+      <p><strong>Imposto:</strong> <span id="tax">R$ 0,00</span></p>
+      <p><strong>Lucro:</strong> <span id="profit">R$ 0,00</span></p>
+    </div>
+
+    <!-- aqui adicionei a classe "btn" -->
+    <button type="submit" class="btn">Salvar Projeto</button>
+  </form>
 </body>
 </html>
