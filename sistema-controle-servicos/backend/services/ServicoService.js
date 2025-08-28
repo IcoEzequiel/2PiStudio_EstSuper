@@ -12,6 +12,26 @@ const ClienteRepo = require('../repositories/ClienteRepository')
 
 const ServicoMapper = require('../mappers/servicoMapper')
 
+const calcularStatus = (servico) => {
+    if (servico.status === 'concluido') {
+        return 'concluido'
+    }
+    const hoje = new Date()
+    const dataInicio = new Date(servico.data_inicio)
+    const dataFim = new Date(servico.data_fim)
+
+    hoje.setHours(0,0,0,0)
+    dataInicio.setHours(0,0,0,0)
+    dataFim.setHours(0,0,0,0)
+
+    if (hoje > dataFim)
+        return 'concluido'
+    else if (hoje >= dataInicio && hoje <= dataFim)
+        return 'em execução'
+    else
+        return 'agendado'
+}
+
 const ServicoService = {
     getAll: async () => {
         const Servicos = await ServicoRepo.getAll(
@@ -19,7 +39,12 @@ const ServicoService = {
                 {model: require('../models/ModelCliente'), as: 'cliente'}
             ]}
         )
-        const ServicosDTO = Servicos.map(S => ServicoMapper.toDTO(S))
+        const ServicosStatusAtt = Servicos.map(servico => {
+            const servicoData = servico.get({ plain: true})
+            servicoData.status = calcularStatus(servicoData)
+            return servicoData
+        })
+        const ServicosDTO = ServicosStatusAtt.map(S => ServicoMapper.toDTO(S))
         return ServicosDTO
     },
 
@@ -32,7 +57,10 @@ const ServicoService = {
         if (!Servico){
             return null
         }
-        const ServicoDTO = ServicoMapper.toDTO(Servico)
+
+        const servicoData = servico.get({ plain: true})
+        servicoData.status = calcularStatus(servicoData)
+        const ServicoDTO = ServicoMapper.toDTO(servicoData)
         return ServicoDTO
     },
 

@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const cont = require('../controller/EquipamentoController')
-const { verifyToken } = require('../middleware/authMiddleware')
+const { verifyToken, checkRole } = require('../middleware/authMiddleware')
 // Rotas do Equipamento
 
 router.use(verifyToken)
