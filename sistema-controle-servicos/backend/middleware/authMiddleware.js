@@ -27,4 +27,19 @@ const verifyToken = (req, res, next) => {
     })
 }
 
-module.exports = {verifyToken}
+const checkRole = (role) => {
+    return (req, res, next) => {
+        // O 'verifytoken' deve ter executado antes, então o 'req.user' deve existir
+        if(!req.user){
+            return res.status(401).json({ error: 'Autenticação necessária'})
+        }
+        // Verifica se o papel do usuárioo no tokem corresponde ao papel exigido
+        if (req.user.papel !== role) {
+            return res.status(403).json({ error: 'Acesso proibido. Permissões insuficientes.'})
+        }
+
+        next()
+    }
+}
+
+module.exports = {verifyToken, checkRole}

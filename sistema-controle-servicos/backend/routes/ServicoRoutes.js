@@ -7,8 +7,8 @@ const { verifyToken } = require('../middleware/authMiddleware')
 router.use(verifyToken)
 router.get('/', cont.getAll)
 router.get('/:id',cont.getById)
-router.post('/', cont.create)
-router.put('/:id', cont.update)
-router.delete('/:id', cont.delete)
+router.post('/',checkRole('administrador'), cont.create)
+router.put('/:id',checkRole('administrador'), cont.update)
+router.delete('/:id',checkRole('administrador'), cont.delete)
 
 module.exports = router
