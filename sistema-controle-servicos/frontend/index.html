@@ -23,7 +23,7 @@
     <nav class="navbar">
       <div class="area-nav">
         <div class="nav-item">
-          <button data-page="dashboard/dashboard.html" type="button" class="nav-btn active">
+          <button data-page="../dashboard/dashboard.html" type="button" class="nav-btn active">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
               <rect width="7" height="9" x="3" y="3" rx="1"></rect>
@@ -34,7 +34,7 @@
             </svg>
             <span class="nav-label">Dashboard</span>
           </button>
-          <button data-page="projetos/projetos.html" type="button" class="nav-btn active">
+          <button data-page="../projetos/projetos.html" type="button" class="nav-btn active">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
               <line x1="8" x2="21" y1="6" y2="6"></line>
@@ -47,7 +47,7 @@
             </svg>
             <span class="nav-label">Projetos</span>
           </button>
-          <button data-page="configuracoes/configuracoes.html" type="button" class="nav-btn active">
+          <button data-page="../configuracoes/configuracoes.html" type="button" class="nav-btn active">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
               <path d="M4 12h16M4 6h16M4 18h16"></path>
@@ -55,7 +55,7 @@
             <span class="nav-label">Configurações</span>
           </button>
         </div>
-        <button class="nav-btn" data-page="novoprojeto/novoprojeto.html">Novo Projeto</button>
+        <button class="btn-novo-projeto" data-page="../novoprojeto/novoprojeto.html">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
             <circle cx="12" cy="12" r="10"></circle>
@@ -79,6 +79,15 @@
 
 </body>
 
+
+<script src="scripts.js">
+  fetch('http://localhost:3000/')
+    .then(response => response.text())
+    .then(data => console.log('Resposta do backend:', data))
+    .catch(err => console.error('Erro:', err));
+</script>
+
+</html>
 
 <!-- <body>
   <header>
@@ -105,13 +114,3 @@
 
   <main id="conteudo"></main>
 </body> -->
-
-
-<script src="scripts.js">
-  fetch('http://localhost:3000/')
-    .then(response => response.text())
-    .then(data => console.log('Resposta do backend:', data))
-    .catch(err => console.error('Erro:', err));
-</script>
-
-</html>

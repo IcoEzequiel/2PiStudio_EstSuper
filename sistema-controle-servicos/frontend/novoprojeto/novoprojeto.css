@@ -1,137 +1,166 @@
 :root {
-    --bg-gradient-start: #1a1a2e;
-    --bg-gradient-end: #16213e;
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --green-border: rgba(85, 255, 128, 0.2);
+    --bg-dark: #0f172a;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.15);
     --text-color: #ffffff;
-    --input-bg: rgba(255, 255, 255, 0.1);
-    --input-border: rgba(255, 255, 255, 0.2);
-    --popover-bg: rgba(22, 33, 62, 0.8);
-    --popover-border: rgba(153, 102, 255, 0.2);
-    --green-text: #48E59B;
-    --red-text: #FF6B6B;
-    --button-gradient-start: #3B82F6;
-    --button-gradient-end: #10B981;
+    --green: #10b981;
+    --blue: #3b82f6;
+    --red: #ef4444;
 }
 
-/* novoprojeto.css */
+/* === RESET BÁSICO === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+}
 
-/* Estilos gerais do formulário */
+
+/* ============================================== */
+/* === TEMA ESCURO PARA O FORMULÁRIO (DARK MODE) === */
+/* ============================================== */
+
+/* 1. Cores de fundo e texto da página */
+body {
+    background-color: #0f172a;
+    /* Fundo azul escuro para a página */
+    color: #e2e8f0;
+    /* Cor de texto padrão (cinza claro) */
+    font-family: 'Inter', sans-serif;
+}
+
+h2 {
+    text-align: center;
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 2rem;
+}
+
+/* 2. Estilo do container do formulário (efeito de vidro) */
 .form {
+    background: rgba(30, 41, 59, 0.5);
+    /* Fundo semitransparente */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Borda sutil e clara */
+    backdrop-filter: blur(10px);
+    /* Efeito de desfoque para o "vidro" */
+    padding: 2.5rem;
+    border-radius: 1rem;
+    max-width: 700px;
+    margin: 2rem auto;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    /* Aumentar o espaçamento para melhor visualização */
-    color: #fff;
-    /* Fundo mais escuro para melhor contraste */
-    backdrop-filter: blur(5px);
-    padding: 2rem;
-    /* Aumentar o padding */
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    /* Sombra para profundidade */
 }
 
-/* Melhorando o grid para responsividade */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
+/* 3. Estilo dos Rótulos (Labels) */
 label {
     display: block;
+    font-weight: 500;
     margin-bottom: 0.5rem;
-    font-weight: 600;
-    /* Usar uma fonte um pouco mais ousada para destaque */
-    color: #b0b0b0;
-    /* Cor mais clara para melhor legibilidade */
+    color: #94a3b8;
+    /* Cor cinza mais suave para os rótulos */
 }
 
+/* 4. Estilo dos campos de texto e seleção */
 input,
 select {
     width: 100%;
-    padding: 0.8rem;
-    border-radius: 8px;
-    border: 1px solid #444;
-    /* Borda um pouco mais escura */
-    background: #1e1e1e;
-    /* Fundo do input mais escuro */
-    color: white;
+    background: #1e293b;
+    /* Fundo dos inputs (azul mais escuro) */
+    border: 1px solid #334155;
+    /* Borda sutil para os inputs */
+    color: #e2e8f0;
+    /* Cor do texto dentro dos inputs */
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
     font-size: 1rem;
-    transition: border-color 0.3s;
+    outline: none;
+    transition: all 0.2s ease-in-out;
 }
 
-/* Estilo de foco para acessibilidade */
+/* Efeito ao focar em um campo */
 input:focus,
 select:focus {
-    outline: none;
-    border-color: #00ff99;
-    /* Cor de foco com a cor do lucro para consistência */
-    box-shadow: 0 0 0 3px rgba(0, 255, 153, 0.2);
+    border-color: #3b82f6;
+    /* Borda azul ao focar */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.switch-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 0.8rem 1rem;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+/* Cor do texto de placeholder */
+::placeholder {
+    color: #64748b;
 }
+
 
 .summary {
-    background: rgba(0, 0, 0, 0.5);
-    padding: 1.5rem;
-    border-radius: 10px;
-    border: 1px solid rgba(0, 255, 153, 0.3);
-    /* Borda com a cor do lucro */
+    background: #1e293b;
+    padding: 2rem;
+    /* Aumentamos o padding para mais espaço interno */
+    border-radius: 0.8rem;
+    border: 1px solid #334155;
 }
 
-.summary h3 {
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
-    color: #00ff99;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 0.5rem;
+/* Estilo para o título "Resumo Financeiro" */
+.summary p:first-child {
+    color: #10b981;
+    /* Cor verde, igual ao destaque do botão */
+    font-size: 1.25rem;
+    /* Fonte maior para o título */
+    font-weight: 700;
+    /* Texto em negrito */
+    margin-bottom: 1.5rem;
+    /* Mais espaço abaixo do título */
 }
 
-.summary .row {
+/* Estilo para as linhas de valores (Custo, Imposto, Lucro) */
+.summary p {
     display: flex;
     justify-content: space-between;
-    margin: 0.5rem 0;
-}
-
-.summary .profit {
-    font-weight: bold;
-    color: #00ff99;
-    font-size: 1.2rem;
-}
-
-/* Adicionando cor de lucro negativo */
-.summary .profit.negative {
-    color: #ff6b6b;
-    /* Um vermelho vibrante */
-}
-
-.btn {
-    background: #00ff99;
-    /* Cor sólida para maior consistência visual */
-    padding: 1rem;
-    border: none;
-    border-radius: 8px;
-    color: #1a1a1a;
     font-size: 1.1rem;
-    font-weight: 700;
+    /* Aumentamos o tamanho da fonte das linhas */
+    margin-bottom: 1rem;
+    /* Aumentamos o espaçamento entre as linhas */
+}
+
+.summary p:last-child {
+    margin-bottom: 0;
+}
+
+.summary span {
+    color: #94a3b8;
+}
+
+/* Destaque para o lucro */
+.summary strong.lucro-positivo {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.summary strong.lucro-negativo {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+
+/* 6. Estilo do Botão "Salvar Projeto" com Gradiente */
+.btn {
+    background: linear-gradient(90deg, #10b981, #3b82f6);
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: 0.8rem;
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: all 0.2s ease;
+    text-align: center;
 }
 
 .btn:hover {
-    background-color: #00e08b;
-    /* Levemente mais escuro no hover */
-    transform: translateY(-2px);
-    /* Efeito sutil de elevação */
+    opacity: 0.9;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
 }

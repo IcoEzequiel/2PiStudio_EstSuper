@@ -146,8 +146,12 @@ async function carregarPagina(pagina) {
       css.id = "extra-css";
       document.head.appendChild(css);
 
-      configurarFormNovoProjeto(); // Inicializa o formulário
+      // Aguarda o HTML ser renderizado antes de configurar o formulário
+      setTimeout(() => {
+        configurarFormNovoProjeto();
+      }, 0);
     }
+
   } catch (err) {
     document.getElementById("conteudo").innerHTML = "<p>Erro ao carregar página</p>";
     console.error(err);
@@ -156,7 +160,7 @@ async function carregarPagina(pagina) {
 
 // Navegação
 function configurarNavegacao() {
-  const links = document.querySelectorAll(".nav-btn");
+  const links = document.querySelectorAll(".nav-btn, .btn-novo-projeto");
   links.forEach(link => {
     link.addEventListener("click", () => {
       const pagina = link.getAttribute("data-page");
@@ -201,6 +205,34 @@ function configurarFormNovoProjeto() {
     });
   }
 
+  // function updateSummary() {
+  //   const hours = parseInt(hoursInput.value, 10) || 1;
+  //   const quote = parseFloat(quoteInput.value) || 0;
+  //   const invoice = invoiceCheckbox.checked;
+
+  //   const selectedEquip = [...equipmentSelect.selectedOptions].map(o => parseInt(o.value));
+  //   const selectedLabor = [...laborSelect.selectedOptions].map(o => parseInt(o.value));
+
+  //   const equipmentCostPerHour = selectedEquip.reduce((sum, id) => {
+  //     const item = equipment.find(e => e.id === id);
+  //     return sum + (item ? item.cost : 0);
+  //   }, 0);
+
+  //   const laborCostPerHour = selectedLabor.reduce((sum, id) => {
+  //     const item = labor.find(l => l.id === id);
+  //     return sum + (item ? item.cost : 0);
+  //   }, 0);
+
+  //   const totalCosts = (equipmentCostPerHour + laborCostPerHour) * hours;
+  //   const tax = invoice ? quote * TAX_RATE : 0;
+  //   const profit = quote - totalCosts - tax;
+
+  //   totalCostsSpan.textContent = `R$ ${totalCosts.toFixed(2)}`;
+  //   taxSpan.textContent = `R$ ${tax.toFixed(2)}`;
+  //   profitSpan.textContent = `R$ ${profit.toFixed(2)}`;
+  //   profitSpan.style.color = profit < 0 ? 'red' : '#388e3c';
+  // }
+
   function updateSummary() {
     const hours = parseInt(hoursInput.value, 10) || 1;
     const quote = parseFloat(quoteInput.value) || 0;
@@ -209,19 +241,15 @@ function configurarFormNovoProjeto() {
     const selectedEquip = [...equipmentSelect.selectedOptions].map(o => parseInt(o.value));
     const selectedLabor = [...laborSelect.selectedOptions].map(o => parseInt(o.value));
 
-    const equipmentCostPerHour = selectedEquip.reduce((sum, id) => {
-      const item = equipment.find(e => e.id === id);
-      return sum + (item ? item.cost : 0);
-    }, 0);
+    // ✅ Usando a função auxiliar para simplificar
+    const equipmentCostPerHour = calculateCostFromSelection(selectedEquip, equipment);
+    const laborCostPerHour = calculateCostFromSelection(selectedLabor, labor);
 
-    const laborCostPerHour = selectedLabor.reduce((sum, id) => {
-      const item = labor.find(l => l.id === id);
-      return sum + (item ? item.cost : 0);
-    }, 0);
-
-    const totalCosts = (equipmentCostPerHour + laborCostPerHour) * hours;
+    // O resto da lógica permanece o mesmo
+    const productionCosts = (equipmentCostPerHour + laborCostPerHour) * hours;
     const tax = invoice ? quote * TAX_RATE : 0;
-    const profit = quote - totalCosts - tax;
+    const totalCosts = productionCosts + tax;
+    const profit = quote - totalCosts;
 
     totalCostsSpan.textContent = `R$ ${totalCosts.toFixed(2)}`;
     taxSpan.textContent = `R$ ${tax.toFixed(2)}`;
