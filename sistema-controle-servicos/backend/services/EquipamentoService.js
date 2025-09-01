@@ -2,22 +2,24 @@ const { sequelize } = require('../db');
 const repo = require('../repositories/EquipamentoRepository')
 const ParaEquipRepo = require('../repositories/ParametrizacaoEquipamentoRepository')
 
-const EquipamentoService = {
-    getAll: async () => {
-        return await repo.getAll({
-            include: [{ model: require('../models/ModelParametrizacaoEquipamento'), as: 'parametrizacao'}]
-        })
-    },
+const getComInclude = async (id) => {
+    const inclusao = {include:[
+        { model: require('../models/ModelParametrizacaoEquipamento'), as: 'parametrizacao'}
+    ]}
+    if(!id)
+        return repo.getAll(inclusao) 
+    else
+        return repo.getById(id,inclusao)
+}
 
-    getById: async (id) => {
-        return await repo.getById(id, {
-            include: [{ model: require('../models/ModelParametrizacaoEquipamento'), as: 'parametrizacao'}]
-        })
-    },
+const validar = async (dados) => {
+    const Equipamento = await repo.getById(dados.id)
+    if(!Equipamento)
+        throw Error('Equipamento não encontrado')
+}
 
-    create: async (dados) => {
+const CriarEditar = async (dados, id = null) => {
         const t = await sequelize.transaction()
-
         try{
             const dadosEquipamento = {
                 nome: dados.nome,
@@ -25,61 +27,60 @@ const EquipamentoService = {
                 descricao: dados.descricao,
                 status: dados.status || 'ativo'
             }
-
-            const novoEquipamento = await repo.save(dadosEquipamento, {transaction: t})
-            
+            let equipamentoSalvo
+            let equipamentoId
+            if(!id){
+                equipamentoSalvo = await repo.save(dadosEquipamento, {transaction: t})
+                equipamentoId = equipamentoSalvo.id
+            } else{
+                equipamentoId = id
+                const equipamento = await getComInclude(id)
+                await validar(equipamento)
+                await repo.update(id,dadosEquipamento, {transaction: t})
+                equipamentoSalvo = equipamento
+            }
             if (dados.valor_hora){
                 const dadosParametrizacao = {
-                    id_equipamento: novoEquipamento.id,
+                    id_equipamento: equipamentoId,
                     valor_hora: dados.valor_hora
                 }
-                await ParaEquipRepo.save(dadosParametrizacao, {transaction: t})
+                const parametrizacao = equipamentoSalvo.parametrizacao
+                if(parametrizacao)
+                    await ParaEquipRepo.update(parametrizacao.id, dadosParametrizacao, {transaction: t})
+                else
+                    await ParaEquipRepo.save(dadosParametrizacao, {transaction: t})
+            } else if (id && equipamentoSalvo.parametrizacao){
+                await ParaEquipRepo.delete(equipamentoSalvo.parametrizacao.id, {transaction: t})
             }
             await t.commit()
 
-            return novoEquipamento
+            return repo.getById(equipamentoId)
         } catch(error){
             await t.rollback()
 
             throw new Error('Erro ao criar Equipamento: ' + error.message)
         }
+}
+
+
+const EquipamentoService = {
+    getAll: async () => {
+        return await getComInclude()
+    },
+
+    getById: async (id) => {
+        return await getComInclude(id)
+    },
+
+    create: async (dados) => {
+        const NovoEquipamento = await CriarEditar(dados, null)
+        return NovoEquipamento
     },
 
     update: async (id, dados) => {
-        const t = await sequelize.transaction()
-
-        try {
-            const Equipamento = await repo.getById(id, {
-                include: [{ model: require('../models/ModelParametrizacaoEquipamento'), as: 'parametrizacao'}],
-                transaction: t
-            })
-            if (!Equipamento)
-                throw new Error('Equipamento não encontrado')
-            const dadosEquipamento = {
-                nome: dados.nome,
-                tipo: dados.tipo,
-                descricao: dados.descricao,
-                status: dados.status || 'ativo'
-            }
-            await repo.update(id, dadosEquipamento, {transaction: t})
-
-            if(dados.valor_hora){
-                const dadosParametrizacao = {
-                    id_equipamento: id,
-                    valor_hora: dados.valor_hora
-                }
-                if(Equipamento.parametrizacao)
-                    await ParaEquipRepo.update(Equipamento.parametrizacao.id, dadosParametrizacao, {transaction: t})
-                else
-                    await ParaEquipRepo.save(dadosParametrizacao, {transaction: t})
-            } else if (Equipamento.parametrizacao)
-                await ParaEquipRepo.delete(Equipamento.parametrizacao.id, {transaction: t})
-            await t.commit()
-            return await repo.getById(id)
-        }catch(error){
-            await t.rollback()
-            throw new Error('Erro ao atualizar Equipamento: ' + error.message)
-        }
+        await validar(dados)
+        const editEquipamento = await CriarEditar(dados, id)
+        return editEquipamento
     },
 
     delete: async (id) => {
@@ -94,15 +95,13 @@ const EquipamentoService = {
                 transaction: t
             })
 
-            if (!equipamento){
-                throw new Error('Equipamento Não Existe')
-            }
+            await validar(equipamento)
 
             if (equipamento.parametrizacao){
                 await ParaEquipRepo.delete(equipamento.parametrizacao.id, {transaction: t})
             }
 
-            if(equipamento.alocacoes != [] && equipamento.alocacoes.length != 0){
+            if(equipamento.alocacoes && equipamento.alocacoes.length > 0){
                 const dadosEquipamento = {
                 nome: equipamento.nome,
                 tipo: equipamento.tipo,

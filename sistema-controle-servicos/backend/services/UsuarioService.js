@@ -4,20 +4,51 @@ const repo = require('../repositories/UsuarioRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
 const UsuarioMapper = require('../mappers/UsuarioMapper')
 
+const getComInclude = async (id) => {
+    const inclusao = {include:[
+        {model: require('../models/ModelFuncionario'), as: 'funcionario'}  
+    ]}
+    if(!id)
+        return repo.getAll(inclusao)
+    else
+        return repo.getById(id, inclusao)
+}
+
+const validar = async (dados, iscreate = false) => {
+    if(dados.id_funcionario){
+        const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+        if(!funcionario)
+            throw new Error('O funcionario não Existe')
+    }
+    if(iscreate && !dados.senha){
+        throw new Error('Nenhuma Senha foi fornecida')
+    }
+    return true
+}
+
+const cripSenha = async (dados) => {
+    const dadosCrip = {
+        id_funcionario: dados.id_funcionario,
+        papel: dados.papel,
+        login: dados.login
+    }
+    if(dados.senha){
+            const salt = await bcrypt.genSalt(10)
+            const senhaHash = await bcrypt.hash(dados.senha, salt)
+            dadosCrip.senha = senhaHash
+        }
+        return dadosCrip
+    }
 
 const UsuarioService = {
     getAll: async () => {
-            const Usuarios = await repo.getAll({
-                include: [{model: require('../models/ModelFuncionario'), as: 'funcionario'}]
-            })
+            const Usuarios = await getComInclude()
             const UsaurioDTO = Usuarios.map(U => UsuarioMapper.toDTO(U))
             return UsaurioDTO
     },
 
     getById: async (id) => {
-            const Usuario = await repo.getById(id, {
-                include: [{model: require('../models/ModelFuncionario'), as: 'funcionario'}]
-            })
+            const Usuario = await getComInclude()
             if(!Usuario){
                 return null
             }
@@ -26,21 +57,9 @@ const UsuarioService = {
     },
 
     create: async (dados) => {
-        if (dados.id_funcionario){
-            const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
-            if (!funcionario){
-                throw new Error('O Funcionario Não Existe')
-            }
-        }
-        const salt = await bcrypt.genSalt(10)
-        const senhaHash = await bcrypt.hash(dados.senha, salt)
+        await validar(dados,true)
 
-        const dadosCrip = {
-            id_funcionario: dados.id_funcionario,
-            papel: dados.papel,
-            login: dados.login,
-            senha: senhaHash
-        }
+        const dadosCrip = await cripSenha(dados)
         const novo = await repo.save(dadosCrip)
         const novoDTO = UsuarioMapper.toDTO(novo)
         return novoDTO
@@ -48,23 +67,8 @@ const UsuarioService = {
     },
 
     update: async (id, dados) => {
-        if (dados.id_funcionario){
-            const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
-            if (!funcionario){
-                throw new Error('O Funcionario Não Existe')
-            }
-        }
-        const dadosCrip = {
-            id_funcionario: dados.id_funcionario,
-            papel: dados.papel,
-            login: dados.login,
-            senha: dados.senha || null
-        }
-        if (dados.senha){
-            const salt = await bcrypt.genSalt(10)
-            const senhaHash = await bcrypt.hash(dados.senha, salt)
-            dadosCrip.senha = senhaHash
-        }
+        await validar(dados)
+        const dadosCrip = await cripSenha(dados)
         const edit = await repo.update(id, dadosCrip)
 
         if (!edit){

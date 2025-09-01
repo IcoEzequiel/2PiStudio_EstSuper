@@ -10,8 +10,13 @@ const FuncionarioRepo = require('../repositories/FuncionarioRepository')
 const EquipamentoRepo = require('../repositories/EquipamentoRepository')
 const ClienteRepo = require('../repositories/ClienteRepository')
 
+// Para transformar o os dados em DTOs
 const ServicoMapper = require('../mappers/servicoMapper')
 
+// Para calcular o status do serviço, ele vai salvar no backEnd quase todas como agendado,
+// mas na hora de mostrar os serviços, transforma conforme a data de hoje. (Se for uma data futura,
+// vai ser 'agendado', se for durante a realização do serviço, recebe 'em execução',
+// se for uma data passada, recebe "concluido")
 const calcularStatus = (servico) => {
     if (servico.status === 'concluido') {
         return 'concluido'
@@ -20,6 +25,7 @@ const calcularStatus = (servico) => {
     const dataInicio = new Date(servico.data_inicio)
     const dataFim = new Date(servico.data_fim)
 
+    // Elimina as horas para não gerar conflito
     hoje.setHours(0,0,0,0)
     dataInicio.setHours(0,0,0,0)
     dataFim.setHours(0,0,0,0)
@@ -28,52 +34,131 @@ const calcularStatus = (servico) => {
         return 'concluido'
     else if (hoje >= dataInicio && hoje <= dataFim)
         return 'em execução'
-    else
+    else // hoje < data_inicio
         return 'agendado'
+}
+
+const getComInclude = async (id) => {
+    const inclusao = {include:[
+                {model: require('../models/ModelCliente'), as: 'cliente'}
+            ]}
+            if(!id)
+                return await ServicoRepo.getAll(inclusao)
+            else
+                return await ServicoRepo.getById(id, inclusao )
+}
+
+const validarServico = async (dados) => {
+    const cliente = await ClienteRepo.getById(dados.id_cliente)
+    if (!cliente){
+        throw new Error('Cliente não existe.')
+    }
+    if (dados.data_fim < dados.data_inicio){
+        throw new Error('A data final não pode ser anterior a data de inicio')
+    }
+
+    if(dados.orcamento < 0){
+        throw new Error('O orcamento não pode ser negativo')
+    }
+}
+
+const validarFuncionario = async (dados, data) => {
+    const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+    if(!funcionario){
+        throw new Error('Funcionario não existe')
+    }
+    if(funcionario.status === 'inativo'){
+        throw new Error('O funcionario ' + funcionario.nome + ' está inativo e não pode ser alocado para serviço')
+    }
+    const conflito = await AlocacaoFuncRepo.findByFuncionarioData(dados.id_funcionario, data)
+    if(conflito){
+        throw new Error('O funcionario ' + funcionario.nome + ' já está alocado em outro serviço no dia ' + data)
+    }
+}   
+
+const validarEquipamento = async (dados, data) => {
+    const equipamento = await EquipamentoRepo.getById(dados.id_equipamento)
+    if(!equipamento){
+        throw new Error('Equipamento não existe')
+    }
+    if(equipamento.status === 'inativo'){
+        throw new Error('Equipmaneto ' + equipamento.nome + ' está inativo e não pode ser alocado para serviço')
+    }
+    const conflito = await AlocacaoEquipRepo.findByEquipamentoData(dados.id_equipamento, data)
+    if (conflito){
+        throw new Error('O equipamento ' + equipamento.nome + ' já está alocado em outro serviço no dia ' + data)
+    }
+}
+
+const gerenciarAlocacoes = async (servicoId, alocacoesDiarias, transaction) => {
+    if (!alocacoesDiarias) return
+
+    for (const data in alocacoesDiarias){
+        const dia = alocacoesDiarias[data]
+        const horasTrabalhadas = dia.horas_trabalhadas
+
+        if (dia.funcionarios){
+            for (const alocFunc of dia.funcionarios){
+                await validarFuncionario(alocFunc, data)
+                const dadosAlocFunc = {
+                    id_servico: servicoId,
+                    id_funcionario: alocFunc.id_funcionario,
+                    data: data,
+                    hora: horasTrabalhadas,
+                    valor_dia_alocado: alocFunc.valor_dia_alocado
+                    }
+                await AlocacaoFuncRepo.save(dadosAlocFunc, {transaction})
+            }
+        }
+        if (dia.equipamentos){
+            for (const alocEquip of dia.equipamentos){
+                await validarEquipamento(alocEquip,data)
+                const dadosAlocEquip = {
+                    id_servico: servicoId,
+                    id_equipamento: alocEquip.id_equipamento,
+                    data: data,
+                    hora: horasTrabalhadas,
+                    valor_hora_alocada: alocEquip.valor_hora_alocada
+                    }
+                await AlocacaoEquipRepo.save(dadosAlocEquip, {transaction})
+            }
+        }
+    }
 }
 
 const ServicoService = {
     getAll: async () => {
-        const Servicos = await ServicoRepo.getAll(
-            { include:[
-                {model: require('../models/ModelCliente'), as: 'cliente'}
-            ]}
-        )
+        // Transformar em uma Função unica
+        const Servicos = await getComInclude()
         const ServicosStatusAtt = Servicos.map(servico => {
             const servicoData = servico
             servicoData.status = calcularStatus(servicoData)
             return servicoData
         })
+        // Trasnformar Até Aqui
         const ServicosDTO = ServicosStatusAtt.map(S => ServicoMapper.toDTO(S))
         return ServicosDTO
     },
 
     getById: async (id) => {
-        const Servico = await ServicoRepo.getById(id,
-            {include: [
-                {model: require('../models/ModelCliente'), as: 'cliente'}
-            ]}
-        )
+        // Transformar em uma função Unica
+        const Servico = await getComInclude(id)
         if (!Servico){
             return null
         }
-
-        const servicoData = servico
+        const servicoData = Servico
         servicoData.status = calcularStatus(servicoData)
+
+        // Trasformar Até aqui
         const ServicoDTO = ServicoMapper.toDTO(servicoData)
         return ServicoDTO
     },
 
     create: async (dados) => {
         const t = await sequelize.transaction()
-
         try {
-
-            // Validação do Cliente
-            const cliente = await ClienteRepo.getById(dados.id_cliente)
-            if (!cliente){
-                throw new Error('Cliente Não Existe.')
-            }
+            // Validação do Cliente e serviço
+            await validarServico(dados)
 
             // Criação do Serviço
             const dadosServico = {
@@ -86,89 +171,13 @@ const ServicoService = {
                 orcamento: dados.orcamento
             }
 
-            if (dadosServico.data_fim < dadosServico.data_inicio){
-                throw new Error('A data final não pode ser anterior a data de inicio')
-            }
-
-            if (dadosServico.orcamento < 0){
-                throw new Error('O orcamento não pode ser negativo')
-            }
-
             const novoServico = await ServicoRepo.save(dadosServico, {transaction: t})
 
             // Criação Alocações
-            if (dados.alocacoes_diarias) {
-                for (const data in dados.alocacoes_diarias){
-                    const dia = dados.alocacoes_diarias[data]
-                    const horasTrabalhadas = dia.horas_trabalhadas
-
-                    // Alocação de Funcionarios
-                    if (dia.funcionarios){
-                        for (const alocFunc of dia.funcionarios){
-
-                            // Validação funcionario
-                            const funcionario = await FuncionarioRepo.getById(alocFunc.id_funcionario,
-                                {include: [{model: require('../models/ModelAlocacaoFuncionario'), as: "alocacoes"}]}
-                            )
-                            if(!funcionario){
-                                throw new Error('Funcionario Não Existe')
-                            }
-                            if(!funcionario.status === 'inativo'){
-                                throw new Error('O funcionario ' + funcionario.nome + ' está inativo e não pode ser alocado para serviço')
-                            }
-                            const conflito = await AlocacaoFuncRepo.findByFuncionarioData(alocFunc.id_funcionario, data)
-                            if (conflito){
-                                throw new Error('O Funcionario ' + funcionario.nome + ' já está alocado em outro serviço no dia ' + data)
-                            }
-
-                            const dadosAlocFunc = {
-                                id_servico: novoServico.id,
-                                id_funcionario: alocFunc.id_funcionario,
-                                data: data,
-                                hora: horasTrabalhadas,
-                                valor_dia_alocado: alocFunc.valor_dia_alocado
-                            }
-                            if(dadosAlocFunc.valor_dia_alocado < 0){
-                                throw new Error('O valor da Diaria não pode ser negativo')
-                            }
-                            await AlocacaoFuncRepo.save(dadosAlocFunc, { transaction: t})
-                        }
-                    }
-
-                    // Alocação de Equipamentos
-
-                    if(dia.equipamentos) {
-                        for(const alocEquip of dia.equipamentos){
-                            // validação equipamento
-                            const equipamento = await EquipamentoRepo.getById(alocEquip.id_equipamento)
-                            if(!equipamento){
-                                throw new Error('Equipamento Não Existe')
-                            }
-                            if(equipamento.status === "inativo"){
-                                throw new Error('Equipamento ' + equipamento.nome +' está inativo e não pode ser alocado para serviço')
-                            }
-                            const conflito = await AlocacaoEquipRepo.findByEquipamentoData(alocEquip.id_equipamento, data)
-                            if (conflito){
-                                throw new Error('O Equipamento ' + equipamento.nome + ' já está alocado em outro serviço no dia ' + data)
-                            }
-                            const dadosAlocEquip = {
-                                id_servico: novoServico.id,
-                                id_equipamento: alocEquip.id_equipamento,
-                                data: data,
-                                hora: horasTrabalhadas,
-                                valor_hora_alocada: alocEquip.valor_hora_alocada
-                            }
-                            if(dadosAlocEquip.valor_hora_alocada < 0){
-                                throw new Error('O valor da hora do equipamento não pode ser negativo')
-                            }
-                            await AlocacaoEquipRepo.save(dadosAlocEquip, { transaction: t})
-                        }
-                    }
-                }
-            }
-
+            await gerenciarAlocacoes(novoServico.id, dados.alocacoes_diarias, t)
             await t.commit()
-            const novoServicoDTO = ServicoMapper.toDTO(novoServico)
+            const servicoCompleto = await getComInclude(novoServico.id)
+            const novoServicoDTO = ServicoMapper.toDTO(servicoCompleto)
             return novoServicoDTO;
         } catch (error){
             await t.rollback()
@@ -182,10 +191,8 @@ const ServicoService = {
 
         try{
             // Validação Cliente
-            const cliente = await ClienteRepo.getById(dados.id_cliente)
-            if(!cliente){
-                throw new Error('Cliente Não Existe')
-            }
+            // Juntar com a outra validação e criar um sistema para diferenciar se é update ou create
+            await validarServico(dados)
             // Valiação Serviço
             const servico = await ServicoRepo.getById(id, {
                 include: [
@@ -194,10 +201,6 @@ const ServicoService = {
                 ], 
                 transaction: t
             })
-
-            if (!servico) {
-                throw new Error('Serviço Não Encontrado')
-            }
 
             // Apaga todas as alocações para depois recriar
             for(const aloc of servico.alocacoesFuncionario || []){
@@ -208,73 +211,7 @@ const ServicoService = {
             }
 
             // Recriação das alocações
-            if (dados.alocacoes_diarias) {
-                for (const data in dados.alocacoes_diarias){
-                    const dia = dados.alocacoes_diarias[data]
-                    const horasTrabalhadas = dia.horas_trabalhadas
-
-                    // Alocação de Funcionarios
-                    if (dia.funcionarios){
-                        for (const alocFunc of dia.funcionarios){
-
-                            // Validação funcionario
-                            const funcionario = await FuncionarioRepo.getById(alocFunc.id_funcionario)
-                            if(!funcionario){
-                                throw new Error('Funcionario Não Existe')
-                            }
-                            if(funcionario.status === "inativo"){
-                                throw new Error('Funcionario ' + funcionario.nome + ' está inativo e não pode ser alocado para serviço')
-                            }
-                            const conflito = await AlocacaoFuncRepo.findByFuncionarioData(alocFunc.id_funcionario, data)
-                            if (conflito){
-                                throw new Error('O Funcionario ' + funcionario.nome + ' já está alocado em outro serviço no dia ' + data)
-                            }
-
-                            const dadosAlocFunc = {
-                                id_servico: id,
-                                id_funcionario: alocFunc.id_funcionario,
-                                data: data,
-                                hora: horasTrabalhadas,
-                                valor_dia_alocado: alocFunc.valor_dia_alocado
-                            }
-                            if(dadosAlocFunc.valor_dia_alocado < 0){
-                                throw new Error('O valor da diaria do funcionario não pode ser negativo')
-                            }
-                            await AlocacaoFuncRepo.save(dadosAlocFunc, { transaction: t})
-                        }
-                    }
-
-                    // Alocação de Equipamentos
-
-                    if(dia.equipamentos) {
-                        for(const alocEquip of dia.equipamentos){
-                            // validação equipamento
-                            const equipamento = await EquipamentoRepo.getById(alocEquip.id_equipamento)
-                            if(!equipamento){
-                                throw new Error('Equipamento Não Existe')
-                            }
-                            if(equipamento.status === "inativo"){
-                                throw new Error('Equipamento: ' + equipamento.nome + "está inaivo e não pode ser alocado para serviço")
-                            }
-                            const conflito = await AlocacaoEquipRepo.findByEquipamentoData(alocEquip.id_equipamento, data)
-                            if (conflito){
-                                throw new Error('O Equipamento ' + equipamento.nome + ' já está alocado em outro serviço no dia ' + data)
-                            }
-                            const dadosAlocEquip = {
-                                id_servico: id,
-                                id_equipamento: alocEquip.id_equipamento,
-                                data: data,
-                                hora: horasTrabalhadas,
-                                valor_hora_alocada: alocEquip.valor_hora_alocada
-                            }
-                            if(dadosAlocEquip.valor_hora_alocada < 0){
-                                throw new Error('O valor da hora do equipamento não pode ser negativo')
-                            }
-                            await AlocacaoEquipRepo.save(dadosAlocEquip, { transaction: t})
-                        }
-                    }
-                }
-            }
+            await gerenciarAlocacoes(id, dados.alocacoes_diarias, t)
 
             const dadosServico = {
                 id_cliente: dados.id_cliente,
@@ -286,15 +223,7 @@ const ServicoService = {
                 orcamento: dados.orcamento
             }
 
-            if (dadosServico.data_fim < dadosServico.data_inicio){
-                throw new Error('A data final não pode ser anterior a data de inicio')
-            }
-
-            if (dadosServico.orcamento < 0){
-                throw new Error('O orcamento não pode ser negativo')
-            }
-
-            const servicoEdit = await ServicoRepo.update(id, dadosServico, {transaction: t})
+            const servicoEdit = await ServicoRepo.update(id, dadosServico, t)
 
             await t.commit()
 
@@ -316,10 +245,6 @@ const ServicoService = {
                 ],
                 transaction: t
             })
-
-            if (!servico){
-                throw new Error('Serviço não encontrado')
-            }
 
             for (const aloc of servico.alocacoesFuncionario || []){
                 await AlocacaoFuncRepo.delete(aloc.id, {transaction: t})

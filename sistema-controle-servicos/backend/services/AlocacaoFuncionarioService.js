@@ -2,27 +2,37 @@ const repo = require('../repositories/AlocacaoFuncionarioRepository')
 const ServicoRepo = require('../repositories/ServicoRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
 const AlocFuncMapper = require('../mappers/AlocacaoFuncionarioMapper')
-const { sequelize } = require('../db'); 
+
+const validar = async (dados) => {
+    const servico = await ServicoRepo.getById(dados.id_servico)
+    const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+    if (!servico)
+        throw Error('Serviço não existe')
+    if (!funcionario)
+        throw Error('Funcionario Não existe')
+    return true
+}
+
+const getComInclude = async (id) => {
+    const inclusao = {include: [
+        {model: require('../models/ModelServico'), as: 'servico'},
+        {model: require('../models/ModelFuncionario'), as: 'funcionario'}  
+    ]}
+    if(!id)
+        return repo.getAll(inclusao)
+    else
+        return repo.getById(id, inclusao)
+}
 
 const AlocacaoFuncionarioService = {
     getAll: async () => {
-        const AlocFuncs = await repo.getAll({
-            include:[
-                {model: require('../models/ModelServico'), as: 'servico'},
-                {model: require('../models/ModelFuncionario'), as: 'funcionario'}
-            ]
-        })
+        const AlocFuncs = await getComInclude()
         const AlocFuncsDTO = AlocFuncs.map(A=>AlocFuncMapper.toDTO(A))
         return AlocFuncsDTO
     },
 
     getById: async (id) => {
-        const AlocFunc = await repo.getById(id,{
-            include:[
-                {model: require('../models/ModelServico'), as: 'servico'},
-                {model: require('../models/ModelFuncionario'), as: 'funcionario'}
-            ]
-        })
+        const AlocFunc = await getComInclude(id)
         if(!AlocFunc){
             return null
         }
@@ -31,28 +41,14 @@ const AlocacaoFuncionarioService = {
     },
 
     create: async (dados) => {
-        const Servico = await ServicoRepo.getById(dados.id_servico)
-        const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
-        if (!Servico){
-            throw Error("Serviço Não Existe")
-        }    
-        if (!Funcionario){
-            throw Error("Fucionario Não Existe")
-        } 
+        await validar(dados)
         const novo = await repo.save(dados)
         const novoDTO = AlocFuncMapper.toDTO(novo)
         return novoDTO
     },
 
     update: async (id, dados) => {
-        const Servico = await ServicoRepo.getById(dados.id_servico)
-        const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
-        if (!Servico){
-            throw Error("Serviço Não Existe")
-        }    
-        if (!Funcionario){
-            throw Error("Fucionario Não Existe")
-        } 
+        await validar(dados)
         const edit = await repo.update(id,dados)
         if(!edit){
             return null
