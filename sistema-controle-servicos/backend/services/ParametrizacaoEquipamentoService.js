@@ -2,16 +2,22 @@ const repo = require('../repositories/ParametrizacaoEquipamentoRepository')
 const EquipamentoRepo = require('../repositories/EquipamentoRepository')
 const ParaEquiMapper = require('../mappers/ParametrizacaoEquipamentoMapper')
 
+// Funcões auxiliares
+
+// Usado para incluir outros objetos ao principal, esses objetos tem que estár realionados no aquivo server.js
 const getComInclude = async (id) => {
+    // Determina quais objetos vão ser inclusos no objeto principal
     const inclusao = {include:[
         {model: require('../models/ModelEquipamento'), as: 'equipamento'}
     ]}
+    // realiza a requisição para o banco de dados com o as inclusões, o repositorio precisa aceitar um "options" para funcionar
     if(!id)
         return repo.getAll(inclusao)
     else
         return repo.getById(id, inclusao)
 }
 
+// Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
 const validar = async (dados) => {
     const Equipamento = await EquipamentoRepo.getById(dados.id_equipamento)
     if (!Equipamento)

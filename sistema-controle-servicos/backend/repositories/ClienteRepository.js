@@ -1,5 +1,6 @@
 const Cliente = require('../models/ModelCliente');
 
+// Ligação com o repository,se precisar criar uma consulta diferente, adicione ela abaixo.
 const ClienteRepository = {
     getAll: async (options = {}) => {
         return await Cliente.findAll(options);

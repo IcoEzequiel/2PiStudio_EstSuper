@@ -2,6 +2,7 @@ const repo = require('../repositories/FeedbackRepository')
 const AlocFuncRepo = require('../repositories/AlocacaoFuncionarioRepository')
 const FeedbackMapper = require('../mappers/FeedbackMapper')
 
+// Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
 const validar = async (dados) => {
     const servicoPrestado = await AlocFuncRepo.getById(dados.id_alocacaoFuncionario)
     if (!servicoPrestado){
@@ -10,16 +11,20 @@ const validar = async (dados) => {
     return true
 }
 
+// Usado para incluir outros objetos ao principal, esses objetos tem que estár realionados no aquivo server.js
 const getComInclude = async (id) => {
+    // Determina quais objetos vão ser inclusos no objeto principal
     const inclusao = {include:[
         {model: require('../models/ModelAlocacaoFuncionario'), as: 'servicoPrestado'}        
     ]}
+    // realiza a requisição para o banco de dados com o as inclusões, o repositorio precisa aceitar um "options" para funcionar
     if(!id)
         return repo.getAll(inclusao)
     else
         return repo.getById(id, inclusao)
 }
 
+// Função principal do feedback
 const FeedbackService = {
     getAll: async () => {
         const Feedbacks = await getComInclude()

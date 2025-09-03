@@ -1,5 +1,7 @@
 const service = require('../services/ServicoService')
 
+// Responsavel pela conexão, as rotas estão em uma pasta separada
+// Todas as validações são necessarias, pos cada uma recebe um "null" do service
 const ServicoController = {
     getAll: async (req, res) => {
         try {

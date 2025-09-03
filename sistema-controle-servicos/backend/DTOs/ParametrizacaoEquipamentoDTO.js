@@ -1,3 +1,4 @@
+// DTO da parametrização do equipamento, junta o objeto equipamento com os dados de seu valor cobrado por hora.
 class ParametrizacaoEquipamentoDTO {
     constructor(parametrizacaoEquipamento, equipamento){
         this.id = parametrizacaoEquipamento.id

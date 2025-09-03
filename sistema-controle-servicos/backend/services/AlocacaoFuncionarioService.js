@@ -3,6 +3,9 @@ const ServicoRepo = require('../repositories/ServicoRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
 const AlocFuncMapper = require('../mappers/AlocacaoFuncionarioMapper')
 
+// Funcões auxiliares
+
+// Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
 const validar = async (dados) => {
     const servico = await ServicoRepo.getById(dados.id_servico)
     const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
@@ -13,16 +16,21 @@ const validar = async (dados) => {
     return true
 }
 
+// Usado para incluir outros objetos ao principal, esses objetos tem que estár realionados no aquivo server.js
 const getComInclude = async (id) => {
+    // Determina quais objetos vão ser inclusos no objeto principal
     const inclusao = {include: [
         {model: require('../models/ModelServico'), as: 'servico'},
         {model: require('../models/ModelFuncionario'), as: 'funcionario'}  
     ]}
+    // realiza a requisição para o banco de dados com o as inclusões, o repositorio precisa aceitar um "options" para funcionar
     if(!id)
         return repo.getAll(inclusao)
     else
         return repo.getById(id, inclusao)
 }
+
+// Funções principais
 
 const AlocacaoFuncionarioService = {
     getAll: async () => {

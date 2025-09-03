@@ -4,7 +4,10 @@ const cont = require('../controller/EquipamentoController')
 const { verifyToken, checkRole } = require('../middleware/authMiddleware')
 // Rotas do Equipamento
 
+// verifica o token
 router.use(verifyToken)
+
+// Configuração das rotas, e quem pode acessa-las
 router.get('/', cont.getAll)
 router.get('/:id',cont.getById)
 router.post('/',checkRole('administrador'), cont.create)

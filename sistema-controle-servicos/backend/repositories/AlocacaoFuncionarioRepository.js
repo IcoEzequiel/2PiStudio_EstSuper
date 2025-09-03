@@ -1,5 +1,6 @@
 const AlocacaoFuncionario = require('../models/ModelAlocacaoFuncionario')
 
+// Ligação com o repository,se precisar criar uma consulta diferente, adicione ela abaixo.
 const AlocacaoFuncionarioRepository = {
     getAll: async (options = {}) => {
         return await AlocacaoFuncionario.findAll(options)

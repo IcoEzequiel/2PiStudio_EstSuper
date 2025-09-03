@@ -2,16 +2,22 @@ const repo = require('../repositories/ParametrizacaoFuncionarioRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
 const ParaFuncMapper = require('../mappers/ParametrizacaoFuncionarioMapper')
 
+// Funcões auxiliares
+
+// Usado para incluir outros objetos ao principal, esses objetos tem que estár realionados no aquivo server.js
 const getComInclude = async (id) => {
+    // Determina quais objetos vão ser inclusos no objeto principal
     const inclusao = {include:[
         {model: require('../models/ModelFuncionario'), as: 'funcionario'}
     ]}
+    // realiza a requisição para o banco de dados com o as inclusões, o repositorio precisa aceitar um "options" para funcionar
     if(!id)
         return repo.getAll(inclusao)
     else
         return repo.getById(id, inclusao)
 }
 
+// Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
 const validar = async (dados) => {
     const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
     if (!Funcionario)

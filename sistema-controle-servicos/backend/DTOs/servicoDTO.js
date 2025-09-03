@@ -1,3 +1,6 @@
+//DTO do servico, que junta o objeto do cliente com os dados do serviço.
+// Se quiser adicionar no envio as alocações de funcionarios e equipamentos, vai ter que modificar esse arquivos:
+// ServicoDTO, ServicoMapper
 class servicoDTO {
     constructor(servico, cliente){
         this.id = servico.id

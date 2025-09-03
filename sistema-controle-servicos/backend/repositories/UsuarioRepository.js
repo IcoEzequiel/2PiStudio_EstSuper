@@ -1,5 +1,6 @@
 const Usuario = require('../models/ModelUsuario')
 
+// Ligação com o repository,se precisar criar uma consulta diferente, adicione ela abaixo.
 const UsuarioRepository = {
     getAll: async (options = {}) => {
         return await Usuario.findAll(options)

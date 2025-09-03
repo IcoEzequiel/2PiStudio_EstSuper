@@ -1,5 +1,6 @@
 const {Sequelize} = require('sequelize')
 
+// Configuração do banco de dados
 const sequelize = new Sequelize('sistema_servicos','root','senha',{
     host: 'localhost',
     dialect: 'mysql'

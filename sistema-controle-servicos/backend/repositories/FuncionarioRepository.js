@@ -1,5 +1,6 @@
 const Funcionario = require('../models/ModelFuncionario')
 
+// Ligação com o repository,se precisar criar uma consulta diferente, adicione ela abaixo.
 const FuncionarioRepository = {
     getAll: async (options = {}) => {
         return await Funcionario.findAll(options)

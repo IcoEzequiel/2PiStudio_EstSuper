@@ -38,65 +38,83 @@ const calcularStatus = (servico) => {
         return 'agendado'
 }
 
+// Usado para incluir outros objetos ao principal, esses objetos tem que estár realionados no aquivo server.js
 const getComInclude = async (id) => {
+    // Determina quais objetos vão ser inclusos no objeto principal
     const inclusao = {include:[
                 {model: require('../models/ModelCliente'), as: 'cliente'}
             ]}
+            // realiza a requisição para o banco de dados com o as inclusões, o repositorio precisa aceitar um "options" para funcionar
             if(!id)
                 return await ServicoRepo.getAll(inclusao)
             else
                 return await ServicoRepo.getById(id, inclusao )
 }
 
+// Valida do serviço.
 const validarServico = async (dados) => {
     const cliente = await ClienteRepo.getById(dados.id_cliente)
+    // Verifica se o cliente existe
     if (!cliente){
         throw new Error('Cliente não existe.')
     }
+    // Verifica se a data final não ocorre antes da data inicial
     if (dados.data_fim < dados.data_inicio){
         throw new Error('A data final não pode ser anterior a data de inicio')
     }
-
+    // Verifica se o orcamento não é negativo
     if(dados.orcamento < 0){
         throw new Error('O orcamento não pode ser negativo')
     }
 }
 
+// Validação do funcionario. (A data é para saber se ele já está alocado nesse dia)
 const validarFuncionario = async (dados, data) => {
     const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+    // Verifica se o funcionario existe
     if(!funcionario){
         throw new Error('Funcionario não existe')
     }
+    // Verifica se ele está inativo ('Inativo' = 'Deletado')
     if(funcionario.status === 'inativo'){
         throw new Error('O funcionario ' + funcionario.nome + ' está inativo e não pode ser alocado para serviço')
     }
+    // Verifica se esse funcionari já não está alocado em outro serviço nesta mesma data.
     const conflito = await AlocacaoFuncRepo.findByFuncionarioData(dados.id_funcionario, data)
     if(conflito){
         throw new Error('O funcionario ' + funcionario.nome + ' já está alocado em outro serviço no dia ' + data)
     }
 }   
 
+// Validação de Equipamento
 const validarEquipamento = async (dados, data) => {
     const equipamento = await EquipamentoRepo.getById(dados.id_equipamento)
+    // Verifica se o equipamento existe.
     if(!equipamento){
         throw new Error('Equipamento não existe')
     }
+    // Verifica se ele está inativo. ('inativo' = deletado)
     if(equipamento.status === 'inativo'){
         throw new Error('Equipmaneto ' + equipamento.nome + ' está inativo e não pode ser alocado para serviço')
     }
     const conflito = await AlocacaoEquipRepo.findByEquipamentoData(dados.id_equipamento, data)
+    // Verifica se ele não está alocado em outro serviço na mesma data
     if (conflito){
         throw new Error('O equipamento ' + equipamento.nome + ' já está alocado em outro serviço no dia ' + data)
     }
 }
 
+// Funcção auxiliar para gerenciar as alocações, criando elas com os dados fornecidos
 const gerenciarAlocacoes = async (servicoId, alocacoesDiarias, transaction) => {
+    // verifica se veio alguma alocação
     if (!alocacoesDiarias) return
 
+    // Looping com as datas que o serviço vai ser prestado
     for (const data in alocacoesDiarias){
         const dia = alocacoesDiarias[data]
         const horasTrabalhadas = dia.horas_trabalhadas
 
+        // Lopping dos funcionarios alocados para esse dia
         if (dia.funcionarios){
             for (const alocFunc of dia.funcionarios){
                 await validarFuncionario(alocFunc, data)
@@ -110,6 +128,7 @@ const gerenciarAlocacoes = async (servicoId, alocacoesDiarias, transaction) => {
                 await AlocacaoFuncRepo.save(dadosAlocFunc, {transaction})
             }
         }
+        // Looping dos equipamentos alocados para esse dia
         if (dia.equipamentos){
             for (const alocEquip of dia.equipamentos){
                 await validarEquipamento(alocEquip,data)
@@ -128,20 +147,17 @@ const gerenciarAlocacoes = async (servicoId, alocacoesDiarias, transaction) => {
 
 const ServicoService = {
     getAll: async () => {
-        // Transformar em uma Função unica
         const Servicos = await getComInclude()
         const ServicosStatusAtt = Servicos.map(servico => {
             const servicoData = servico
             servicoData.status = calcularStatus(servicoData)
             return servicoData
         })
-        // Trasnformar Até Aqui
         const ServicosDTO = ServicosStatusAtt.map(S => ServicoMapper.toDTO(S))
         return ServicosDTO
     },
 
     getById: async (id) => {
-        // Transformar em uma função Unica
         const Servico = await getComInclude(id)
         if (!Servico){
             return null
@@ -149,7 +165,6 @@ const ServicoService = {
         const servicoData = Servico
         servicoData.status = calcularStatus(servicoData)
 
-        // Trasformar Até aqui
         const ServicoDTO = ServicoMapper.toDTO(servicoData)
         return ServicoDTO
     },
@@ -157,10 +172,8 @@ const ServicoService = {
     create: async (dados) => {
         const t = await sequelize.transaction()
         try {
-            // Validação do Cliente e serviço
             await validarServico(dados)
 
-            // Criação do Serviço
             const dadosServico = {
                 id_cliente: dados.id_cliente,
                 nome: dados.nome,
@@ -173,7 +186,6 @@ const ServicoService = {
 
             const novoServico = await ServicoRepo.save(dadosServico, {transaction: t})
 
-            // Criação Alocações
             await gerenciarAlocacoes(novoServico.id, dados.alocacoes_diarias, t)
             await t.commit()
             const servicoCompleto = await getComInclude(novoServico.id)
@@ -190,10 +202,8 @@ const ServicoService = {
         const t = await sequelize.transaction()
 
         try{
-            // Validação Cliente
-            // Juntar com a outra validação e criar um sistema para diferenciar se é update ou create
             await validarServico(dados)
-            // Valiação Serviço
+            // Pega o serviço com suas alocações
             const servico = await ServicoRepo.getById(id, {
                 include: [
                     { model: require('../models/ModelAlocacaoFuncionario'), as: 'alocacoesFuncionario'},
@@ -238,6 +248,7 @@ const ServicoService = {
         const t = await sequelize.transaction()
 
         try {
+            // Pega o serviço com suas alocações
             const servico = await ServicoRepo.getById(id, {
                 include: [
                     {model: require('../models/ModelAlocacaoFuncionario'), as: 'alocacoesFuncionario'},
@@ -245,7 +256,7 @@ const ServicoService = {
                 ],
                 transaction: t
             })
-
+            // Deleta as alocações
             for (const aloc of servico.alocacoesFuncionario || []){
                 await AlocacaoFuncRepo.delete(aloc.id, {transaction: t})
             }

@@ -1,5 +1,6 @@
 const Servico = require('../models/ModelServico')
 
+// Ligação com o repository,se precisar criar uma consulta diferente, adicione ela abaixo.
 const ServicoRepository = {
     getAll: async (options = {}) => {
         return await Servico.findAll(options)

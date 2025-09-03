@@ -1,5 +1,6 @@
 const Equipamento = require('../models/ModelEquipamento')
 
+// Ligação com o repository,se precisar criar uma consulta diferente, adicione ela abaixo.
 const EquipamentoRepository = {
     getAll: async (options = {}) => {
         return await Equipamento.findAll(options)

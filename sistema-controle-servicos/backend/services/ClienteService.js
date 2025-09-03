@@ -1,6 +1,6 @@
 const repo = require('../repositories/ClienteRepository')
-const { sequelize } = require('../db'); 
 
+// Funções Principais do Cliente.
 const ClienteService = {
     getAll: async () => {
         return await repo.getAll()

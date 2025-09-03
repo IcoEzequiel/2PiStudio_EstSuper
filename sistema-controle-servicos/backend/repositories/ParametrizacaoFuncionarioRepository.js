@@ -1,5 +1,6 @@
 const ParametrizacaoFuncionario = require('../models/ModelParametrizacaoFuncionario')
 
+// Ligação com o repository,se precisar criar uma consulta diferente, adicione ela abaixo.
 const ParametrizacaoFuncionarioRepository = {
     getAll: async (options = {}) => {
         return await ParametrizacaoFuncionario.findAll(options)

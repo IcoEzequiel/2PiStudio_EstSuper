@@ -1,3 +1,4 @@
+// DTO da parametrização de Funcionarios, que junta o objeto funcionario com seu valor cobrado por diaria
 class ParametrizacaoFuncionarioDTO {
     constructor(parametrizacaoFuncionario, funcionario){
         this.id = parametrizacaoFuncionario.id

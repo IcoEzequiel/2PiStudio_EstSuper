@@ -4,28 +4,37 @@ const repo = require('../repositories/UsuarioRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
 const UsuarioMapper = require('../mappers/UsuarioMapper')
 
+// Funcões auxiliares
+
+// Usado para incluir outros objetos ao principal, esses objetos tem que estár realionados no aquivo server.js
 const getComInclude = async (id) => {
+    // Determina quais objetos vão ser inclusos no objeto principal
     const inclusao = {include:[
         {model: require('../models/ModelFuncionario'), as: 'funcionario'}  
     ]}
+    // realiza a requisição para o banco de dados com o as inclusões, o repositorio precisa aceitar um "options" para funcionar
     if(!id)
         return repo.getAll(inclusao)
     else
         return repo.getById(id, inclusao)
 }
 
+// Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
 const validar = async (dados, iscreate = false) => {
+    // Valida se o funcionario existe se ele vinher nos dados, pos pode ter um usuario que não é um funcionario, como o admin
     if(dados.id_funcionario){
         const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
         if(!funcionario)
             throw new Error('O funcionario não Existe')
     }
+    // Se for uma criação e não passou a senha, pos o update pode mandar ou não a alteração da senha
     if(iscreate && !dados.senha){
         throw new Error('Nenhuma Senha foi fornecida')
     }
     return true
 }
 
+// Criptografia da senha
 const cripSenha = async (dados) => {
     const dadosCrip = {
         id_funcionario: dados.id_funcionario,
@@ -57,8 +66,10 @@ const UsuarioService = {
     },
 
     create: async (dados) => {
+        // Passa true para saber que é um create
         await validar(dados,true)
 
+        // Manda criptografar a senha antes de salvar no banco de dados
         const dadosCrip = await cripSenha(dados)
         const novo = await repo.save(dadosCrip)
         const novoDTO = UsuarioMapper.toDTO(novo)

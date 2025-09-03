@@ -1,5 +1,6 @@
 const Feedback = require('../models/ModelFeedback')
 
+// Ligação com o repository,se precisar criar uma consulta diferente, adicione ela abaixo.
 const FeedbackRepository = {
     getAll: async (options = {}) => {
         return await Feedback.findAll(options)

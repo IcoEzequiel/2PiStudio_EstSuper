@@ -2,22 +2,26 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const UsuarioRepo = require('../repositories/UsuarioRepository')
 
+// Controler da autenticação
 const AuthController = {
     login: async (req, res) => {
         const { login, senha } = req.body
 
         try {
 
+            // Procura se o login está certo
             const Usuario = await UsuarioRepo.findByLogin(login);
             if (!Usuario){
                 return res.status(401).json({ error: 'Credenciais Inválidas'})
             }
 
+            // Procura se a senha do usuario está certa
             const senhaCorreta = await bcrypt.compare(senha, Usuario.senha)
             if (!senhaCorreta){
-                return res.status(401).json({ error: 'Credenciais Invalidas'})
+                return res.status(401).json({ error: 'Credenciais Inválidas'})
             }
 
+            // Se a senha e o usuario estiver corretos, gera o token
             const payload = {
                 id: Usuario.id,
                 papel: Usuario.papel

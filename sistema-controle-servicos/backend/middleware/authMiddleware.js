@@ -1,5 +1,8 @@
 const jwt = require('jsonwebtoken')
 
+// Codigo de altenticação, o de verificar o token e o de checar a permição
+
+// Verifica o token, se existe, se é valido
 const verifyToken = (req, res, next) => {
     // Verifica se a segurança está ligada
     if (process.env.AUTH_ENABLED !== 'true') {
@@ -27,6 +30,8 @@ const verifyToken = (req, res, next) => {
     })
 }
 
+// Verifica a permição do usuario, se ele é adiministrador ou funcionario,
+// As rotas que cada um pode acesar estão na pasta routes.
 const checkRole = (role) => {
     return (req, res, next) => {
         // O 'verifytoken' deve ter executado antes, então o 'req.user' deve existir
