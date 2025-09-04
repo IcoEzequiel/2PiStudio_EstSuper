@@ -35,6 +35,9 @@ const verifyToken = (req, res, next) => {
 const checkRole = (role) => {
     return (req, res, next) => {
         // O 'verifytoken' deve ter executado antes, então o 'req.user' deve existir
+        if (process.env.AUTH_ENABLED !== 'true'){
+            return next()
+        }
         if(!req.user){
             return res.status(401).json({ error: 'Autenticação necessária'})
         }
