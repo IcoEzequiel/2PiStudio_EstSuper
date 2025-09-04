@@ -1,11 +1,34 @@
-let equipment = [
-    { id: 1, name: 'Câmera 4K', cost: 50 },
-    { id: 2, name: 'Kit de Iluminação', cost: 100 }
-];
-let labor = [
-    { id: 1, name: 'Diretor de Fotografia', cost: 30 },
-    { id: 2, name: 'Editor de Video', cost: 40 }
-];
+// No topo do arquivo scripts.js
+import { request } from "./shared/api.js"; // Ajuste o caminho se necessário
+
+// Variáveis globais que você já tem
+let equipment = [];
+let labor = [];
+
+async function carregarDadosIniciais() {
+    console.log("Buscando dados iniciais da API...");
+    try {
+        // Busca os dados de equipamentos
+        const responseEquip = await fetch('/equipamento'); // <-- Use o URL da sua API de equipamentos
+        if (!responseEquip.ok) throw new Error('Falha ao buscar equipamentos');
+        equipment = await responseEquip.json(); // Converte a resposta para JSON e armazena na variável global
+
+        // Busca os dados de mão de obra
+        const responseLabor = await fetch('/mao-de-obra'); // <-- Use o URL da sua API de mão de obra
+        if (!responseLabor.ok) throw new Error('Falha ao buscar mão de obra');
+        labor = await responseLabor.json(); // Converte e armazena na variável global
+
+        console.log("Dados carregados com sucesso!", { equipment, labor });
+
+    } catch (err) {
+        console.error("Erro ao carregar dados iniciais:", err);
+        alert("Não foi possível carregar os recursos do servidor. Usando dados de exemplo.");
+        
+        // **PLANO B:** Se a API falhar, você pode carregar dados de exemplo para não travar a aplicação
+        equipment = [{ id: 1, name: 'Câmera (Exemplo)', cost: 150.00 }];
+        labor = [{ id: 1, name: 'Editor (Exemplo)', cost: 120.00 }];
+    }
+}
 
 // Lógica para carregar páginas no "conteudo"
 async function carregarPagina(pagina) {
@@ -144,107 +167,164 @@ function configurarFormNovoProjeto() {
     updateSummary();
 }
 
- // function updateSummary() {
-  //   const hours = parseInt(hoursInput.value, 10) || 1;
-  //   const quote = parseFloat(quoteInput.value) || 0;
-  //   const invoice = invoiceCheckbox.checked;
-
-  //   const selectedEquip = [...equipmentSelect.selectedOptions].map(o => parseInt(o.value));
-  //   const selectedLabor = [...laborSelect.selectedOptions].map(o => parseInt(o.value));
-
-  //   const equipmentCostPerHour = selectedEquip.reduce((sum, id) => {
-  //     const item = equipment.find(e => e.id === id);
-  //     return sum + (item ? item.cost : 0);
-  //   }, 0);
-
-  //   const laborCostPerHour = selectedLabor.reduce((sum, id) => {
-  //     const item = labor.find(l => l.id === id);
-  //     return sum + (item ? item.cost : 0);
-  //   }, 0);
-
-  //   const totalCosts = (equipmentCostPerHour + laborCostPerHour) * hours;
-  //   const tax = invoice ? quote * TAX_RATE : 0;
-  //   const profit = quote - totalCosts - tax;
-
-  //   totalCostsSpan.textContent = `R$ ${totalCosts.toFixed(2)}`;
-  //   taxSpan.textContent = `R$ ${tax.toFixed(2)}`;
-  //   profitSpan.textContent = `R$ ${profit.toFixed(2)}`;
-  //   profitSpan.style.color = profit < 0 ? 'red' : '#388e3c';
-  // }
-
 // --- Lógica da página de Configurações ---
+// --- Lógica da página de Configurações (Versão Completa com CRUD) ---
 function configurarPaginaConfiguracoes() {
-    const equipmentContainer = document.getElementById('equipment-items');
-    const laborContainer = document.getElementById('labor-items');
-    const addEquipmentBtn = document.getElementById('add-equipment-btn');
-    const addLaborBtn = document.getElementById('add-labor-btn');
+    // --- URLs da API ---
+    const API_EQUIPMENT = '/equipamento';
+    const API_LABOR = '/mao-de-obra';
 
+    // --- Seleção dos Elementos (Equipamentos) ---
+    const equipmentContainer = document.getElementById('equipment-items');
+    const addEquipmentBtn = document.getElementById('add-equipment-btn');
+    const equipmentNameInput = document.getElementById('equipment-name');
+    const equipmentCostInput = document.getElementById('equipment-cost');
+    let editingEquipmentId = null; // Controla se estamos editando um equipamento
+
+    // --- Seleção dos Elementos (Mão de Obra) ---
+    const laborContainer = document.getElementById('labor-items');
+    const addLaborBtn = document.getElementById('add-labor-btn');
+    const laborNameInput = document.getElementById('labor-name');
+    const laborCostInput = document.getElementById('labor-cost');
+    let editingLaborId = null; // Controla se estamos editando mão de obra
+
+    // 1. FUNÇÃO PARA DESENHAR OS ITENS NA TELA
     function renderList(type) {
         const data = type === 'equipment' ? equipment : labor;
         const container = type === 'equipment' ? equipmentContainer : laborContainer;
-        container.innerHTML = '';
+        
+        container.innerHTML = ''; // Limpa a lista antes de redesenhar
         data.forEach(item => {
-            container.innerHTML += `
-                <div class="resource-item">
-                    <div class="resource-item-info">
-                        <p>${item.name}</p>
-                        <p>R$ ${item.cost.toFixed(2)} / hora</p>
-                    </div>
-                    <button class="delete-btn" data-id="${item.id}" data-type="${type}">X</button>
+            const itemCost = item.cost || item.custo || 0;
+            const itemName = item.name || item.nome || 'Nome não encontrado';
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'resource-item';
+            itemDiv.innerHTML = `
+                <div class="resource-item-info">
+                    <p>${itemName}</p>
+                    <p>R$ ${parseFloat(itemCost).toFixed(2)} / hora</p>
+                </div>
+                <div class="actions">
+                    <button class="edit-btn" data-id="${item.id}" data-type="${type}">✏️</button>
+                    <button class="delete-btn" data-id="${item.id}" data-type="${type}">🗑️</button>
                 </div>
             `;
+            container.appendChild(itemDiv);
         });
     }
 
-    function addItem(type) {
-        const nameInput = document.getElementById(`${type}-name`);
-        const costInput = document.getElementById(`${type}-cost`);
-        const name = nameInput.value.trim();
-        const cost = parseFloat(costInput.value);
+    // 2. FUNÇÃO PARA CARREGAR UM ITEM PARA EDIÇÃO
+    async function loadItemForEdit(type, id) {
+        const endpoint = type === 'equipment' ? `${API_EQUIPMENT}/${id}` : `${API_LABOR}/${id}`;
+        try {
+            const item = await request(endpoint);
+            if (type === 'equipment') {
+                equipmentNameInput.value = item.name || item.nome;
+                equipmentCostInput.value = item.cost || item.custo;
+                editingEquipmentId = id;
+                addEquipmentBtn.innerHTML = 'Salvar'; // Muda o texto do botão para "Salvar"
+            } else {
+                laborNameInput.value = item.name || item.nome;
+                laborCostInput.value = item.cost || item.custo;
+                editingLaborId = id;
+                addLaborBtn.innerHTML = 'Salvar';
+            }
+        } catch (err) {
+            alert(`Erro ao carregar item para edição: ${err.message}`);
+        }
+    }
 
-        if (!name || isNaN(cost) || cost <= 0) {
-            alert('Por favor, preencha o nome e um custo válido.');
+    // 3. FUNÇÃO PRINCIPAL PARA SALVAR (CRIAR E ATUALIZAR)
+    async function handleItemSubmit(type) {
+        const isEditing = type === 'equipment' ? !!editingEquipmentId : !!editingLaborId;
+        const id = type === 'equipment' ? editingEquipmentId : editingLaborId;
+        
+        const nameInput = type === 'equipment' ? equipmentNameInput : laborNameInput;
+        const costInput = type === 'equipment' ? equipmentCostInput : laborCostInput;
+        const addButton = type === 'equipment' ? addEquipmentBtn : addLaborBtn;
+
+        const dados = {
+            name: nameInput.value.trim(),
+            cost: parseFloat(costInput.value)
+        };
+
+        if (!dados.name || isNaN(dados.cost)) {
+            alert("Por favor, preencha nome e custo válidos.");
             return;
         }
 
-        const newItem = { id: Date.now(), name, cost };
-        if (type === 'equipment') equipment.push(newItem);
-        else labor.push(newItem);
+        const method = isEditing ? 'PUT' : 'POST';
+        const endpoint = isEditing 
+            ? `${(type === 'equipment' ? API_EQUIPMENT : API_LABOR)}/${id}` 
+            : (type === 'equipment' ? API_EQUIPMENT : API_LABOR);
+        
+        try {
+            await request(endpoint, method, dados);
 
-        nameInput.value = '';
-        costInput.value = '';
-        renderList(type);
-    }
+            // Limpa o formulário e o estado de edição
+            nameInput.value = '';
+            costInput.value = '';
+            if (type === 'equipment') editingEquipmentId = null;
+            else editingLaborId = null;
+            
+            // Volta o botão para o ícone de adicionar
+            addButton.innerHTML = `<svg class="icon-sm" ...> </svg>`; // Cole seu SVG aqui novamente
 
-    function deleteItem(type, id) {
-        if (type === 'equipment') {
-            equipment = equipment.filter(item => item.id !== id);
-        } else {
-            labor = labor.filter(item => item.id !== id);
+            await carregarDadosIniciais(); // Busca os dados mais recentes do servidor
+            renderList(type); // Atualiza a lista na tela
+
+        } catch (err) {
+            alert(`Erro ao salvar: ${err.message}`);
         }
-        renderList(type);
     }
 
-    addEquipmentBtn.addEventListener('click', () => addItem('equipment'));
-    addLaborBtn.addEventListener('click', () => addItem('labor'));
+    // 4. FUNÇÃO PARA EXCLUIR UM ITEM
+    async function deleteItem(type, id) {
+        if (!confirm('Tem certeza que deseja excluir este item?')) return;
+        
+        const endpoint = `${(type === 'equipment' ? API_EQUIPMENT : API_LABOR)}/${id}`;
+        
+        try {
+            await request(endpoint, 'DELETE');
+            await carregarDadosIniciais(); // Busca os dados mais recentes
+            renderList(type); // Atualiza a lista na tela
+        } catch (err) {
+            alert(`Erro ao excluir: ${err.message}`);
+        }
+    }
 
+    // --- CONFIGURAÇÃO DOS EVENTOS ---
+    addEquipmentBtn.addEventListener('click', () => handleItemSubmit('equipment'));
+    addLaborBtn.addEventListener('click', () => handleItemSubmit('labor'));
+
+    // Delegação de eventos para os botões de editar e excluir
     const mainContainer = document.querySelector('.main-container');
     if (mainContainer) {
         mainContainer.addEventListener('click', (event) => {
-            if (event.target.classList.contains('delete-btn')) {
-                const id = parseInt(event.target.dataset.id, 10);
-                const type = event.target.dataset.type;
+            const button = event.target.closest('button');
+            if (!button) return;
+
+            const { id, type } = button.dataset;
+
+            if (button.classList.contains('edit-btn')) {
+                loadItemForEdit(type, id);
+            } else if (button.classList.contains('delete-btn')) {
                 deleteItem(type, id);
             }
         });
     }
 
+    // --- INICIALIZAÇÃO ---
+    // Renderiza as listas com os dados que já foram carregados globalmente
     renderList('equipment');
     renderList('labor');
 }
 
 // --- Inicialização do Site ---
-window.onload = () => {
-    configurarNavegacao();
-    carregarPagina("dashboard/dashboard.html"); // Página inicial
+
+window.onload = async () => { // Transforme em uma função 'async'
+    await carregarDadosIniciais(); // 1. Espera os dados serem carregados
+    configurarNavegacao();         // 2. Configura a navegação
+    carregarPagina("dashboard/dashboard.html"); // 3. Carrega a página inicial
 };
