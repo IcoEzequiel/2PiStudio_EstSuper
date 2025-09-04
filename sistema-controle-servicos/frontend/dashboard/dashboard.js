@@ -1,18 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // Dados de exemplo para simular a informação vinda do servidor
-    const projects = [
-        { nome: 'Website Loja Online', cliente: 'João Silva', status: 'em andamento', orcamento: 12000 },
-        { nome: 'Aplicativo Mobile', cliente: 'Maria Souza', status: 'concluído', orcamento: 8000 },
-        { nome: 'Painel Interno', cliente: 'Empresa ACME', status: 'em orçamento', orcamento: 5000 },
-        { nome: 'E-commerce Moderno', cliente: 'Startup XYZ', status: 'cancelado', orcamento: 2500 },
-        { nome: 'Sistema de Gestão', cliente: 'Corporação ABC', status: 'em andamento', orcamento: 15000 },
-        { nome: 'Landing Page Marketing', cliente: 'Agência Digital', status: 'concluído', orcamento: 3000 },
-        { nome: 'Identidade Visual', cliente: 'Designer Freelancer', status: 'concluído', orcamento: 2000 },
-        { nome: 'Protótipo UX/UI', cliente: 'Cliente B', status: 'em andamento', orcamento: 7000 },
-        { nome: 'Site Institucional', cliente: 'Empresa D', status: 'concluído', orcamento: 9500 },
-        { nome: 'Portal de Notícias', cliente: 'Jornal Online', status: 'concluído', orcamento: 18000 },
-    ];
+    // const projects = [
+    //     { nome: 'Website Loja Online', cliente: 'João Silva', status: 'em andamento', orcamento: 12000 },
+    //     { nome: 'Aplicativo Mobile', cliente: 'Maria Souza', status: 'concluído', orcamento: 8000 },
+    //     { nome: 'Painel Interno', cliente: 'Empresa ACME', status: 'em orçamento', orcamento: 5000 },
+    //     { nome: 'E-commerce Moderno', cliente: 'Startup XYZ', status: 'cancelado', orcamento: 2500 },
+    //     { nome: 'Sistema de Gestão', cliente: 'Corporação ABC', status: 'em andamento', orcamento: 15000 },
+    //     { nome: 'Landing Page Marketing', cliente: 'Agência Digital', status: 'concluído', orcamento: 3000 },
+    //     { nome: 'Identidade Visual', cliente: 'Designer Freelancer', status: 'concluído', orcamento: 2000 },
+    //     { nome: 'Protótipo UX/UI', cliente: 'Cliente B', status: 'em andamento', orcamento: 7000 },
+    //     { nome: 'Site Institucional', cliente: 'Empresa D', status: 'concluído', orcamento: 9500 },
+    //     { nome: 'Portal de Notícias', cliente: 'Jornal Online', status: 'concluído', orcamento: 18000 },
+    // ];
 
     // Função para formatar o valor como moeda brasileira (Real)
     const formatCurrency = (amount) => {

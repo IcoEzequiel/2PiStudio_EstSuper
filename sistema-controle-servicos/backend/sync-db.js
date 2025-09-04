@@ -13,7 +13,7 @@ require('./models/ModelParametrizacaoFuncionario')
 require('./models/ModelUsuario')
 console.log('Inicioando Sincronização do banco de dados...')
 
-//Funcção para sincronizar o banco de dados caso mude algo nos models
+//Função para sincronizar o banco de dados caso mude algo nos models
 
 sequelize.sync({ alter: true })  // ou { force: true } para recriar as tabelas (isso vai deletar os dados)
   .then(() => {
