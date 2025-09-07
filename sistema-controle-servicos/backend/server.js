@@ -116,13 +116,18 @@ ParaEquip.belongsTo(Equipamento, {
 
 Feedback.belongsTo(AlocFunc,{
     foreignKey:'id_alocacaoFuncionario',
-    as: 'servico'
+    as: 'servicoPrestado'
 })
 
-AlocFunc.hasOne(Feedback,{
-    foreignKey:'id_alocacaoFuncionario',
-    as: 'feedback'
-})
+// AlocFunc.belongsTo(Funcionario,{
+//     foreignKey:'id_funcionario',
+//     as: 'funcionario'
+// })
+
+// AlocFunc.belongsTo(Servico, {
+//     foreignKey: "id_servico",
+//     as: "servico"
+// })
  
 // Relação Usuario <-> Funcionario (Um funcionario tem Um Usuario)
 

@@ -4,7 +4,7 @@ const FeedbackDTO = require('../DTOs/FeedbackDTO')
 class FeedbackMapper {
     static toDTO(feedback){
         const feedbackData = feedback.get()
-        return new FeedbackDTO(feedbackData,feedbackData.alocacaoFuncionario)
+        return new FeedbackDTO(feedbackData,feedbackData.servicoPrestado)
     }
 }
 // Não vi necessidade de transformar de volta em objeto, já que o front retorna objetos e o server reconhece eles.

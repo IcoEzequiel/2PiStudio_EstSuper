@@ -9,7 +9,6 @@ class servicoDTO {
         this.descricao = servico.descricao
         this.data_inicio = servico.data_inicio
         this.data_fim = servico.data_fim
-        this.tempo_expediente = servico.tempo_expediente
         this.status = servico.status
         this.orcamento = servico.orcamento
     }

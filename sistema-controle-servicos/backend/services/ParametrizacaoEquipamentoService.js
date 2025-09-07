@@ -18,11 +18,19 @@ const getComInclude = async (id) => {
 }
 
 // Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
-const validar = async (dados) => {
-    const Equipamento = await EquipamentoRepo.getById(dados.id_equipamento)
-    if (!Equipamento)
-        throw Error('Equipamento Não Existe')
-    return true
+const validar = async (dados, create = false) => {
+    if(create){
+        const Equipamento = await EquipamentoRepo.getById(dados.id_equipamento)
+        if (!Equipamento)
+            throw Error('Equipamento Não Existe')
+        return true
+    } else {
+        if(dados.id_equipamento){
+            const Equipamento = await EquipamentoRepo.getById(dados.id_equipamento)
+            if (!Equipamento)
+                throw Error('Equipamento Não Existe')
+        }
+    }
 }
 
 const ParametrizacaoEquipamentoService = {
@@ -42,9 +50,10 @@ const ParametrizacaoEquipamentoService = {
     },
 
     create: async (dados) => {
-        await validar(dados)
+        await validar(dados,true)
         const novo = await repo.save(dados)
-        const novoDTO = ParaEquiMapper.toDTO(novo)
+        const novo2 = await getComInclude(novo.id)
+        const novoDTO = ParaEquiMapper.toDTO(novo2)
         return novoDTO
     },
 
@@ -54,7 +63,8 @@ const ParametrizacaoEquipamentoService = {
         if(!edit){
             return null
         }
-        const editDTO = ParaEquiMapper.toDTO(edit)
+        const edit2 = await getComInclude(edit.id)
+        const editDTO = ParaEquiMapper.toDTO(edit2)
         return editDTO
     },
 

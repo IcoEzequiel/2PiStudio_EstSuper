@@ -17,7 +17,8 @@ const ServicoRepository = {
     update: async (id, dados, options = {}) => {
         const arqui = await Servico.findByPk(id, options)
         if (!arqui) return null
-        return await arqui.update(dados, options)
+        const edit  = await arqui.update(dados, options)
+        return edit
     },
 
     delete: async (id, options = {}) => {

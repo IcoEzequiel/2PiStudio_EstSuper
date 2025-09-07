@@ -18,11 +18,18 @@ const getComInclude = async (id) => {
 }
 
 // Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
-const validar = async (dados) => {
-    const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
-    if (!Funcionario)
-        throw Error('Funcionario Não Existe')
-    return true
+const validar = async (dados, create = false) => {
+    if(create){
+        const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+        if (!Funcionario)
+            throw Error('Funcionario Não Existe')
+    } else{
+        if(dados.id_funcionario){
+            const Funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+            if (!Funcionario)
+            throw Error('Funcionario Não Existe')
+        }
+    }
 }
 
 const ParametrizacaoFuncionarioService = {
@@ -44,7 +51,8 @@ const ParametrizacaoFuncionarioService = {
     create: async (dados) => {
         await validar(dados)
         const novo = await repo.save(dados)
-        const novoDTO = ParaFuncMapper.toDTO(novo)
+        const novo2 = await getComInclude(novo.id)
+        const novoDTO = ParaFuncMapper.toDTO(novo2)
         return novoDTO
     },
 
@@ -54,7 +62,8 @@ const ParametrizacaoFuncionarioService = {
         if (!edit){
             null
         }
-        const editDTO = ParaFuncMapper.toDTO(edit)
+        const edit2 = await getComInclude(edit.id)
+        const editDTO = ParaFuncMapper.toDTO(edit2)
         return editDTO
     },
 

@@ -18,11 +18,13 @@ const getComInclude = async (id) => {
 }
 
 // Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
-const validar = async (dados) => {
-    const Equipamento = await repo.getById(dados.id)
-    if(!Equipamento)
-        throw Error('Equipamento não encontrado')
-}
+// Comentado pos não está sendo utilizado
+
+// const validar = async (dados) => {
+//     const Equipamento = await repo.getById(dados.id)
+//     if(!Equipamento)
+//         throw Error('Equipamento não encontrado')
+// }
 
 // Função para criar / editar um equipamento, junto com a criação da parametrização desse equipamento, se fornecido
 const CriarEditar = async (dados, id = null) => {
@@ -47,7 +49,6 @@ const CriarEditar = async (dados, id = null) => {
             else{
                 equipamentoId = id
                 const equipamento = await getComInclude(id)
-                await validar(equipamento)
                 await repo.update(id,dadosEquipamento, {transaction: t})
                 equipamentoSalvo = equipamento
             }
@@ -97,7 +98,6 @@ const EquipamentoService = {
     },
 
     update: async (id, dados) => {
-        await validar(dados)
         const editEquipamento = await CriarEditar(dados, id)
         return editEquipamento
     },

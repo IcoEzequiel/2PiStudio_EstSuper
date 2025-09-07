@@ -6,14 +6,27 @@ const AlocFuncMapper = require('../mappers/AlocacaoFuncionarioMapper')
 // Funcões auxiliares
 
 // Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
-const validar = async (dados) => {
-    const servico = await ServicoRepo.getById(dados.id_servico)
-    const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
-    if (!servico)
-        throw Error('Serviço não existe')
-    if (!funcionario)
-        throw Error('Funcionario Não existe')
-    return true
+const validar = async (dados, create = false) => {
+    if(create){
+        const servico = await ServicoRepo.getById(dados.id_servico)
+        const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+        if (!servico)
+            throw Error('Serviço não existe')
+        if (!funcionario)
+            throw Error('Funcionario Não existe')
+        return true
+    } else {
+        if(dados.id_funcionario){
+        const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+        if (!funcionario)
+            throw Error('Funcionario Não existe')
+        }
+        if (dados.id_servico){
+            const servico = await ServicoRepo.getById(dados.id_servico)
+            if (!servico)
+                throw Error('Serviço não existe')
+        }
+    }
 }
 
 // Usado para incluir outros objetos ao principal, esses objetos tem que estár realionados no aquivo server.js
@@ -49,9 +62,10 @@ const AlocacaoFuncionarioService = {
     },
 
     create: async (dados) => {
-        await validar(dados)
+        await validar(dados, true)
         const novo = await repo.save(dados)
-        const novoDTO = AlocFuncMapper.toDTO(novo)
+        const novo2 = await getComInclude(novo.id)
+        const novoDTO = AlocFuncMapper.toDTO(novo2)
         return novoDTO
     },
 

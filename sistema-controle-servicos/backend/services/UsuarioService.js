@@ -20,7 +20,7 @@ const getComInclude = async (id) => {
 }
 
 // Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
-const validar = async (dados, iscreate = false) => {
+const validar = async (dados, create = false) => {
     // Valida se o funcionario existe se ele vinher nos dados, pos pode ter um usuario que não é um funcionario, como o admin
     if(dados.id_funcionario){
         const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
@@ -28,7 +28,7 @@ const validar = async (dados, iscreate = false) => {
             throw new Error('O funcionario não Existe')
     }
     // Se for uma criação e não passou a senha, pos o update pode mandar ou não a alteração da senha
-    if(iscreate && !dados.senha){
+    if(create && !dados.senha){
         throw new Error('Nenhuma Senha foi fornecida')
     }
     return true
@@ -57,7 +57,7 @@ const UsuarioService = {
     },
 
     getById: async (id) => {
-            const Usuario = await getComInclude()
+            const Usuario = await getComInclude(id)
             if(!Usuario){
                 return null
             }
@@ -72,7 +72,8 @@ const UsuarioService = {
         // Manda criptografar a senha antes de salvar no banco de dados
         const dadosCrip = await cripSenha(dados)
         const novo = await repo.save(dadosCrip)
-        const novoDTO = UsuarioMapper.toDTO(novo)
+        const novo2 = await getComInclude(novo.id)
+        const novoDTO = UsuarioMapper.toDTO(novo2)
         return novoDTO
         
     },
@@ -85,8 +86,8 @@ const UsuarioService = {
         if (!edit){
             return null
         }
-
-        const editDTO = UsuarioMapper.toDTO(edit)
+        const edit2 = await getComInclude(id)
+        const editDTO = UsuarioMapper.toDTO(edit2)
         return editDTO
     },
 

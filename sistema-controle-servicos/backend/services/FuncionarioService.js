@@ -18,11 +18,12 @@ const getComInclude = async (id) => {
 }
 
 // Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
-const validar = async (dados) => {
-    const Funcionario = await repo.getById(dados.id)
-    if(!Funcionario)
-        throw Error('Funcionario não encontrado')
-}
+// Comentado por não está sendo utilizado
+// const validar = async (dados) => {
+//     const Funcionario = await repo.getById(dados.id)
+//     if(!Funcionario)
+//         throw Error('Funcionario não encontrado')
+// }
 
 // Função para criar / editar um funcionario, junto com a criação da parametrização desse funcionario, se fornecido
 const CriarEditar = async (dados, id = null) => {
@@ -114,7 +115,6 @@ const FuncionarioService = {
                 ]
             })
 
-            await validar(funcionario)
             // Se existir uma parametrização, deleta
             if(funcionario.parametrizacao){
                 await ParaFuncRepo.delete(funcionario.parametrizacao.id, {transaction: t})

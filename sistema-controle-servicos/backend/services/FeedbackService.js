@@ -3,19 +3,32 @@ const AlocFuncRepo = require('../repositories/AlocacaoFuncionarioRepository')
 const FeedbackMapper = require('../mappers/FeedbackMapper')
 
 // Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
-const validar = async (dados) => {
-    const servicoPrestado = await AlocFuncRepo.getById(dados.id_alocacaoFuncionario)
-    if (!servicoPrestado){
-        throw new Error('Serviço prestado inexistente')
+const validar = async (dados, create = false) => {
+    if(create){
+        const servicoPrestado = await AlocFuncRepo.getById(dados.id_alocacaoFuncionario)
+        if (!servicoPrestado){
+            throw new Error('Serviço prestado inexistente')
+        }
+        return true
+    } else {
+        if(dados.servicoPrestado){
+            const servicoPrestado = await AlocFuncRepo.getById(dados.id_alocacaoFuncionario)
+            if (!servicoPrestado){
+                throw new Error('Serviço prestado inexistente')
+            }
+        }
     }
-    return true
 }
-
 // Usado para incluir outros objetos ao principal, esses objetos tem que estár realionados no aquivo server.js
 const getComInclude = async (id) => {
     // Determina quais objetos vão ser inclusos no objeto principal
     const inclusao = {include:[
-        {model: require('../models/ModelAlocacaoFuncionario'), as: 'servicoPrestado'}        
+        {model: require('../models/ModelAlocacaoFuncionario'), as: 'servicoPrestado',
+            include: [
+                {model: require('../models/ModelFuncionario'), as: 'funcionario'},
+                {model: require('../models/ModelServico'), as: 'servico'}
+            ]
+        }        
     ]}
     // realiza a requisição para o banco de dados com o as inclusões, o repositorio precisa aceitar um "options" para funcionar
     if(!id)
@@ -42,19 +55,24 @@ const FeedbackService = {
     },
 
     create: async (dados) => {
-        await validar(dados)
+        await validar(dados,true)
         const novo = await repo.save(dados)
-        const novoDTO = FeedbackMapper.toDTO(novo)
+        const novo2 = await getComInclude(novo.id)
+        const novoDTO = FeedbackMapper.toDTO(novo2)
         return novoDTO
     },
 
     update: async (id, dados) => {
-        await validar(dados)
+        const existe = await repo.getById(id)
+        if(!existe){
+            throw new Error('Feedback não existe')
+        }
         const edit = await repo.update(id, dados)
         if(!edit){
             return null
         }
-        const editDTO = FeedbackMapper.toDTO(edit)
+        const edit2 = await getComInclude(edit.id)
+        const editDTO = FeedbackMapper.toDTO(edit2)
         return editDTO
     },
 

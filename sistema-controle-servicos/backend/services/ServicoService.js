@@ -52,22 +52,49 @@ const getComInclude = async (id) => {
 }
 
 // Valida do serviço.
-const validarServico = async (dados) => {
-    const cliente = await ClienteRepo.getById(dados.id_cliente)
-    // Verifica se o cliente existe
-    if (!cliente){
-        throw new Error('Cliente não existe.')
+const validarServico = async (dados,id = null) => {
+    if(!id){
+        const cliente = await ClienteRepo.getById(dados.id_cliente)
+        // Verifica se o cliente existe
+        if (!cliente){
+            throw new Error('Cliente não existe.')
+        }
+        // Verifica se a data final não ocorre antes da data inicial
+        if (dados.data_fim < dados.data_inicio){
+            throw new Error('A data final não pode ser anterior a data de inicio')
+        }
+        // Verifica se o orcamento não é negativo
+        if(dados.orcamento < 0){
+            throw new Error('O orcamento não pode ser negativo')
     }
-    // Verifica se a data final não ocorre antes da data inicial
-    if (dados.data_fim < dados.data_inicio){
-        throw new Error('A data final não pode ser anterior a data de inicio')
-    }
-    // Verifica se o orcamento não é negativo
-    if(dados.orcamento < 0){
-        throw new Error('O orcamento não pode ser negativo')
+    } else {
+        const servico = await getComInclude(id)
+        if(!servico)
+            throw new Error('Servico não existe')
+        if(dados.id_cliente){
+            const cliente = await ClienteRepo.getById(dados.id_cliente)
+            // Verifica se o cliente existe
+            if (!cliente){
+                throw new Error('Cliente não existe.')
+            }
+        }
+        if(dados.data_inicio && dados.data_fim){
+            if(dados.data_fim < dados.data_inicio)
+                throw new Error("A data Final não pode ser anterior a data de inicio")
+        if(dados.data_fim && servico.data_inicio){
+            if(dados.data_fim < servico.data_inicio)
+                throw new Error("A data Final não pode ser anterior a data de inicio") 
+        }
+        if(dados.data_inicio && servico.data_fim){
+            if(servico.data_fim < dados.data_inicio)
+                throw new Error("A data Final não pode ser anterior a data de inicio")
+        }
+        }
+
+        if(dados.orcamento && dados.orcamento < 0)
+                throw new Error('O orcamento não pode ser negativo')
     }
 }
-
 // Validação do funcionario. (A data é para saber se ele já está alocado nesse dia)
 const validarFuncionario = async (dados, data) => {
     const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
@@ -202,7 +229,7 @@ const ServicoService = {
         const t = await sequelize.transaction()
 
         try{
-            await validarServico(dados)
+            await validarServico(dados,id)
             // Pega o serviço com suas alocações
             const servico = await ServicoRepo.getById(id, {
                 include: [
@@ -213,31 +240,30 @@ const ServicoService = {
             })
 
             // Apaga todas as alocações para depois recriar
-            for(const aloc of servico.alocacoesFuncionario || []){
-                await AlocacaoFuncRepo.delete(aloc.id, {transaction: t})
+            if(servico.alocacoesFuncionario){
+                for(const aloc of servico.alocacoesFuncionario || []){
+                    await AlocacaoFuncRepo.delete(aloc.id, {transaction: t})
+                }
             }
-            for(const aloc of servico.alocacoesEquipamento || []){
-                await AlocacaoEquipRepo.delete(aloc.id, {transaction: t})
+            if(servico.alocacoesEquipamento){
+                for(const aloc of servico.alocacoesEquipamento || []){
+                    await AlocacaoEquipRepo.delete(aloc.id, {transaction: t})
+                }
             }
 
             // Recriação das alocações
-            await gerenciarAlocacoes(id, dados.alocacoes_diarias, t)
+            if(dados.alocacoes_diarias)
+                await gerenciarAlocacoes(id, dados.alocacoes_diarias,{transaction: t})
 
             const dadosServico = {
-                id_cliente: dados.id_cliente,
-                nome: dados.nome, 
-                descricao: dados.descricao,
-                data_inicio: dados.data_inicio,
-                data_fim: dados.data_fim,
-                status: dados.status,
-                orcamento: dados.orcamento
+                ...servico.get({plain: true}),
+                ...dados
             }
-
-            const servicoEdit = await ServicoRepo.update(id, dadosServico, t)
-
+            await ServicoRepo.update(id, dadosServico, {transaction: t})
             await t.commit()
-
-            return servicoEdit
+            const servicoedit = await getComInclude(id)
+            const servicoEditDTO = ServicoMapper.toDTO(servicoedit)
+            return servicoEditDTO
         } catch(error){
             await t.rollback()
             throw new Error('Erro ao atualizar serviço: ' + error.message)
