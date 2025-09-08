@@ -99,42 +99,52 @@
 </head> -->
 
 
-<form id="projectForm" class="form">
+<form id="form-novo-servico" class="form">
+    <div class="form-section">
     <h2>Criar Novo Projeto</h2>
     <div class="grid">
-        <div>
-            <label for="clientName">Nome do Cliente</label>
-            <input type="text" id="clientName" name="clientName">
+        <div class="form-group">
+            <label for="servico-cliente">Cliente</label>
+            <select id="servico-cliente" required>
+                <option value="">Selecione um cliente...</option>
+            </select>
         </div>
 
-        <div>
-            <label for="projectName">Nome do Projeto</label>
-            <input type="text" id="projectName" name="projectName">
+        <div class="form-group">
+            <label for="servico-nome">Nome do Projeto</label>
+            <input type="text" id="servico-nome" placeholder="Ex: Gravação de Podcast" required>
         </div>
     </div>
 
     <div class="grid">
-        <div>
-            <label for="hours">Horas de Trabalho</label>
-            <input type="number" id="hours" name="hours" placeholder="Ex: 120">
+        <div class="form-group full-width">
+            <label for="servico-descricao">Descrição do Projeto</label>
+            <textarea id="servico-descricao" rows="3" placeholder="Detalhes sobre o serviço..."></textarea>
         </div>
 
-        <div>
-            <label for="quote">Receita Estimada (Orçamento)</label>
-            <input type="number" id="quote" name="quote" placeholder="Ex: 10000">
+        <div class="form-group">
+            <label for="servico-orcamento">Orçamento (R$)</label>
+            <input type="number" id="servico-orcamento" placeholder="Ex: 1500.00" step="0.01" min="0" required>
+        </div>
+    </div>
+    <div class="grid">
+        <div class="form-group">
+            <label for="servico-data-inicio">Data de Início</label>
+            <input type="date" id="servico-data-inicio" required>
+        </div>
+        <div class="form-group">
+            <label for="servico-data-fim">Data de Fim</label>
+            <input type="date" id="servico-data-fim" required>
         </div>
     </div>
 
     <div class="grid">
-        <div>
-            <label for="laborSelect">Mão de Obra</label>
-            <select id="laborSelect" name="laborSelect" multiple></select>
+        <div class="form-section">
+            <h3>Alocação de Recursos por Dia</h3>
+            <p id="alocacao-placeholder">Preencha as datas de início e fim para alocar recursos.</p>
+            <div id="alocacoes-diarias-container"></div>
         </div>
-
-        <div>
-            <label for="equipmentSelect">Equipamentos</label>
-            <select id="equipmentSelect" name="equipmentSelect" multiple></select>
-        </div>
+    </div>
     </div>
 
     <div>
@@ -151,6 +161,7 @@
         <p><span>Imposto (6%):</span> <strong id="tax">R$ 0,00</strong></p>
         <p><span>Lucro Líquido:</span> <strong id="profit" class="positive">R$ 0,00</strong></p>
     </div>
-
-    <button type="submit" class="btn">Salvar Projeto</button>
+    <div class="form-actions">
+        <button type="submit" class="btn">Salvar Projeto</button>
+    </div>
 </form>

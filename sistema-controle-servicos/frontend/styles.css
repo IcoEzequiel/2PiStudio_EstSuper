@@ -400,3 +400,53 @@ select:focus {
     transform: translateY(-2px);
     /* Efeito sutil de elevação */
 }
+
+/* Resolução temporaria pelo gemini (mudar depois)
+/* Cria o container para as duas colunas (Funcionários e Equipamentos) */
+.resource-columns {
+    display: flex;
+    gap: 2rem; /* Espaçamento entre as colunas */
+    width: 100%;
+}
+
+/* Define que cada coluna ocupará metade do espaço */
+.resource-columns .column {
+    flex: 1;
+    min-width: 0; /* Previne que as colunas estourem o container */
+}
+
+/* A lista de recursos dentro de cada coluna */
+.resource-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Espaçamento entre os itens da lista */
+}
+
+/* Transforma cada item da lista (checkbox, nome, valor) em uma linha */
+.resource-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Joga o nome para a esquerda e o valor para a direita */
+    padding: 0.25rem;
+    border-radius: 4px;
+}
+
+/* Agrupa o checkbox e o nome para mantê-los juntos */
+.resource-name-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Agrupa o input de custo e a unidade (/dia, /hora) */
+.resource-cost-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Define um tamanho fixo para o input de custo para alinhá-los verticalmente */
+.resource-item .cost-input {
+    width: 80px; 
+    text-align: right;
+}

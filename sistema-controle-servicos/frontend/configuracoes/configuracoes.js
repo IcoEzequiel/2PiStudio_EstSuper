@@ -116,7 +116,7 @@
 //     let editingEquipmentId = null; // Variável para controlar a edição
 
 //     // --- LÓGICA PARA MÃO DE OBRA ---
-//     const API_LABOR = '/mao-de-obra'; 
+//     const API_LABOR = '/funcionario'; 
 //     const laborNameInput = document.getElementById('labor-name');
 //     const laborCostInput = document.getElementById('labor-cost');
 //     const addLaborBtn = document.getElementById('add-labor-btn');
@@ -130,6 +130,7 @@
 //             const newItemDiv = document.createElement('div');
 //             newItemDiv.classList.add('resource-item'); // Classe para estilização
 //             // Adapte os campos (item.nome, item.custo) conforme o que sua API retorna
+//             const custo = item.parametrizacao ? item.parametrizacao.valor_hora: 0
 //             newItemDiv.innerHTML = `
 //                 <span>${item.nome}</span>
 //                 <span class="cost">R$ ${parseFloat(item.custo || 0).toFixed(2)}/h</span>
@@ -150,12 +151,17 @@
 //         });
 //     }
 
-//     // Função para renderizar a lista de Mão de Obra
+//     // Função para renderizar a lista de Mão de Obra (funcionarios)
 //     function renderLabor(lista) {
 //         laborListContainer.innerHTML = ''; // Limpa a lista
 //         lista.forEach(item => {
 //             const newItemDiv = document.createElement('div');
 //             newItemDiv.classList.add('resource-item');
+
+//             const custo = item.parametrizacao ? item.parametrizacao.valor_diaria : 0
+
+//             const custoPorHora = custo / 8;
+
 //             newItemDiv.innerHTML = `
 //                 <span>${item.nome}</span>
 //                 <span class="cost">R$ ${parseFloat(item.custo || 0).toFixed(2)}/h</span>
@@ -193,10 +199,10 @@
 //     async function handleEquipmentSubmit() {
 //         const dados = {
 //             nome: equipmentNameInput.value.trim(),
-//             custo: parseFloat(equipmentCostInput.value)
+//             valor_hora: parseFloat(equipmentCostInput.value)
 //         };
 
-//         if (!dados.nome || isNaN(dados.custo)) {
+//         if (!dados.nome) {
 //             alert("Por favor, preencha o nome e o custo do equipamento.");
 //             return;
 //         }
@@ -222,7 +228,7 @@
 //         try {
 //             const item = await request(`${API_EQUIPMENT}/${id}`);
 //             equipmentNameInput.value = item.nome;
-//             equipmentCostInput.value = item.custo;
+//             equipmentCostInput.value = item.parametrizacao ? item.parametrizacao.valor_hora: '';
 //             editingEquipmentId = id;
 //         } catch (err) {
 //             alert("Erro ao carregar equipamento para edição: " + err.message);
@@ -243,10 +249,10 @@
 //     async function handleLaborSubmit() {
 //         const dados = {
 //             nome: laborNameInput.value.trim(),
-//             custo: parseFloat(laborCostInput.value)
+//             valor_diaria: parseFloat(laborCostInput.value) * 8
 //         };
 
-//         if (!dados.nome || isNaN(dados.custo)) {
+//         if (!dados.nome) {
 //             alert("Por favor, preencha o nome e o custo do profissional.");
 //             return;
 //         }
@@ -270,7 +276,7 @@
 //         try {
 //             const item = await request(`${API_LABOR}/${id}`);
 //             laborNameInput.value = item.nome;
-//             laborCostInput.value = item.custo;
+//             laborCostInput.value = item.parametrizacao ? item.parametrizacao.valor_diaria : '';
 //             editingLaborId = id;
 //         } catch (err) {
 //             alert("Erro ao carregar mão de obra para edição: " + err.message);

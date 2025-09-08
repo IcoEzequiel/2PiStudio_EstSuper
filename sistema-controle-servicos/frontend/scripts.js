@@ -3,30 +3,43 @@ import { request } from "./shared/api.js"; // Ajuste o caminho se necessário
 
 // Variáveis globais que você já tem
 let equipment = [];
-let labor = [];
+let labor = []; // representa funcionario
+let clientes = []
 
 async function carregarDadosIniciais() {
     console.log("Buscando dados iniciais da API...");
     try {
-        // Busca os dados de equipamentos
-        const responseEquip = await fetch('/equipamento'); // <-- Use o URL da sua API de equipamentos
-        if (!responseEquip.ok) throw new Error('Falha ao buscar equipamentos');
-        equipment = await responseEquip.json(); // Converte a resposta para JSON e armazena na variável global
+        // Promise.all faz as requisições em paralelo
 
-        // Busca os dados de mão de obra
-        const responseLabor = await fetch('/mao-de-obra'); // <-- Use o URL da sua API de mão de obra
-        if (!responseLabor.ok) throw new Error('Falha ao buscar mão de obra');
-        labor = await responseLabor.json(); // Converte e armazena na variável global
+        const results = await Promise.allSettled([
+            request('/equipamento'),
+            request('/funcionario'),
+            request('/cliente')
+        ]);
+        // Agora verificamos cada resultado individualmente
+        if (results[0].status === 'fulfilled') {
+            equipment = results[0].value || [];
+        } else {
+            console.error("Erro ao buscar equipamentos:", results[0].reason);
+        }
 
-        console.log("Dados carregados com sucesso!", { equipment, labor });
+        if (results[1].status === 'fulfilled') {
+            labor = results[1].value || [];
+        } else {
+            console.error("Erro ao buscar funcionários:", results[1].reason);
+        }
+
+        if (results[2].status === 'fulfilled') {
+            clientes = results[2].value || [];
+        } else {
+            console.error("Erro ao buscar clientes:", results[2].reason);
+        }
+
+        console.log("Dados carregados com sucesso!", { equipment, labor,clientes });
 
     } catch (err) {
         console.error("Erro ao carregar dados iniciais:", err);
         alert("Não foi possível carregar os recursos do servidor. Usando dados de exemplo.");
-        
-        // **PLANO B:** Se a API falhar, você pode carregar dados de exemplo para não travar a aplicação
-        equipment = [{ id: 1, name: 'Câmera (Exemplo)', cost: 150.00 }];
-        labor = [{ id: 1, name: 'Editor (Exemplo)', cost: 120.00 }];
     }
 }
 
@@ -87,244 +100,387 @@ function configurarNavegacao() {
 
 // --- Lógica do formulário de Novo Projeto ---
 function configurarFormNovoProjeto() {
-    const TAX_RATE = 0.06;
+    console.log("Configurando o formulário de novo projeto com UI melhorada...");
 
-    const equipmentSelect = document.getElementById("equipmentSelect");
-    const laborSelect = document.getElementById("laborSelect");
-    const hoursInput = document.getElementById("hours");
-    const quoteInput = document.getElementById("quote");
-    const invoiceCheckbox = document.getElementById("invoice");
+    // 1. PEGAR OS ELEMENTOS DO FORMULÁRIO (sem alterações aqui)
+    const form = document.getElementById('form-novo-servico');
+    const clienteSelect = document.getElementById('servico-cliente');
+    const dataInicioInput = document.getElementById('servico-data-inicio');
+    const dataFimInput = document.getElementById('servico-data-fim');
+    const orcamentoInput = document.getElementById('servico-orcamento');
+    const invoiceCheckbox = document.getElementById('invoice');
+    
+    const alocacoesContainer = document.getElementById('alocacoes-diarias-container');
+    const placeholder = document.getElementById('alocacao-placeholder');
+
     const totalCostsSpan = document.getElementById("totalCosts");
     const taxSpan = document.getElementById("tax");
     const profitSpan = document.getElementById("profit");
-
-    function calculateCostFromSelection(selectedIds, dataSource) {
-        return selectedIds.reduce((sum, id) => {
-            const item = dataSource.find(data => data.id === id);
-            return sum + (item ? item.cost : 0);
-        }, 0);
-    }
-
-    function populateSelects() {
-        equipmentSelect.innerHTML = '';
-        laborSelect.innerHTML = '';
-        equipment.forEach(e => {
-            const opt = document.createElement("option");
-            opt.value = e.id;
-            opt.textContent = `${e.name} - R$ ${e.cost}/h`;
-            equipmentSelect.appendChild(opt);
-        });
-        labor.forEach(l => {
-            const opt = document.createElement("option");
-            opt.value = l.id;
-            opt.textContent = `${l.name} - R$ ${l.cost}/h`;
-            laborSelect.appendChild(opt);
-        });
-    }
-
-    function updateSummary() {
-        const hours = parseInt(hoursInput.value, 10) || 1;
-        const quote = parseFloat(quoteInput.value) || 0;
-        const invoice = invoiceCheckbox.checked;
-
-        const selectedEquip = [...equipmentSelect.selectedOptions].map(o => parseInt(o.value));
-        const selectedLabor = [...laborSelect.selectedOptions].map(o => parseInt(o.value));
-
-        const equipmentCostPerHour = calculateCostFromSelection(selectedEquip, equipment);
-        const laborCostPerHour = calculateCostFromSelection(selectedLabor, labor);
-
-        const productionCosts = (equipmentCostPerHour + laborCostPerHour) * hours;
-        const tax = invoice ? quote * TAX_RATE : 0;
-        const totalCosts = productionCosts + tax;
-        const profit = quote - totalCosts;
-
-        totalCostsSpan.textContent = `R$ ${totalCosts.toFixed(2)}`;
-        taxSpan.textContent = `R$ ${tax.toFixed(2)}`;
-        profitSpan.textContent = `R$ ${profit.toFixed(2)}`;
-        profitSpan.style.color = profit < 0 ? 'red' : '#388e3c';
-    }
-
-    populateSelects();
-    equipmentSelect.addEventListener("change", updateSummary);
-    laborSelect.addEventListener("change", updateSummary);
-    hoursInput.addEventListener("input", updateSummary);
-    quoteInput.addEventListener("input", updateSummary);
-    invoiceCheckbox.addEventListener("change", updateSummary);
-
-    document.getElementById("projectForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const clientName = document.getElementById("clientName").value.trim();
-        const projectName = document.getElementById("projectName").value.trim();
-        if (!clientName || !projectName) {
-            alert("Nome do cliente e do projeto são obrigatórios!");
+    
+    // 2. FUNÇÃO PARA POPULAR O DROPDOWN DE CLIENTES (sem alterações aqui)
+    function popularClientes() {
+        if (!clientes || clientes.length === 0) {
+            clienteSelect.innerHTML = '<option value="">Nenhum cliente cadastrado</option>';
             return;
         }
-        alert("Projeto salvo com sucesso!");
-        document.getElementById("projectForm").reset();
-        updateSummary();
+        clienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
+        clientes.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.id;
+            option.textContent = cliente.nome;
+            clienteSelect.appendChild(option);
+        });
+    }
+
+    // 3. FUNÇÃO PARA GERAR OS CAMPOS DE ALOCAÇÃO (GRANDES MUDANÇAS AQUI)
+    function gerarCamposDeAlocacao() {
+    console.log("Iniciando gerarCamposDeAlocacao (com novo layout)...");
+    
+    const dataInicioStr = dataInicioInput.value;
+    const dataFimStr = dataFimInput.value;
+
+    alocacoesContainer.innerHTML = '';
+
+    if (!dataInicioStr || !dataFimStr || new Date(dataFimStr) < new Date(dataInicioStr)) {
+        placeholder.style.display = 'block';
+        atualizarResumoFinanceiro();
+        return;
+    }
+    
+    placeholder.style.display = 'none';
+
+    try {
+        const diaAtual = new Date(`${dataInicioStr}T00:00:00`);
+        const dataFinal = new Date(`${dataFimStr}T00:00:00`);
+
+        while (diaAtual <= dataFinal) {
+            const dataISO = diaAtual.toISOString().split('T')[0];
+            const dataFormatada = diaAtual.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+
+            const cardHTML = `
+                <div class="allocation-day-card" data-date="${dataISO}">
+                    <h4>Dia: ${dataFormatada}</h4>
+                    <div class="form-group">
+                        <label for="horas-${dataISO}">Horas Trabalhadas</label>
+                        <input type="number" id="horas-${dataISO}" class="horas-trabalhadas" min="1" value="8">
+                    </div>
+                    
+                    <div class="resource-columns">
+                        <div class="column">
+                            <div class="form-group resource-group">
+                                <label>Funcionários</label>
+                                <div class="resource-list">
+                                    ${labor.map(f => `
+                                        <div class="resource-item">
+                                            <div class="resource-name-group">
+                                                <input type="checkbox" id="func-${f.id}-${dataISO}" value="${f.id}" class="resource-checkbox" data-target-cost="cost-func-${f.id}-${dataISO}">
+                                                <label for="func-${f.id}-${dataISO}">${f.nome}</label>
+                                            </div>
+                                            <div class="resource-cost-group">
+                                                <input type="number" step="0.01" id="cost-func-${f.id}-${dataISO}" class="cost-input" value="${(parseFloat(f.parametrizacao?.valor_diaria ?? 0)).toFixed(2)}" disabled>
+                                                <span>/dia</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="column">
+                            <div class="form-group resource-group">
+                                <label>Equipamentos</label>
+                                <div class="resource-list">
+                                    ${equipment.map(e => `
+                                        <div class="resource-item">
+                                            <div class="resource-name-group">
+                                                <input type="checkbox" id="equip-${e.id}-${dataISO}" value="${e.id}" class="resource-checkbox" data-target-cost="cost-equip-${e.id}-${dataISO}">
+                                                <label for="equip-${e.id}-${dataISO}">${e.nome}</label>
+                                            </div>
+                                            <div class="resource-cost-group">
+                                                <input type="number" step="0.01" id="cost-equip-${e.id}-${dataISO}" class="cost-input" value="${(parseFloat(e.parametrizacao?.valor_hora ?? 0)).toFixed(2)}" disabled>
+                                                <span>/hora</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            alocacoesContainer.insertAdjacentHTML('beforeend', cardHTML);
+            diaAtual.setUTCDate(diaAtual.getUTCDate() + 1);
+        }
+    } catch (error) {
+        console.error("ERRO CRÍTICO ao gerar os cards de alocação:", error);
+        alocacoesContainer.innerHTML = '<p style="color: red;">Ocorreu um erro ao gerar os campos. Verifique o console (F12) para mais detalhes.</p>';
+    }
+    
+    atualizarResumoFinanceiro();
+}
+
+    // 4. FUNÇÃO PARA ATUALIZAR O RESUMO FINANCEIRO (ATUALIZADA)
+    function atualizarResumoFinanceiro() {
+        let custoTotalProducao = 0;
+        const orcamento = parseFloat(orcamentoInput.value) || 0;
+        
+        document.querySelectorAll('.allocation-day-card').forEach(card => {
+            const horas = parseFloat(card.querySelector('.horas-trabalhadas').value) || 0;
+            
+            // Itera sobre todos os checkboxes de recursos no card
+            card.querySelectorAll('.resource-checkbox:checked').forEach(checkbox => {
+                const costInput = document.getElementById(checkbox.dataset.targetCost);
+                const custo = parseFloat(costInput.value) || 0;
+
+                if (costInput.id.startsWith('cost-func-')) {
+                    // Custo de funcionário é diário
+                    custoTotalProducao += custo;
+                } else if (costInput.id.startsWith('cost-equip-')) {
+                    // Custo de equipamento é por hora
+                    custoTotalProducao += custo * horas;
+                }
+            });
+        });
+
+        const imposto = invoiceCheckbox.checked ? orcamento * 0.06 : 0;
+        const custosTotais = custoTotalProducao + imposto;
+        const lucro = orcamento - custosTotais;
+        
+        totalCostsSpan.textContent = `R$ ${custosTotais.toFixed(2)}`;
+        taxSpan.textContent = `R$ ${imposto.toFixed(2)}`;
+        profitSpan.textContent = `R$ ${lucro.toFixed(2)}`;
+        profitSpan.style.color = lucro < 0 ? '#d32f2f' : '#388e3c';
+    }
+
+    // 5. ADICIONAR OS EVENT LISTENERS (COM UMA NOVA LÓGICA)
+    dataInicioInput.addEventListener('change', gerarCamposDeAlocacao);
+    dataFimInput.addEventListener('change', gerarCamposDeAlocacao);
+    orcamentoInput.addEventListener('input', atualizarResumoFinanceiro);
+    invoiceCheckbox.addEventListener('change', atualizarResumoFinanceiro);
+    
+    alocacoesContainer.addEventListener('change', (e) => {
+        // Habilita/desabilita input de custo e recalcula o resumo
+        if (e.target.matches('.resource-checkbox')) {
+            const costInput = document.getElementById(e.target.dataset.targetCost);
+            costInput.disabled = !e.target.checked;
+            atualizarResumoFinanceiro();
+        }
+        // Recalcula se as horas ou o custo de um item habilitado mudar
+        if (e.target.matches('.horas-trabalhadas') || e.target.matches('.cost-input')) {
+            atualizarResumoFinanceiro();
+        }
     });
 
-    updateSummary();
+    // 6. MANIPULAR O ENVIO DO FORMULÁRIO (ATUALIZADO)
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const payload = {
+            id_cliente: clienteSelect.value,
+            nome: document.getElementById('servico-nome').value,
+            descricao: document.getElementById('servico-descricao').value,
+            data_inicio: dataInicioInput.value,
+            data_fim: dataFimInput.value,
+            orcamento: orcamentoInput.value,
+            alocacoes_diarias: {}
+        };
+
+        document.querySelectorAll('.allocation-day-card').forEach(card => {
+            const data = card.dataset.date;
+            const alocacaoDoDia = {
+                horas_trabalhadas: parseFloat(card.querySelector('.horas-trabalhadas').value) || 0,
+                funcionarios: [],
+                equipamentos: []
+            };
+
+            card.querySelectorAll('.resource-checkbox:checked').forEach(checkbox => {
+                const costInput = document.getElementById(checkbox.dataset.targetCost);
+                const custo = parseFloat(costInput.value);
+                const id = parseInt(checkbox.value);
+
+                if (costInput.id.startsWith('cost-func-')) {
+                    alocacaoDoDia.funcionarios.push({ id_funcionario: id, valor_dia_alocado: custo });
+                } else if (costInput.id.startsWith('cost-equip-')) {
+                    alocacaoDoDia.equipamentos.push({ id_equipamento: id, valor_hora_alocada: custo });
+                }
+            });
+            payload.alocacoes_diarias[data] = alocacaoDoDia;
+        });
+
+        console.log("JSON a ser enviado para a API:");
+        console.log(JSON.stringify(payload, null, 2));
+
+        try {
+            // 1. Descomente a linha abaixo para ATIVAR a chamada à API
+            const novoServico = await request('/servico', 'POST', payload);
+
+            console.log('Serviço criado com sucesso no backend:', novoServico);
+            alert('Projeto criado com sucesso!');
+
+            // 2. Limpa o formulário e redireciona para o dashboard
+            form.reset();
+            gerarCamposDeAlocacao(); // Limpa os cards de alocação
+            carregarPagina('dashboard/dashboard.html'); // Volta para a página inicial
+
+        } catch (err) {
+            // Se o backend retornar um erro (ex: validação), ele será exibido
+            alert(`Erro ao salvar projeto: ${err.message}`);
+            console.error("Detalhes do erro:", err);
+        }
+    });
+
+    // --- INICIALIZAÇÃO ---
+    popularClientes();
 }
 
 // --- Lógica da página de Configurações ---
 // --- Lógica da página de Configurações (Versão Completa com CRUD) ---
+// Em scripts.js
+
+// --- Lógica da página de Configurações ---
 function configurarPaginaConfiguracoes() {
-    // --- URLs da API ---
-    const API_EQUIPMENT = '/equipamento';
-    const API_LABOR = '/mao-de-obra';
+    
+    // As variáveis agora são declaradas no escopo principal da função
+    let editingState = { id: null, type: null };
 
-    // --- Seleção dos Elementos (Equipamentos) ---
-    const equipmentContainer = document.getElementById('equipment-items');
-    const addEquipmentBtn = document.getElementById('add-equipment-btn');
-    const equipmentNameInput = document.getElementById('equipment-name');
-    const equipmentCostInput = document.getElementById('equipment-cost');
-    let editingEquipmentId = null; // Controla se estamos editando um equipamento
+    // Mapeamento de configurações para cada tipo de recurso
+    const configs = {
+        equipment: { 
+            api: '/equipamento', 
+            data: () => equipment, 
+            inputs: { nome: 'equipment-name', valor: 'equipment-cost' }, 
+            list: 'equipment-items' 
+        },
+        labor: { 
+            api: '/funcionario', 
+            data: () => labor, 
+            inputs: { nome: 'labor-name', valor: 'labor-cost' }, 
+            list: 'labor-items' 
+        },
+        client: { 
+            api: '/cliente', 
+            data: () => clientes, 
+            inputs: { nome: 'client-name', tipo: 'client-type', cpf: 'client-cpf-cnpj' }, 
+            list: 'client-items' 
+        }
+    };
 
-    // --- Seleção dos Elementos (Mão de Obra) ---
-    const laborContainer = document.getElementById('labor-items');
-    const addLaborBtn = document.getElementById('add-labor-btn');
-    const laborNameInput = document.getElementById('labor-name');
-    const laborCostInput = document.getElementById('labor-cost');
-    let editingLaborId = null; // Controla se estamos editando mão de obra
-
-    // 1. FUNÇÃO PARA DESENHAR OS ITENS NA TELA
-    function renderList(type) {
-        const data = type === 'equipment' ? equipment : labor;
-        const container = type === 'equipment' ? equipmentContainer : laborContainer;
-        
-        container.innerHTML = ''; // Limpa a lista antes de redesenhar
-        data.forEach(item => {
-            const itemCost = item.cost || item.custo || 0;
-            const itemName = item.name || item.nome || 'Nome não encontrado';
-
+    // FUNÇÃO PARA RENDERIZAR UMA LISTA
+    function render(type) {
+        const config = configs[type];
+        const container = document.getElementById(config.list);
+        const data = config.data();
+        container.innerHTML = '';
+        (data || []).forEach(item => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'resource-item';
+            let detailsHtml = '';
+            
+            if (type === 'client') {
+                detailsHtml = `<span>${item.tipo_cliente || ''}: ${item.cpf_cnpj || ''}</span>`;
+            } else {
+                const isEquipment = type === 'equipment';
+                const cost = item.parametrizacao ? (isEquipment ? item.parametrizacao.valor_hora : item.parametrizacao.valor_diaria / 8) : 0;
+                detailsHtml = `<span class="cost">R$ ${parseFloat(cost).toFixed(2)}/h</span>`;
+            }
+
             itemDiv.innerHTML = `
                 <div class="resource-item-info">
-                    <p>${itemName}</p>
-                    <p>R$ ${parseFloat(itemCost).toFixed(2)} / hora</p>
+                    <span>${item.nome}</span>
+                    ${detailsHtml}
                 </div>
                 <div class="actions">
                     <button class="edit-btn" data-id="${item.id}" data-type="${type}">✏️</button>
                     <button class="delete-btn" data-id="${item.id}" data-type="${type}">🗑️</button>
-                </div>
-            `;
+                </div>`;
             container.appendChild(itemDiv);
         });
     }
 
-    // 2. FUNÇÃO PARA CARREGAR UM ITEM PARA EDIÇÃO
-    async function loadItemForEdit(type, id) {
-        const endpoint = type === 'equipment' ? `${API_EQUIPMENT}/${id}` : `${API_LABOR}/${id}`;
-        try {
-            const item = await request(endpoint);
-            if (type === 'equipment') {
-                equipmentNameInput.value = item.name || item.nome;
-                equipmentCostInput.value = item.cost || item.custo;
-                editingEquipmentId = id;
-                addEquipmentBtn.innerHTML = 'Salvar'; // Muda o texto do botão para "Salvar"
-            } else {
-                laborNameInput.value = item.name || item.nome;
-                laborCostInput.value = item.cost || item.custo;
-                editingLaborId = id;
-                addLaborBtn.innerHTML = 'Salvar';
-            }
-        } catch (err) {
-            alert(`Erro ao carregar item para edição: ${err.message}`);
-        }
-    }
-
-    // 3. FUNÇÃO PRINCIPAL PARA SALVAR (CRIAR E ATUALIZAR)
-    async function handleItemSubmit(type) {
-        const isEditing = type === 'equipment' ? !!editingEquipmentId : !!editingLaborId;
-        const id = type === 'equipment' ? editingEquipmentId : editingLaborId;
+    // FUNÇÕES DE AÇÃO (salvar, carregar para editar, deletar)
+    async function handleSave(type) {
+        const config = configs[type];
+        const method = editingState.id ? 'PUT' : 'POST';
+        const endpoint = editingState.id ? `${config.api}/${editingState.id}` : config.api;
         
-        const nameInput = type === 'equipment' ? equipmentNameInput : laborNameInput;
-        const costInput = type === 'equipment' ? equipmentCostInput : laborCostInput;
-        const addButton = type === 'equipment' ? addEquipmentBtn : addLaborBtn;
+        const nome = document.getElementById(config.inputs.nome).value.trim();
+        if (!nome) return alert('O nome é obrigatório.');
 
-        const dados = {
-            name: nameInput.value.trim(),
-            cost: parseFloat(costInput.value)
-        };
+        const dados = { nome };
 
-        if (!dados.name || isNaN(dados.cost)) {
-            alert("Por favor, preencha nome e custo válidos.");
-            return;
+        if (type === 'client') {
+            dados.tipo_cliente = document.getElementById(config.inputs.tipo).value;
+            dados.cpf_cnpj = document.getElementById(config.inputs.cpf).value.trim();
+            if (!dados.cpf_cnpj) return alert('O CPF/CNPJ é obrigatório.');
+        } else {
+            const cost = parseFloat(document.getElementById(config.inputs.valor).value) || 0;
+            if (type === 'equipment') dados.valor_hora = cost;
+            else dados.valor_diaria = cost * 8;
         }
-
-        const method = isEditing ? 'PUT' : 'POST';
-        const endpoint = isEditing 
-            ? `${(type === 'equipment' ? API_EQUIPMENT : API_LABOR)}/${id}` 
-            : (type === 'equipment' ? API_EQUIPMENT : API_LABOR);
         
         try {
             await request(endpoint, method, dados);
-
-            // Limpa o formulário e o estado de edição
-            nameInput.value = '';
-            costInput.value = '';
-            if (type === 'equipment') editingEquipmentId = null;
-            else editingLaborId = null;
+            await carregarDadosIniciais();
+            render('equipment'); render('labor'); render('client'); // Re-renderiza tudo
             
-            // Volta o botão para o ícone de adicionar
-            addButton.innerHTML = `<svg class="icon-sm" ...> </svg>`; // Cole seu SVG aqui novamente
+            // Limpa o formulário específico e o estado de edição
+            document.getElementById(config.inputs.nome).value = '';
+            if (type === 'client') document.getElementById(config.inputs.cpf).value = '';
+            else document.getElementById(config.inputs.valor).value = '';
+            editingState.id = null;
+            editingState.type = null;
 
-            await carregarDadosIniciais(); // Busca os dados mais recentes do servidor
-            renderList(type); // Atualiza a lista na tela
-
-        } catch (err) {
-            alert(`Erro ao salvar: ${err.message}`);
-        }
+        } catch(err) { alert(`Erro ao salvar: ${err.message}`); }
     }
 
-    // 4. FUNÇÃO PARA EXCLUIR UM ITEM
-    async function deleteItem(type, id) {
-        if (!confirm('Tem certeza que deseja excluir este item?')) return;
-        
-        const endpoint = `${(type === 'equipment' ? API_EQUIPMENT : API_LABOR)}/${id}`;
-        
+    async function loadForEdit(type, id) {
+        const config = configs[type];
         try {
-            await request(endpoint, 'DELETE');
-            await carregarDadosIniciais(); // Busca os dados mais recentes
-            renderList(type); // Atualiza a lista na tela
-        } catch (err) {
-            alert(`Erro ao excluir: ${err.message}`);
-        }
-    }
-
-    // --- CONFIGURAÇÃO DOS EVENTOS ---
-    addEquipmentBtn.addEventListener('click', () => handleItemSubmit('equipment'));
-    addLaborBtn.addEventListener('click', () => handleItemSubmit('labor'));
-
-    // Delegação de eventos para os botões de editar e excluir
-    const mainContainer = document.querySelector('.main-container');
-    if (mainContainer) {
-        mainContainer.addEventListener('click', (event) => {
-            const button = event.target.closest('button');
-            if (!button) return;
-
-            const { id, type } = button.dataset;
-
-            if (button.classList.contains('edit-btn')) {
-                loadItemForEdit(type, id);
-            } else if (button.classList.contains('delete-btn')) {
-                deleteItem(type, id);
+            const item = await request(`${config.api}/${id}`);
+            document.getElementById(config.inputs.nome).value = item.nome;
+            editingState = { id: id, type: type };
+            if (type === 'client') {
+                document.getElementById(config.inputs.tipo).value = item.tipo_cliente;
+                document.getElementById(config.inputs.cpf).value = item.cpf_cnpj;
+            } else {
+                const costInput = document.getElementById(config.inputs.valor);
+                const isEquipment = type === 'equipment';
+                costInput.value = item.parametrizacao ? (isEquipment ? item.parametrizacao.valor_hora : item.parametrizacao.valor_diaria / 8) : '';
             }
-        });
+        } catch (err) { alert(`Erro ao carregar item para edição: ${err.message}`); }
     }
 
-    // --- INICIALIZAÇÃO ---
-    // Renderiza as listas com os dados que já foram carregados globalmente
-    renderList('equipment');
-    renderList('labor');
+    async function handleDelete(type, id) {
+        if (!confirm('Tem certeza que deseja excluir/inativar este item?')) return;
+        const config = configs[type];
+        try {
+            await request(`${config.api}/${id}`, 'DELETE');
+            await carregarDadosIniciais();
+            render(type);
+        } catch (err) { alert(`Erro ao excluir: ${err.message}`); }
+    }
+
+    // --- INICIALIZAÇÃO E EVENTOS ---
+    render('equipment');
+    render('labor');
+    render('client');
+
+    document.getElementById('add-equipment-btn').addEventListener('click', () => handleSave('equipment'));
+    document.getElementById('add-labor-btn').addEventListener('click', () => handleSave('labor'));
+    document.getElementById('add-client-btn').addEventListener('click', () => handleSave('client'));
+    
+    document.querySelector('.grid-container').addEventListener('click', (event) => {
+        const button = event.target.closest('button.edit-btn, button.delete-btn');
+        if (!button) return;
+        const { id, type } = button.dataset;
+        if (button.classList.contains('edit-btn')) loadForEdit(type, id);
+        else if (button.classList.contains('delete-btn')) handleDelete(type, id);
+    });
 }
 
 // --- Inicialização do Site ---
-
-window.onload = async () => { // Transforme em uma função 'async'
-    await carregarDadosIniciais(); // 1. Espera os dados serem carregados
-    configurarNavegacao();         // 2. Configura a navegação
-    carregarPagina("dashboard/dashboard.html"); // 3. Carrega a página inicial
+window.onload = async () => {
+    await carregarDadosIniciais();
+    configurarNavegacao();
+    carregarPagina("dashboard/dashboard.html");
 };

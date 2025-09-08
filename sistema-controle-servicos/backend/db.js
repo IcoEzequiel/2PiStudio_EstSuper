@@ -1,7 +1,7 @@
 const {Sequelize} = require('sequelize')
 
 // banco de dados de testes
-const dbTeste = process.NODE_ENV === 'test'
+const dbTeste = process.env.NODE_ENV === 'test'
 ? 'sistema_servicos_test'
 : 'sistema_servicos'
 
@@ -12,4 +12,4 @@ const sequelize = new Sequelize(dbTeste,'root','senha',{
     logging: false
 });
 
-module.exports = {sequelize, Sequelize};
+module.exports = {sequelize, Sequelize}; 
