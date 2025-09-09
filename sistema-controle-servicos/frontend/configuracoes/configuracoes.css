@@ -12,7 +12,6 @@ body {
     padding-top: 2rem;
 }
 
-/* --- ESTRUTURA DA PÁGINA DE CONFIGURAÇÕES --- */
 .main-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -55,7 +54,6 @@ body {
     }
 }
 
-/* --- ESTILOS DOS CARDS --- */
 .card {
     border-radius: 0.75rem;
     padding: 1.5rem;
@@ -76,7 +74,6 @@ body {
     margin-top: 1rem;
 }
 
-/* --- FORMULÁRIO E LISTA --- */
 .add-item-form {
     display: flex;
     gap: 0.5rem;
@@ -87,7 +84,7 @@ input[type="text"],
 input[type="number"] {
     width: 100%;
     background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
     padding: 0.5rem 0.75rem;
     border-radius: 0.375rem;
@@ -134,4 +131,18 @@ input[type="number"] {
     border: none;
     color: #f87171;
     cursor: pointer;
+}
+
+select {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+}
+
+select option {
+    background-color: #2c2c2c;
+    color: white;
+    padding: 10px;
 }

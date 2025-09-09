@@ -6,6 +6,9 @@ let equipment = [];
 let labor = []; // representa funcionario
 let clientes = []
 
+const modalBackdrop = document.getElementById('novo-projeto-modal-backdrop');
+const modalContainer = document.getElementById('novo-projeto-modal-container');
+
 async function carregarDadosIniciais() {
     console.log("Buscando dados iniciais da API...");
     try {
@@ -35,11 +38,38 @@ async function carregarDadosIniciais() {
             console.error("Erro ao buscar clientes:", results[2].reason);
         }
 
-        console.log("Dados carregados com sucesso!", { equipment, labor,clientes });
+        console.log("Dados carregados com sucesso!", { equipment, labor, clientes });
 
     } catch (err) {
         console.error("Erro ao carregar dados iniciais:", err);
         alert("Não foi possível carregar os recursos do servidor. Usando dados de exemplo.");
+    }
+}
+
+async function abrirModalNovoProjeto() {
+    if (!document.getElementById('novoprojeto-css')) {
+        const linkCSS = document.createElement("link");
+        linkCSS.rel = "stylesheet";
+        linkCSS.href = "novoprojeto/novoprojeto.css";
+        linkCSS.id = "novoprojeto-css";
+        document.head.appendChild(linkCSS);
+    }
+    const modalContainer = document.getElementById('novo-projeto-modal-container');
+    const resposta = await fetch('novoprojeto/novoprojeto.html');
+    modalContainer.innerHTML = await resposta.text();
+    
+    modalBackdrop.classList.add('active');
+    configurarFormNovoProjeto();
+    document.getElementById('close-modal-btn').addEventListener('click', fecharModalNovoProjeto);
+}
+
+
+function fecharModalNovoProjeto() {
+    modalBackdrop.classList.remove('active');
+    modalContainer.innerHTML = '';
+    const linkCSS = document.getElementById('novoprojeto-css');
+    if (linkCSS) {
+        linkCSS.remove();
     }
 }
 
@@ -63,14 +93,14 @@ async function carregarPagina(pagina) {
             document.head.appendChild(css);
         }
 
-        if (pagina.includes("novoprojeto")) {
-            let css = document.createElement("link");
-            css.rel = "stylesheet";
-            css.href = "novoprojeto/novoprojeto.css";
-            css.id = "extra-css";
-            document.head.appendChild(css);
-            setTimeout(() => { configurarFormNovoProjeto(); }, 0);
-        }
+        // if (pagina.includes("novoprojeto")) {
+        //     let css = document.createElement("link");
+        //     css.rel = "stylesheet";
+        //     css.href = "novoprojeto/novoprojeto.css";
+        //     css.id = "extra-css";
+        //     document.head.appendChild(css);
+        //     setTimeout(() => { configurarFormNovoProjeto(); }, 0);
+        // }
 
         if (pagina.includes("configuracoes")) {
             let css = document.createElement("link");
@@ -89,11 +119,14 @@ async function carregarPagina(pagina) {
 
 // Navegação
 function configurarNavegacao() {
-    const links = document.querySelectorAll(".nav-btn, .btn-novo-projeto");
+    document.getElementById('btn-abrir-modal-projeto').addEventListener('click', abrirModalNovoProjeto);
+    const links = document.querySelectorAll(".nav-btn");
     links.forEach(link => {
         link.addEventListener("click", () => {
             const pagina = link.getAttribute("data-page");
-            carregarPagina(pagina);
+            if (pagina) {
+                carregarPagina(pagina);
+            }
         });
     });
 }
@@ -109,14 +142,14 @@ function configurarFormNovoProjeto() {
     const dataFimInput = document.getElementById('servico-data-fim');
     const orcamentoInput = document.getElementById('servico-orcamento');
     const invoiceCheckbox = document.getElementById('invoice');
-    
+
     const alocacoesContainer = document.getElementById('alocacoes-diarias-container');
     const placeholder = document.getElementById('alocacao-placeholder');
 
     const totalCostsSpan = document.getElementById("totalCosts");
     const taxSpan = document.getElementById("tax");
     const profitSpan = document.getElementById("profit");
-    
+
     // 2. FUNÇÃO PARA POPULAR O DROPDOWN DE CLIENTES (sem alterações aqui)
     function popularClientes() {
         if (!clientes || clientes.length === 0) {
@@ -134,30 +167,30 @@ function configurarFormNovoProjeto() {
 
     // 3. FUNÇÃO PARA GERAR OS CAMPOS DE ALOCAÇÃO (GRANDES MUDANÇAS AQUI)
     function gerarCamposDeAlocacao() {
-    console.log("Iniciando gerarCamposDeAlocacao (com novo layout)...");
-    
-    const dataInicioStr = dataInicioInput.value;
-    const dataFimStr = dataFimInput.value;
+        console.log("Iniciando gerarCamposDeAlocacao (com novo layout)...");
 
-    alocacoesContainer.innerHTML = '';
+        const dataInicioStr = dataInicioInput.value;
+        const dataFimStr = dataFimInput.value;
 
-    if (!dataInicioStr || !dataFimStr || new Date(dataFimStr) < new Date(dataInicioStr)) {
-        placeholder.style.display = 'block';
-        atualizarResumoFinanceiro();
-        return;
-    }
-    
-    placeholder.style.display = 'none';
+        alocacoesContainer.innerHTML = '';
 
-    try {
-        const diaAtual = new Date(`${dataInicioStr}T00:00:00`);
-        const dataFinal = new Date(`${dataFimStr}T00:00:00`);
+        if (!dataInicioStr || !dataFimStr || new Date(dataFimStr) < new Date(dataInicioStr)) {
+            placeholder.style.display = 'block';
+            atualizarResumoFinanceiro();
+            return;
+        }
 
-        while (diaAtual <= dataFinal) {
-            const dataISO = diaAtual.toISOString().split('T')[0];
-            const dataFormatada = diaAtual.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        placeholder.style.display = 'none';
 
-            const cardHTML = `
+        try {
+            const diaAtual = new Date(`${dataInicioStr}T00:00:00`);
+            const dataFinal = new Date(`${dataFimStr}T00:00:00`);
+
+            while (diaAtual <= dataFinal) {
+                const dataISO = diaAtual.toISOString().split('T')[0];
+                const dataFormatada = diaAtual.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+
+                const cardHTML = `
                 <div class="allocation-day-card" data-date="${dataISO}">
                     <h4>Dia: ${dataFormatada}</h4>
                     <div class="form-group">
@@ -208,25 +241,25 @@ function configurarFormNovoProjeto() {
                     </div>
                 </div>
             `;
-            alocacoesContainer.insertAdjacentHTML('beforeend', cardHTML);
-            diaAtual.setUTCDate(diaAtual.getUTCDate() + 1);
+                alocacoesContainer.insertAdjacentHTML('beforeend', cardHTML);
+                diaAtual.setUTCDate(diaAtual.getUTCDate() + 1);
+            }
+        } catch (error) {
+            console.error("ERRO CRÍTICO ao gerar os cards de alocação:", error);
+            alocacoesContainer.innerHTML = '<p style="color: red;">Ocorreu um erro ao gerar os campos. Verifique o console (F12) para mais detalhes.</p>';
         }
-    } catch (error) {
-        console.error("ERRO CRÍTICO ao gerar os cards de alocação:", error);
-        alocacoesContainer.innerHTML = '<p style="color: red;">Ocorreu um erro ao gerar os campos. Verifique o console (F12) para mais detalhes.</p>';
+
+        atualizarResumoFinanceiro();
     }
-    
-    atualizarResumoFinanceiro();
-}
 
     // 4. FUNÇÃO PARA ATUALIZAR O RESUMO FINANCEIRO (ATUALIZADA)
     function atualizarResumoFinanceiro() {
         let custoTotalProducao = 0;
         const orcamento = parseFloat(orcamentoInput.value) || 0;
-        
+
         document.querySelectorAll('.allocation-day-card').forEach(card => {
             const horas = parseFloat(card.querySelector('.horas-trabalhadas').value) || 0;
-            
+
             // Itera sobre todos os checkboxes de recursos no card
             card.querySelectorAll('.resource-checkbox:checked').forEach(checkbox => {
                 const costInput = document.getElementById(checkbox.dataset.targetCost);
@@ -245,7 +278,7 @@ function configurarFormNovoProjeto() {
         const imposto = invoiceCheckbox.checked ? orcamento * 0.06 : 0;
         const custosTotais = custoTotalProducao + imposto;
         const lucro = orcamento - custosTotais;
-        
+
         totalCostsSpan.textContent = `R$ ${custosTotais.toFixed(2)}`;
         taxSpan.textContent = `R$ ${imposto.toFixed(2)}`;
         profitSpan.textContent = `R$ ${lucro.toFixed(2)}`;
@@ -257,7 +290,7 @@ function configurarFormNovoProjeto() {
     dataFimInput.addEventListener('change', gerarCamposDeAlocacao);
     orcamentoInput.addEventListener('input', atualizarResumoFinanceiro);
     invoiceCheckbox.addEventListener('change', atualizarResumoFinanceiro);
-    
+
     alocacoesContainer.addEventListener('change', (e) => {
         // Habilita/desabilita input de custo e recalcula o resumo
         if (e.target.matches('.resource-checkbox')) {
@@ -339,29 +372,29 @@ function configurarFormNovoProjeto() {
 
 // --- Lógica da página de Configurações ---
 function configurarPaginaConfiguracoes() {
-    
+
     // As variáveis agora são declaradas no escopo principal da função
     let editingState = { id: null, type: null };
 
     // Mapeamento de configurações para cada tipo de recurso
     const configs = {
-        equipment: { 
-            api: '/equipamento', 
-            data: () => equipment, 
-            inputs: { nome: 'equipment-name', valor: 'equipment-cost' }, 
-            list: 'equipment-items' 
+        equipment: {
+            api: '/equipamento',
+            data: () => equipment,
+            inputs: { nome: 'equipment-name', valor: 'equipment-cost' },
+            list: 'equipment-items'
         },
-        labor: { 
-            api: '/funcionario', 
-            data: () => labor, 
-            inputs: { nome: 'labor-name', valor: 'labor-cost' }, 
-            list: 'labor-items' 
+        labor: {
+            api: '/funcionario',
+            data: () => labor,
+            inputs: { nome: 'labor-name', valor: 'labor-cost' },
+            list: 'labor-items'
         },
-        client: { 
-            api: '/cliente', 
-            data: () => clientes, 
-            inputs: { nome: 'client-name', tipo: 'client-type', cpf: 'client-cpf-cnpj' }, 
-            list: 'client-items' 
+        client: {
+            api: '/cliente',
+            data: () => clientes,
+            inputs: { nome: 'client-name', tipo: 'client-type', cpf: 'client-cpf-cnpj' },
+            list: 'client-items'
         }
     };
 
@@ -375,7 +408,7 @@ function configurarPaginaConfiguracoes() {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'resource-item';
             let detailsHtml = '';
-            
+
             if (type === 'client') {
                 detailsHtml = `<span>${item.tipo_cliente || ''}: ${item.cpf_cnpj || ''}</span>`;
             } else {
@@ -402,7 +435,7 @@ function configurarPaginaConfiguracoes() {
         const config = configs[type];
         const method = editingState.id ? 'PUT' : 'POST';
         const endpoint = editingState.id ? `${config.api}/${editingState.id}` : config.api;
-        
+
         const nome = document.getElementById(config.inputs.nome).value.trim();
         if (!nome) return alert('O nome é obrigatório.');
 
@@ -417,12 +450,12 @@ function configurarPaginaConfiguracoes() {
             if (type === 'equipment') dados.valor_hora = cost;
             else dados.valor_diaria = cost * 8;
         }
-        
+
         try {
             await request(endpoint, method, dados);
             await carregarDadosIniciais();
             render('equipment'); render('labor'); render('client'); // Re-renderiza tudo
-            
+
             // Limpa o formulário específico e o estado de edição
             document.getElementById(config.inputs.nome).value = '';
             if (type === 'client') document.getElementById(config.inputs.cpf).value = '';
@@ -430,7 +463,7 @@ function configurarPaginaConfiguracoes() {
             editingState.id = null;
             editingState.type = null;
 
-        } catch(err) { alert(`Erro ao salvar: ${err.message}`); }
+        } catch (err) { alert(`Erro ao salvar: ${err.message}`); }
     }
 
     async function loadForEdit(type, id) {
@@ -468,7 +501,7 @@ function configurarPaginaConfiguracoes() {
     document.getElementById('add-equipment-btn').addEventListener('click', () => handleSave('equipment'));
     document.getElementById('add-labor-btn').addEventListener('click', () => handleSave('labor'));
     document.getElementById('add-client-btn').addEventListener('click', () => handleSave('client'));
-    
+
     document.querySelector('.grid-container').addEventListener('click', (event) => {
         const button = event.target.closest('button.edit-btn, button.delete-btn');
         if (!button) return;
@@ -483,4 +516,10 @@ window.onload = async () => {
     await carregarDadosIniciais();
     configurarNavegacao();
     carregarPagina("dashboard/dashboard.html");
+
+    modalBackdrop.addEventListener('click', (event) => {
+        if (event.target === modalBackdrop) {
+            fecharModalNovoProjeto();
+        }
+    });
 };

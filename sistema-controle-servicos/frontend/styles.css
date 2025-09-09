@@ -23,66 +23,6 @@
     --radius: 0.75rem;
 }
 
-.modal {
-    display: none;
-    /* Inicia escondida */
-    position: fixed;
-    /* Posiciona sobre o conteúdo */
-    z-index: 1;
-    /* Fica no topo */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    /* Fundo escuro e embaçado */
-    backdrop-filter: blur(5px);
-    /* Efeito de desfoque no fundo */
-    -webkit-backdrop-filter: blur(5px);
-    /* Para compatibilidade com navegadores WebKit */
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 500px;
-    position: relative;
-    animation: fadein 0.3s ease-in-out;
-}
-
-/* Animação para a modal aparecer suavemente */
-@keyframes fadein {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* Estilo do botão de fechar */
-.close-btn {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close-btn:hover,
-.close-btn:focus {
-    color: #000;
-    text-decoration: none;
-}
-
 body {
     background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
     color: hsl(var(--foreground));
@@ -262,43 +202,19 @@ main {
     height: 20px;
 }
 
-/* :root {
-    --bg-gradient-start: #1a1a2e;
-    --bg-gradient-end: #16213e;
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --green-border: rgba(85, 255, 128, 0.2);
-    --text-color: #ffffff;
-    --input-bg: rgba(255, 255, 255, 0.1);
-    --input-border: rgba(255, 255, 255, 0.2);
-    --popover-bg: rgba(22, 33, 62, 0.8);
-    --popover-border: rgba(153, 102, 255, 0.2);
-    --green-text: #48E59B;
-    --red-text: #FF6B6B;
-    --button-gradient-start: #3B82F6;
-    --button-gradient-end: #10B981;
-} */
-
-/* novoprojeto.css */
-
-/* Estilos gerais do formulário */
 .form {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    /* Aumentar o espaçamento para melhor visualização */
     color: #fff;
     background: rgba(25, 25, 25, 0.7);
-    /* Fundo mais escuro para melhor contraste */
     backdrop-filter: blur(5px);
     padding: 2rem;
-    /* Aumentar o padding */
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Melhorando o grid para responsividade */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -309,9 +225,7 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    /* Usar uma fonte um pouco mais ousada para destaque */
     color: #b0b0b0;
-    /* Cor mais clara para melhor legibilidade */
 }
 
 input,
@@ -320,20 +234,16 @@ select {
     padding: 0.8rem;
     border-radius: 8px;
     border: 1px solid #444;
-    /* Borda um pouco mais escura */
     background: #1e1e1e;
-    /* Fundo do input mais escuro */
     color: white;
     font-size: 1rem;
     transition: border-color 0.3s;
 }
 
-/* Estilo de foco para acessibilidade */
 input:focus,
 select:focus {
     outline: none;
     border-color: #00ff99;
-    /* Cor de foco com a cor do lucro para consistência */
     box-shadow: 0 0 0 3px rgba(0, 255, 153, 0.2);
 }
 
@@ -352,7 +262,6 @@ select:focus {
     padding: 1.5rem;
     border-radius: 10px;
     border: 1px solid rgba(0, 255, 153, 0.3);
-    /* Borda com a cor do lucro */
 }
 
 .summary h3 {
@@ -375,15 +284,12 @@ select:focus {
     font-size: 1.2rem;
 }
 
-/* Adicionando cor de lucro negativo */
 .summary .profit.negative {
     color: #ff6b6b;
-    /* Um vermelho vibrante */
 }
 
 .btn {
     background: #00ff99;
-    /* Cor sólida para maior consistência visual */
     padding: 1rem;
     border: none;
     border-radius: 8px;
@@ -396,57 +302,91 @@ select:focus {
 
 .btn:hover {
     background-color: #00e08b;
-    /* Levemente mais escuro no hover */
     transform: translateY(-2px);
-    /* Efeito sutil de elevação */
 }
 
-/* Resolução temporaria pelo gemini (mudar depois)
-/* Cria o container para as duas colunas (Funcionários e Equipamentos) */
 .resource-columns {
     display: flex;
-    gap: 2rem; /* Espaçamento entre as colunas */
+    gap: 2rem;
     width: 100%;
 }
 
-/* Define que cada coluna ocupará metade do espaço */
 .resource-columns .column {
     flex: 1;
-    min-width: 0; /* Previne que as colunas estourem o container */
+    min-width: 0;
 }
 
-/* A lista de recursos dentro de cada coluna */
 .resource-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem; /* Espaçamento entre os itens da lista */
+    gap: 0.5rem;
 }
 
-/* Transforma cada item da lista (checkbox, nome, valor) em uma linha */
 .resource-item {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Joga o nome para a esquerda e o valor para a direita */
+    justify-content: space-between;
     padding: 0.25rem;
     border-radius: 4px;
 }
 
-/* Agrupa o checkbox e o nome para mantê-los juntos */
 .resource-name-group {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-/* Agrupa o input de custo e a unidade (/dia, /hora) */
 .resource-cost-group {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-/* Define um tamanho fixo para o input de custo para alinhá-los verticalmente */
 .resource-item .cost-input {
-    width: 80px; 
+    width: 80px;
     text-align: right;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1000;
+}
+
+.modal-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.modal {
+    width: 100%;
+    max-width: 700px;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(3, 201, 169, 0.2);
+    background: rgba(26, 26, 46, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    position: relative;
+    z-index: 1001;
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.modal-backdrop.active .modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
 }

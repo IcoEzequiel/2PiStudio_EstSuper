@@ -1,166 +1,251 @@
 :root {
-    --bg-dark: #0f172a;
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.15);
-    --text-color: #ffffff;
-    --green: #10b981;
-    --blue: #3b82f6;
-    --red: #ef4444;
+    --form-bg: #1e293b;
+    --input-bg: #0f172a;
+    --border-color: #334155;
+    --accent-color: #22c55e;
+    --accent-hover: #16a34a;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --font-family: 'Inter', sans-serif;
+    --gradient-start: #22c55e;
+    --gradient-end: #3b82f6;
 }
 
-/* === RESET BÁSICO === */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Inter", sans-serif;
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem 1rem;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1000;
 }
 
-
-/* ============================================== */
-/* === TEMA ESCURO PARA O FORMULÁRIO (DARK MODE) === */
-/* ============================================== */
-
-/* 1. Cores de fundo e texto da página */
-body {
-    background-color: #0f172a;
-    /* Fundo azul escuro para a página */
-    color: #e2e8f0;
-    /* Cor de texto padrão (cinza claro) */
-    font-family: 'Inter', sans-serif;
+.modal-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
-h2 {
-    text-align: center;
-    color: #ffffff;
-    font-weight: 600;
-    margin-bottom: 2rem;
-}
-
-/* 2. Estilo do container do formulário (efeito de vidro) */
 .form {
-    background: rgba(30, 41, 59, 0.5);
-    /* Fundo semitransparente */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    /* Borda sutil e clara */
-    backdrop-filter: blur(10px);
-    /* Efeito de desfoque para o "vidro" */
-    padding: 2.5rem;
-    border-radius: 1rem;
-    max-width: 700px;
-    margin: 2rem auto;
+    background-color: var(--form-bg);
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    border-radius: 0.75rem;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    /* Sombra para profundidade */
-}
-
-/* 3. Estilo dos Rótulos (Labels) */
-label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    color: #94a3b8;
-    /* Cor cinza mais suave para os rótulos */
-}
-
-/* 4. Estilo dos campos de texto e seleção */
-input,
-select {
+    gap: 1.25rem;
     width: 100%;
-    background: #1e293b;
-    /* Fundo dos inputs (azul mais escuro) */
-    border: 1px solid #334155;
-    /* Borda sutil para os inputs */
-    color: #e2e8f0;
-    /* Cor do texto dentro dos inputs */
+    max-width: 700px;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal-backdrop.active .form {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.modal-header .gradient-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.75rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-group label svg {
+    width: 16px;
+    height: 16px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
-    font-size: 1rem;
+    font-size: 0.875rem;
     outline: none;
     transition: all 0.2s ease-in-out;
 }
 
-/* Efeito ao focar em um campo */
+textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
 input:focus,
-select:focus {
-    border-color: #3b82f6;
-    /* Borda azul ao focar */
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+select:focus,
+textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
 }
 
-/* Cor do texto de placeholder */
-::placeholder {
-    color: #64748b;
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25em;
+    padding-right: 2.5rem;
 }
 
-
-.summary {
-    background: #1e293b;
-    padding: 2rem;
-    /* Aumentamos o padding para mais espaço interno */
-    border-radius: 0.8rem;
-    border: 1px solid #334155;
-}
-
-/* Estilo para o título "Resumo Financeiro" */
-.summary p:first-child {
-    color: #10b981;
-    /* Cor verde, igual ao destaque do botão */
-    font-size: 1.25rem;
-    /* Fonte maior para o título */
-    font-weight: 700;
-    /* Texto em negrito */
-    margin-bottom: 1.5rem;
-    /* Mais espaço abaixo do título */
-}
-
-/* Estilo para as linhas de valores (Custo, Imposto, Lucro) */
-.summary p {
+.form-switch {
     display: flex;
     justify-content: space-between;
-    font-size: 1.1rem;
-    /* Aumentamos o tamanho da fonte das linhas */
-    margin-bottom: 1rem;
-    /* Aumentamos o espaçamento entre as linhas */
+    align-items: center;
+    background-color: var(--input-bg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
-.summary p:last-child {
-    margin-bottom: 0;
+.switch-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
 }
 
-.summary span {
-    color: #94a3b8;
+.switch-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
-/* Destaque para o lucro */
-.summary strong.lucro-positivo {
-    color: #10b981;
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-secondary);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.switch-toggle input:checked+.switch-slider {
+    background-color: var(--accent-color);
+}
+
+.switch-toggle input:checked+.switch-slider:before {
+    transform: translateX(20px);
+    background-color: white;
+}
+
+.summary-box {
+    background-color: var(--input-bg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.summary-box h3 {
+    font-size: 1rem;
     font-weight: 600;
+    color: var(--accent-color);
 }
 
-.summary strong.lucro-negativo {
-    color: #ef4444;
-    font-weight: 600;
+.summary-item {
+    display: flex;
+    justify-content: space-between;
 }
 
+.summary-item span:last-child {
+    color: var(--text-primary);
+    font-weight: 500;
+}
 
-/* 6. Estilo do Botão "Salvar Projeto" com Gradiente */
-.btn {
-    background: linear-gradient(90deg, #10b981, #3b82f6);
-    color: #fff;
+.summary-item.profit span {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: #4ade80;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 0.75rem;
     border: none;
-    padding: 0.8rem 1.2rem;
-    border-radius: 0.8rem;
-    font-size: 1.1rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+    color: white;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
+    transition: opacity 0.2s;
 }
 
-.btn:hover {
+.submit-button:hover {
     opacity: 0.9;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
 }
