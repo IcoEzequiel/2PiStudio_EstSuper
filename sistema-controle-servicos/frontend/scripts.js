@@ -47,7 +47,7 @@ async function carregarDadosIniciais() {
 }
 
 async function abrirModalNovoProjeto() {
-    document.body.classList.add('modal-open'); 
+    document.body.classList.add('modal-open');
     if (!document.getElementById('novoprojeto-css')) {
         const linkCSS = document.createElement("link");
         linkCSS.rel = "stylesheet";
@@ -58,7 +58,7 @@ async function abrirModalNovoProjeto() {
     const modalContainer = document.getElementById('novo-projeto-modal-container');
     const resposta = await fetch('novoprojeto/novoprojeto.html');
     modalContainer.innerHTML = await resposta.text();
-    
+
     modalBackdrop.classList.add('active');
     configurarFormNovoProjeto();
     document.getElementById('close-modal-btn').addEventListener('click', fecharModalNovoProjeto);
@@ -199,7 +199,7 @@ function configurarNavegacao() {
 //                         <label for="horas-${dataISO}">Horas Trabalhadas</label>
 //                         <input type="number" id="horas-${dataISO}" class="horas-trabalhadas" min="1" value="8">
 //                     </div>
-                    
+
 //                     <div class="resource-columns">
 //                         <div class="column">
 //                             <div class="form-group resource-group">
@@ -368,20 +368,132 @@ function configurarNavegacao() {
 //     popularClientes();
 // }
 
+
+// function configurarFormNovoProjeto() {
+//     console.log("Configurando o formulário de projeto simplificado...");
+//     const form = document.getElementById('form-novo-projeto');
+//     const clienteSelect = document.getElementById('servico-cliente');
+//     const equipmentSelect = document.getElementById('equipmentSelect');
+//     const laborSelect = document.getElementById('laborSelect');
+//     const orcamentoInput = document.getElementById('quote');
+//     const invoiceCheckbox = document.getElementById('invoice');
+//     const totalCostsSpan = document.getElementById("totalCosts");
+//     const taxSpan = document.getElementById("tax");
+//     const profitSpan = document.getElementById("profit");
+
+//     function popularClientes() {
+//         clienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
+//         (clientes || []).forEach(cliente => {
+//             const option = document.createElement('option');
+//             option.value = cliente.id;
+//             option.textContent = cliente.nome;
+//             clienteSelect.appendChild(option);
+//         });
+//     }
+
+//     function popularRecursos() {
+//         equipmentSelect.innerHTML = '<option value="">Selecionar Equipamentos</option>';
+//         (equipment || []).forEach(equip => {
+//             const custo = equip.parametrizacao?.valor_hora ?? 0;
+//             const option = document.createElement('option');
+//             option.value = equip.id;
+//             option.dataset.cost = custo;
+//             option.textContent = `${equip.nome} (R$ ${custo.toFixed(2)}/h)`;
+//             equipmentSelect.appendChild(option);
+//         });
+
+//         laborSelect.innerHTML = '<option value="">Selecionar Mão de Obra</option>';
+//         (labor || []).forEach(func => {
+//             const custo = (func.parametrizacao?.valor_diaria ?? 0) / 8;
+//             const option = document.createElement('option');
+//             option.value = func.id;
+//             option.dataset.cost = custo;
+//             option.textContent = `${func.nome} (R$ ${custo.toFixed(2)}/h)`;
+//             laborSelect.appendChild(option);
+//         });
+//     }
+
+//     function atualizarResumo() {
+//         const orcamento = parseFloat(orcamentoInput.value) || 0;
+//         const emiteNotaFiscal = invoiceCheckbox.checked;
+//         let custoDeProducao = 0;
+
+//         const imposto = emiteNotaFiscal ? orcamento * 0.06 : 0;
+//         const custosTotais = custoDeProducao + imposto;
+//         const lucro = orcamento - custosTotais;
+
+//         totalCostsSpan.textContent = `R$ ${custosTotais.toFixed(2)}`;
+//         taxSpan.textContent = `R$ ${imposto.toFixed(2)}`;
+//         profitSpan.textContent = `R$ ${lucro.toFixed(2)}`;
+
+//         profitSpan.style.color = lucro < 0 ? '#ef4444' : '#22c55e';
+//     }
+//     orcamentoInput.addEventListener('input', atualizarResumo);
+//     invoiceCheckbox.addEventListener('change', atualizarResumo);
+//     form.addEventListener('submit', async (e) => {
+//         e.preventDefault();
+
+//         const payload = {
+//             id_cliente: clienteSelect.value,
+//             nome: document.getElementById('servico-nome').value,
+//             descricao: document.getElementById('servico-descricao').value,
+//             data_inicio: document.getElementById('servico-data-inicio').value,
+//             data_fim: document.getElementById('servico-data-fim').value,
+//             orcamento: orcamentoInput.value,
+//         };
+
+//         try {
+//             await request('/servico', 'POST', payload);
+//             alert('Projeto criado com sucesso!');
+//             fecharModalNovoProjeto();
+//             carregarPagina('dashboard/dashboard.html');
+//         } catch (err) {
+//             alert(`Erro ao salvar projeto: ${err.message}`);
+//         }
+//     });
+
+//     popularClientes();
+//     popularRecursos();
+//     atualizarResumo();
+// }
+
+
 // EM SCRIPTS.JS
 
 function configurarFormNovoProjeto() {
-    console.log("Configurando o formulário de projeto simplificado...");
+    console.log("Configurando formulário com switch de datas e alocação diária...");
+
+    // 1. SELECIONAR OS ELEMENTOS
     const form = document.getElementById('form-novo-projeto');
     const clienteSelect = document.getElementById('servico-cliente');
-    const equipmentSelect = document.getElementById('equipmentSelect');
-    const laborSelect = document.getElementById('laborSelect');
+    const dataInicioInput = document.getElementById('servico-data-inicio');
+    const dataFimInput = document.getElementById('servico-data-fim');
     const orcamentoInput = document.getElementById('quote');
     const invoiceCheckbox = document.getElementById('invoice');
+    const multiDaySwitch = document.getElementById('multi-day-switch');
+    const alocacoesContainer = document.getElementById('alocacoes-diarias-container');
+    const placeholder = document.getElementById('alocacao-placeholder');
     const totalCostsSpan = document.getElementById("totalCosts");
     const taxSpan = document.getElementById("tax");
     const profitSpan = document.getElementById("profit");
 
+    // 2. LÓGICA DO SWITCH DE DURAÇÃO
+    function handleMultiDayToggle() {
+        const isMultiDay = multiDaySwitch.checked;
+        dataFimInput.disabled = !isMultiDay;
+
+        if (isMultiDay) {
+            if (dataInicioInput.value) {
+                dataFimInput.value = dataInicioInput.value;
+            }
+            dataFimInput.focus();
+        }
+
+        // Dispara o evento 'change' para que a alocação seja recalculada
+        dataFimInput.dispatchEvent(new Event('change'));
+    }
+
+    // 3. FUNÇÃO PARA POPULAR O DROPDOWN DE CLIENTES
     function popularClientes() {
         clienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
         (clientes || []).forEach(cliente => {
@@ -392,70 +504,162 @@ function configurarFormNovoProjeto() {
         });
     }
 
-    function popularRecursos() {
-        equipmentSelect.innerHTML = '<option value="">Selecionar Equipamentos</option>';
-        (equipment || []).forEach(equip => {
-            const custo = equip.parametrizacao?.valor_hora ?? 0;
-            const option = document.createElement('option');
-            option.value = equip.id;
-            option.dataset.cost = custo;
-            option.textContent = `${equip.nome} (R$ ${custo.toFixed(2)}/h)`;
-            equipmentSelect.appendChild(option);
-        });
+    // 4. FUNÇÃO PARA GERAR OS CARDS DE ALOCAÇÃO
+    // EM SCRIPTS.JS
 
-        laborSelect.innerHTML = '<option value="">Selecionar Mão de Obra</option>';
-        (labor || []).forEach(func => {
-            const custo = (func.parametrizacao?.valor_diaria ?? 0) / 8;
-            const option = document.createElement('option');
-            option.value = func.id;
-            option.dataset.cost = custo;
-            option.textContent = `${func.nome} (R$ ${custo.toFixed(2)}/h)`;
-            laborSelect.appendChild(option);
-        });
+    function gerarCamposDeAlocacao() {
+        let dataInicioStr = dataInicioInput.value;
+        let dataFimStr = dataFimInput.value;
+
+        if (!multiDaySwitch.checked && dataInicioStr) {
+            dataFimStr = dataInicioStr;
+        }
+
+        alocacoesContainer.innerHTML = '';
+
+        if (!dataInicioStr || !dataFimStr || new Date(dataFimStr) < new Date(dataInicioStr)) {
+            placeholder.style.display = 'block';
+            atualizarResumoFinanceiro();
+            return;
+        }
+
+        placeholder.style.display = 'none';
+        const diaAtual = new Date(`${dataInicioStr}T12:00:00Z`);
+        const dataFinal = new Date(`${dataFimStr}T12:00:00Z`);
+
+        while (diaAtual <= dataFinal) {
+            const dataISO = diaAtual.toISOString().split('T')[0];
+            const dataFormatada = diaAtual.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+
+            // ✅ NOVA ESTRUTURA HTML PARA O CARD ✅
+            const cardHTML = `
+            <div class="allocation-day-card" data-date="${dataISO}">
+                <h4>Dia: ${dataFormatada}</h4>
+                <div class="form-group">
+                    <label for="horas-${dataISO}">Horas Trabalhadas</label>
+                    <input type="number" id="horas-${dataISO}" class="horas-trabalhadas" min="1" value="8">
+                </div>
+                <div class="resource-columns">
+                    <div class="column">
+                        <label class="column-title">Funcionários</label>
+                        <div class="custom-multiselect">
+                            <div class="select-trigger">
+                                <span>Selecionar Funcionários</span>
+                                <span class="arrow"></span>
+                            </div>
+                            <div class="options-list">
+                                ${labor.map(f => `
+                                    <div class="resource-item">
+                                        <input type="checkbox" id="func-${f.id}-${dataISO}" value="${f.id}" class="resource-checkbox" data-cost="${(f.parametrizacao?.valor_diaria ?? 0)}" data-cost-type="daily">
+                                        <label for="func-${f.id}-${dataISO}">${f.nome}</label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <label class="column-title">Equipamentos</label>
+                        <div class="custom-multiselect">
+                            <div class="select-trigger">
+                                <span>Selecionar Equipamentos</span>
+                                <span class="arrow"></span>
+                            </div>
+                            <div class="options-list">
+                                ${equipment.map(e => `
+                                    <div class="resource-item">
+                                        <input type="checkbox" id="equip-${e.id}-${dataISO}" value="${e.id}" class="resource-checkbox" data-cost="${(e.parametrizacao?.valor_hora ?? 0)}" data-cost-type="hourly">
+                                        <label for="equip-${e.id}-${dataISO}">${e.nome}</label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+            alocacoesContainer.insertAdjacentHTML('beforeend', cardHTML);
+            diaAtual.setUTCDate(diaAtual.getUTCDate() + 1);
+        }
+        atualizarResumoFinanceiro();
     }
 
-    function atualizarResumo() {
+    // 5. FUNÇÃO PARA ATUALIZAR O RESUMO FINANCEIRO
+    function atualizarResumoFinanceiro() {
+        let custoTotalProducao = 0;
         const orcamento = parseFloat(orcamentoInput.value) || 0;
-        const emiteNotaFiscal = invoiceCheckbox.checked;
-        let custoDeProducao = 0;
-        
-        const imposto = emiteNotaFiscal ? orcamento * 0.06 : 0;
-        const custosTotais = custoDeProducao + imposto;
+
+        document.querySelectorAll('.allocation-day-card').forEach(card => {
+            const horas = parseFloat(card.querySelector('.horas-trabalhadas').value) || 0;
+            card.querySelectorAll('.resource-checkbox:checked').forEach(checkbox => {
+                const custo = parseFloat(checkbox.dataset.cost) || 0;
+                const tipoCusto = checkbox.dataset.costType;
+
+                if (tipoCusto === 'daily') {
+                    custoTotalProducao += custo;
+                } else if (tipoCusto === 'hourly') {
+                    custoTotalProducao += custo * horas;
+                }
+            });
+        });
+
+        const imposto = invoiceCheckbox.checked ? orcamento * 0.06 : 0;
+        const custosTotais = custoTotalProducao + imposto;
         const lucro = orcamento - custosTotais;
 
-        totalCostsSpan.textContent = `R$ ${custosTotais.toFixed(2)}`;
-        taxSpan.textContent = `R$ ${imposto.toFixed(2)}`;
-        profitSpan.textContent = `R$ ${lucro.toFixed(2)}`;
-
+        totalCostsSpan.textContent = `R$ ${custosTotais.toFixed(2).replace('.', ',')}`;
+        taxSpan.textContent = `R$ ${imposto.toFixed(2).replace('.', ',')}`;
+        profitSpan.textContent = `R$ ${lucro.toFixed(2).replace('.', ',')}`;
         profitSpan.style.color = lucro < 0 ? '#ef4444' : '#22c55e';
     }
-    orcamentoInput.addEventListener('input', atualizarResumo);
-    invoiceCheckbox.addEventListener('change', atualizarResumo);
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const payload = {
-            id_cliente: clienteSelect.value,
-            nome: document.getElementById('servico-nome').value,
-            descricao: document.getElementById('servico-descricao').value,
-            data_inicio: document.getElementById('servico-data-inicio').value,
-            data_fim: document.getElementById('servico-data-fim').value,
-            orcamento: orcamentoInput.value,
-        };
 
-        try {
-            await request('/servico', 'POST', payload);
-            alert('Projeto criado com sucesso!');
-            fecharModalNovoProjeto();
-            carregarPagina('dashboard/dashboard.html');
-        } catch (err) {
-            alert(`Erro ao salvar projeto: ${err.message}`);
+    // 6. ADICIONAR OS EVENT LISTENERS
+    multiDaySwitch.addEventListener('change', handleMultiDayToggle);
+    dataInicioInput.addEventListener('change', gerarCamposDeAlocacao);
+    dataFimInput.addEventListener('change', gerarCamposDeAlocacao);
+    orcamentoInput.addEventListener('input', atualizarResumoFinanceiro);
+    invoiceCheckbox.addEventListener('change', atualizarResumoFinanceiro);
+
+    alocacoesContainer.addEventListener('change', (e) => {
+        if (e.target.matches('.resource-checkbox, .horas-trabalhadas')) {
+            atualizarResumoFinanceiro();
         }
     });
 
+    // EM SCRIPTS.JS (dentro de configurarFormNovoProjeto)
+
+    // ... (no final da função, onde estão os listeners) ...
+
+    alocacoesContainer.addEventListener('click', (e) => {
+        // Lógica para abrir/fechar o dropdown customizado
+        const trigger = e.target.closest('.select-trigger');
+        if (trigger) {
+            const multiSelect = trigger.closest('.custom-multiselect');
+            multiSelect.classList.toggle('open');
+        }
+    });
+
+    alocacoesContainer.addEventListener('change', (e) => {
+        // Lógica que você já tinha para recalcular o resumo
+        if (e.target.matches('.resource-checkbox, .horas-trabalhadas')) {
+            atualizarResumoFinanceiro();
+        }
+    });
+
+    // Adicione esta função para fechar os dropdowns se clicar fora
+    window.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-multiselect')) {
+            document.querySelectorAll('.custom-multiselect.open').forEach(select => {
+                select.classList.remove('open');
+            });
+        }
+    });
+
+    // 7. ENVIO DO FORMULÁRIO
+    form.addEventListener('submit', async (e) => { /* ... sua lógica de envio ... */ });
+
+    // 8. INICIALIZAÇÃO
     popularClientes();
-    popularRecursos();
-    atualizarResumo();
+    atualizarResumoFinanceiro();
 }
 
 // --- Lógica da página de Configurações ---
