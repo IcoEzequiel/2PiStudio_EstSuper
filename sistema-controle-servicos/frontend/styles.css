@@ -401,3 +401,33 @@ select:focus {
     transform: scale(1) translateY(0);
     opacity: 1;
 }
+
+.footer {
+    width: 100%;
+    max-width: 80rem;
+    margin: 2rem auto 0;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #94a3b8;
+}
+
+.footer-logout-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    transition: color 0.2s ease-in-out;
+}
+
+.footer-logout-btn:hover {
+    color: #f8fafc;
+}

@@ -1,4 +1,8 @@
-// No topo do arquivo scripts.js
+const authToken = localStorage.getItem('authToken');
+
+if (!authToken) {
+    window.location.href = 'login/login.html';
+}
 import { request } from "./shared/api.js"; // Ajuste o caminho se necessário
 
 // Variáveis globais que você já tem
@@ -122,6 +126,7 @@ async function carregarPagina(pagina) {
 // Navegação
 function configurarNavegacao() {
     document.getElementById('btn-abrir-modal-projeto').addEventListener('click', abrirModalNovoProjeto);
+
     const links = document.querySelectorAll(".nav-btn");
     links.forEach(link => {
         link.addEventListener("click", () => {
@@ -131,6 +136,14 @@ function configurarNavegacao() {
             }
         });
     });
+
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('authToken');
+            window.location.href = 'login/login.html';
+        });
+    }
 }
 
 // // --- Lógica do formulário de Novo Projeto ---
@@ -458,7 +471,7 @@ function configurarNavegacao() {
 // }
 
 
-// EM SCRIPTS.JS
+
 
 function configurarFormNovoProjeto() {
     console.log("Configurando formulário com switch de datas e alocação diária...");
@@ -612,47 +625,46 @@ function configurarFormNovoProjeto() {
         profitSpan.style.color = lucro < 0 ? '#ef4444' : '#22c55e';
     }
 
-    // 6. ADICIONAR OS EVENT LISTENERS
+    // 6. ADICIONAR OS EVENT LISTENERS (VERSÃO CORRIGIDA E UNIFICADA)
     multiDaySwitch.addEventListener('change', handleMultiDayToggle);
     dataInicioInput.addEventListener('change', gerarCamposDeAlocacao);
     dataFimInput.addEventListener('change', gerarCamposDeAlocacao);
     orcamentoInput.addEventListener('input', atualizarResumoFinanceiro);
     invoiceCheckbox.addEventListener('change', atualizarResumoFinanceiro);
 
-    alocacoesContainer.addEventListener('change', (e) => {
-        if (e.target.matches('.resource-checkbox, .horas-trabalhadas')) {
-            atualizarResumoFinanceiro();
-        }
-    });
-
-    // EM SCRIPTS.JS (dentro de configurarFormNovoProjeto)
-
-    // ... (no final da função, onde estão os listeners) ...
-
+    // Listener único e inteligente para o container de alocações
     alocacoesContainer.addEventListener('click', (e) => {
         // Lógica para abrir/fechar o dropdown customizado
         const trigger = e.target.closest('.select-trigger');
         if (trigger) {
-            const multiSelect = trigger.closest('.custom-multiselect');
-            multiSelect.classList.toggle('open');
+            // Fecha todos os outros dropdowns abertos antes de abrir o novo
+            const currentMultiSelect = trigger.closest('.custom-multiselect');
+            document.querySelectorAll('.custom-multiselect.open').forEach(select => {
+                if (select !== currentMultiSelect) {
+                    select.classList.remove('open');
+                }
+            });
+            currentMultiSelect.classList.toggle('open');
         }
     });
 
+    // O listener de 'change' continua separado, pois lida com outra ação
     alocacoesContainer.addEventListener('change', (e) => {
-        // Lógica que você já tinha para recalcular o resumo
         if (e.target.matches('.resource-checkbox, .horas-trabalhadas')) {
             atualizarResumoFinanceiro();
         }
     });
 
-    // Adicione esta função para fechar os dropdowns se clicar fora
-    window.addEventListener('click', (e) => {
+    // Listener para fechar os dropdowns se clicar fora deles
+    // Este listener deve ser adicionado QUANDO o modal abre e removido QUANDO fecha.
+    // Vamos adicioná-lo no escopo do formulário por enquanto.
+    form.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-multiselect')) {
             document.querySelectorAll('.custom-multiselect.open').forEach(select => {
                 select.classList.remove('open');
             });
         }
-    });
+    }, true); // O 'true' ajuda a capturar o evento de forma mais eficaz
 
     // 7. ENVIO DO FORMULÁRIO
     form.addEventListener('submit', async (e) => { /* ... sua lógica de envio ... */ });
