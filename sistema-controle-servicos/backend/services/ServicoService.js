@@ -106,11 +106,13 @@ const validarFuncionario = async (dados, data) => {
     if(funcionario.status === 'inativo'){
         throw new Error('O funcionario ' + funcionario.nome + ' está inativo e não pode ser alocado para serviço')
     }
+    //Comentado pos pode haver alocações para o mesmo dia
+
     // Verifica se esse funcionari já não está alocado em outro serviço nesta mesma data.
-    const conflito = await AlocacaoFuncRepo.findByFuncionarioData(dados.id_funcionario, data)
-    if(conflito){
-        throw new Error('O funcionario ' + funcionario.nome + ' já está alocado em outro serviço no dia ' + data)
-    }
+    // const conflito = await AlocacaoFuncRepo.findByFuncionarioData(dados.id_funcionario, data)
+    // if(conflito){
+    //     throw new Error('O funcionario ' + funcionario.nome + ' já está alocado em outro serviço no dia ' + data)
+    // }
 }   
 
 // Validação de Equipamento
@@ -124,11 +126,13 @@ const validarEquipamento = async (dados, data) => {
     if(equipamento.status === 'inativo'){
         throw new Error('Equipmaneto ' + equipamento.nome + ' está inativo e não pode ser alocado para serviço')
     }
-    const conflito = await AlocacaoEquipRepo.findByEquipamentoData(dados.id_equipamento, data)
+    //Comentado pos pode haver alocações para o mesmo dia
+
     // Verifica se ele não está alocado em outro serviço na mesma data
-    if (conflito){
-        throw new Error('O equipamento ' + equipamento.nome + ' já está alocado em outro serviço no dia ' + data)
-    }
+    // const conflito = await AlocacaoEquipRepo.findByEquipamentoData(dados.id_equipamento, data)
+    // if (conflito){
+    //     throw new Error('O equipamento ' + equipamento.nome + ' já está alocado em outro serviço no dia ' + data)
+    // }
 }
 
 // Funcção auxiliar para gerenciar as alocações, criando elas com os dados fornecidos

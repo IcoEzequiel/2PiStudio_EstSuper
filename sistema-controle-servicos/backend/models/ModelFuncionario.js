@@ -12,12 +12,12 @@ const Funcionario = sequelize.define('Funcionario',{
         type: DataTypes.STRING,
         allowNull: false
     },
-    cpf:{
-        type: DataTypes.STRING(15),
-    },
-    email: DataTypes.STRING,
-    telefone: DataTypes.STRING,
-    cargo: DataTypes.STRING,
+    // cpf:{
+    //     type: DataTypes.STRING(15),
+    // },
+    // email: DataTypes.STRING,
+    // telefone: DataTypes.STRING,
+    // cargo: DataTypes.STRING,
     // Inativoé utilizado para "deletar" um funcionario mas não apagar os dados dos serviços que ele prestou,
     // o tornado apenas inativo
     status: DataTypes.ENUM('ativo','inativo')

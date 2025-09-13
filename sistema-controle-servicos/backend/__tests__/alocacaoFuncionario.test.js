@@ -29,7 +29,7 @@ describe('Testes para as rotas de /alocacaoFuncionario', () => {
 
             const Funcionario = await request(app)
             .post('/funcionario')
-            .send({nome: "Cleber",cpf:"159.456.753-99"})
+            .send({nome: "Cleber"})
 
             const servico = await request(app)
             .post('/servico')
@@ -73,7 +73,7 @@ describe('Testes para as rotas de /alocacaoFuncionario', () => {
 
             const Funcionario = await request(app)
             .post('/funcionario')
-            .send({nome: "Claudio",cpf: "456.147.369-45"})
+            .send({nome: "Claudio"})
 
             const servico = await request(app)
             .post('/servico')
@@ -107,7 +107,7 @@ describe('Testes para as rotas de /alocacaoFuncionario', () => {
 
             const Funcionario = await request(app)
             .post('/funcionario')
-            .send({nome: "Joaquim", cpf: "451.875.648-98"})
+            .send({nome: "Joaquim"})
 
             const servico = await request(app)
             .post('/servico')

@@ -12,8 +12,8 @@ const Equipamento = sequelize.define('Equipamentos', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    tipo: DataTypes.STRING,
-    descricao: DataTypes.TEXT,
+    // tipo: DataTypes.STRING,
+    // descricao: DataTypes.TEXT,
     // Inativo é util para quando um equipamento for deletado mas ele já foi alocado em um Serviço, apenas transforma ele
     // em inativo para não excluir os dados do serviço que ele ja foi alocado.
     status: DataTypes.ENUM('ativo','inativo')

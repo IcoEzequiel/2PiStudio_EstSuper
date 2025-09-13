@@ -22,12 +22,12 @@ const Cliente = sequelize.define('Cliente', {
         type: DataTypes.STRING(30),
         allowNull:false
     },
-    email: {
-        type: DataTypes.STRING
-    },
-    telefone: {
-        type: DataTypes.STRING(15)
-    }
+    // email: {
+    //     type: DataTypes.STRING
+    // },
+    // telefone: {
+    //     type: DataTypes.STRING(15)
+    // }
 },
     // Como estamos usando o sequelise para definir o model, temos que informar o nome da tabela (de preferencia o mesmo do 
     // banco de dados), e definir o timestamps para falso (timestamps são campos para informar quando a instancia foi criada

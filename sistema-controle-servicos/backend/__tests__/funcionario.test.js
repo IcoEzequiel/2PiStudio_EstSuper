@@ -25,11 +25,11 @@ describe('Testes para as rotas de /funcionario', () => {
         beforeAll(async () => {
             await request(app)
             .post('/funcionario')
-            .send({ nome: "Ana teste", cpf: "111.111.111-11", cargo:"Supervisora"})
+            .send({ nome: "Ana teste"})
 
             await request(app)
             .post('/funcionario')
-            .send({ nome: "Beto teste", cpf: "222.222.222-22", cargo:"Tecnico"})
+            .send({ nome: "Beto teste"})
         })
 
         it('Deve retornar uma lista com todos os funcionarios criados', async () => {
@@ -57,8 +57,6 @@ describe('Testes para as rotas de /funcionario', () => {
     it('deve criar um novo funcionario com parametrização com sucesso', async () => {
         const novoFuncionario = {
             nome: "João Teste",
-            cpf: "123.456.789-10",
-            cargo: "testador",
             valor_diaria: 100.00
         }
 
@@ -74,9 +72,7 @@ describe('Testes para as rotas de /funcionario', () => {
     
     it('deve criar um funcionario sem parametrização com sucesso', async () => {
         const novoFuncionario = {
-            nome: "João Teste",
-            cpf: "123.456.789-10",
-            cargo: "testador",
+            nome: "João Teste"
         }
         const response = await request(app)
             .post('/funcionario')
@@ -95,13 +91,13 @@ describe('Testes para as rotas de /funcionario', () => {
         beforeEach(async () => {
             const response = await request(app)
                 .post('/funcionario')
-                .send({ nome: "Funcionario Padão", cpf: "123.456.789-10", cargo: "Técnico",valor_diaria: 100.00})
+                .send({ nome: "Funcionario Padão",valor_diaria: 100.00})
 
             funcionarioTeste = response.body
         })
 
         it("Deve atualizar um funcionario com sucesso", async () => {
-            const dadosAtt = {nome: "Funcionario Atualizado", cargo: "Técnico Sênior", valor_diaria: 120.00}
+            const dadosAtt = {nome: "Funcionario Atualizado", valor_diaria: 120.00}
 
             const response = await request(app)
                 .put('/funcionario/' + funcionarioTeste.id)
@@ -109,7 +105,6 @@ describe('Testes para as rotas de /funcionario', () => {
             
             expect(response.status).toBe(200)
             expect(response.body.nome).toBe(dadosAtt.nome)
-            expect(response.body.cargo).toBe(dadosAtt.cargo)
             expect(parseFloat(response.body.parametrizacao.valor_diaria)).toBe(dadosAtt.valor_diaria)
         })
 
@@ -128,7 +123,7 @@ describe('Testes para as rotas de /funcionario', () => {
         it("Deve deletar permanentemente um funcionario e sua parametrização", async ()=> {
             const response = await request(app)
                 .delete('/funcionario/' + funcionarioTeste.id)
-            
+            console.log(response.body.error)
             expect(response.status).toBe(204)
 
             const getresponse = await request(app)
@@ -137,7 +132,7 @@ describe('Testes para as rotas de /funcionario', () => {
             expect(getresponse.status).toBe(404)
         })
 
-        it("Deve mudar o status para Inativo ao deletar um funcionario e deletar sua parametrização que esteja alocado em um serviço", async () => {
+        it("Deve mudar o status para Inativo ao deletar um funcionario que esteja alocado em um serviço", async () => {
             const cliente = await request(app).post('/cliente')
             .send({nome:"Cliente", tipo_cliente:"fisico",cpf_cnpj:"123.123.123-45"})
             await request(app).post('/servico').send({
@@ -146,14 +141,13 @@ describe('Testes para as rotas de /funcionario', () => {
             })
 
             const response = await request(app).delete('/funcionario/' + funcionarioTeste.id)
-
+            console.log(response.body)
             expect(response.status).toBe(204)
 
             const getresponse = await request(app).get('/funcionario/' + funcionarioTeste.id)
 
             expect(getresponse.status).toBe(200)
             expect(getresponse.body.status).toBe('inativo')
-            expect(getresponse.body.parametrizacao).toBe(null)
         })
     })
 

@@ -1,6 +1,8 @@
 const { sequelize } = require('../db'); 
 const repo = require('../repositories/FuncionarioRepository')
 const ParaFuncRepo = require('../repositories/ParametrizacaoFuncionarioRepository')
+const UsuarioRepo = require('../repositories/UsuarioRepository')
+const ModelUsuario = require('../models/ModelUsuario');
 
 // Funcções auxiliares
 
@@ -33,10 +35,10 @@ const CriarEditar = async (dados, id = null) => {
     try{
         const dadosFuncionario = {
             nome: dados.nome,
-            cpf: dados.cpf,
-            email: dados.email,
-            telefone: dados.telefone,
-            cargo: dados.cargo,
+            // cpf: dados.cpf,
+            // email: dados.email,
+            // telefone: dados.telefone,
+            // cargo: dados.cargo,
             status: dados.status || 'ativo'
         }
         let funcionarioSalvo
@@ -45,6 +47,14 @@ const CriarEditar = async (dados, id = null) => {
         if(!id){
             funcionarioSalvo = await repo.save(dadosFuncionario, {transaction: t})
             funcionarioId = funcionarioSalvo.id
+            const primeiroNome = funcionarioSalvo.nome.split(' ')[0]
+            const usuario = {
+                id_funcionario: funcionarioSalvo.id,
+                papel: "funcionario",
+                login: primeiroNome,
+                senha: "qwerty88"
+            }
+            await UsuarioRepo.save(usuario, {transaction: t})
         } 
         // Aqui é um update
         else{
@@ -52,6 +62,17 @@ const CriarEditar = async (dados, id = null) => {
             const funcionario = await getComInclude(id)
             await repo.update(id, dadosFuncionario, {transaction:t})
             funcionarioSalvo = funcionario
+            const primeiroNome = funcionarioSalvo.nome.split(' ')[0]
+            // const usuarioExistente = await UsuarioRepo.findOne({ where: { id_funcionario: id } });
+            if(dados.status === 'ativo'){
+                const usuario = {
+                id_funcionario: funcionarioSalvo.id,
+                papel: "funcionario",
+                login: primeiroNome,
+                senha: "qwerty88"
+                }
+                await UsuarioRepo.save(usuario, {transaction: t})
+            }
         }
         // Verifica se foi passado dados relacionados a parametrização do funcionario
         if (dados.valor_diaria){
@@ -115,30 +136,19 @@ const FuncionarioService = {
                 ]
             })
 
-            // Se existir uma parametrização, deleta
-            if(funcionario.parametrizacao){
-                await ParaFuncRepo.delete(funcionario.parametrizacao.id, {transaction: t})
-            }
-            // Se existir um usuario relacionado a esse funcionario, deleta. (Não sei como deixar redondo como o de cima, mas funciona)
-            await require('../models/ModelUsuario').destroy({
-                where: { id_funcionario: id}, transaction: t
-            })
-
+            // Se existir um usuario relacionado a esse funcionario, deleta.
+            await ModelUsuario.destroy({ where: { id_funcionario: id }, transaction: t });
             // Se o Funcionario possuir alocações, troca seu status para inativo
             if(funcionario.alocacoes && funcionario.alocacoes.length > 0){
-                const dadosFuncionario = {
-                nome: funcionario.nome,
-                cpf: funcionario.cpf,
-                email: funcionario.email,
-                numero_telefone: funcionario.numero_telefone,
-                cargo: funcionario.cargo,
-                status: "inativo"
-            }
-                await repo.update(id,dadosFuncionario,{transaction: t})
+                await repo.update(id, { status: "inativo" }, { transaction: t });
             } 
             // Se ele não foi alocado para nenhum serviço, deleta ele do banco de dados
             else {
                 await repo.delete(id, {transaction: t})
+                // Se existir uma parametrização, deleta
+                if(funcionario.parametrizacao){
+                    await ParaFuncRepo.delete(funcionario.parametrizacao.id, {transaction: t})
+                }
             }
             await t.commit()
             return true

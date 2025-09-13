@@ -34,8 +34,8 @@ const CriarEditar = async (dados, id = null) => {
         try{
             const dadosEquipamento = {
                 nome: dados.nome,
-                tipo: dados.tipo,
-                descricao: dados.descricao,
+                // tipo: dados.tipo,
+                // descricao: dados.descricao,
                 status: dados.status || 'ativo'
             }
             let equipamentoSalvo
@@ -127,8 +127,8 @@ const EquipamentoService = {
             if(equipamento.alocacoes && equipamento.alocacoes.length > 0){
                 const dadosEquipamento = {
                 nome: equipamento.nome,
-                tipo: equipamento.tipo,
-                descricao: equipamento.descricao,
+                // tipo: equipamento.tipo,
+                // descricao: equipamento.descricao,
                 status: "inativo"
             }
                 await repo.update(id, dadosEquipamento, {transaction: t})

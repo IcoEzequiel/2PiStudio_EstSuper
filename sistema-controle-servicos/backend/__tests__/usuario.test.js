@@ -24,13 +24,9 @@ describe('Testes para as rotas de /usuario', () => {
     describe('quando existe usuario no banco', () => {
         beforeAll(async () => {
 
-            const Funcionario = await request(app)
-            .post('/Funcionario')
-            .send({nome: "Claudio", cpf: "159.456.025.42"})
-
             await request(app)
-            .post("/usuario")
-            .send({id_funcionario: Funcionario.body.id, login:"claudio",senha:"senha",papel:"funcionario"})
+            .post('/Funcionario')
+            .send({nome: "Claudio"})
 
             await request(app)
             .post("/usuario")
@@ -63,22 +59,19 @@ describe('Testes para as rotas de /usuario', () => {
 
             const Funcionario = await request(app)
             .post('/funcionario')
-            .send({nome: "Jubirildo", cpf: "456.864.846-42"})
+            .send({nome: "Jubirildo"})
 
-            const novoUsuario = {
-                id_funcionario: Funcionario.body.id,
-                login: "ju",
-                senha:"1234",
-                papel:"funcionario"
-            }
             const response = await request(app)
-            .post("/usuario")
-            .send(novoUsuario)
-        expect(response.status).toBe(201)
-        expect(response.body).toHaveProperty('id')
-        expect(response.body.funcionario.id).toBe(novoUsuario.id_funcionario)
-        expect(response.body.login).toBe(novoUsuario.login)
-        expect(response.body).not.toHaveProperty('senha')
+            .get("/usuario" )
+        
+        const lista = response.body
+        const usuario = lista[lista.length -1]
+
+        expect(response.status).toBe(200)
+        expect(usuario).toHaveProperty('id')
+        expect(usuario.funcionario.id).toBe(Funcionario.body.id)
+        expect(usuario.login).toBe(Funcionario.body.nome)
+        expect(usuario).not.toHaveProperty('senha')
     })
     
     // Teste de Atualização
@@ -90,11 +83,10 @@ describe('Testes para as rotas de /usuario', () => {
 
             const Funcionario = await request(app)
             .post('/Funcionario')
-            .send({nome: "Gilberto", cpf:"97.542.013-65"})
+            .send({nome: "Gilberto"})
 
             const response = await request(app)
-            .post("/usuario")
-            .send({id_funcionario: Funcionario.body.id,login:"gilber", senha:"bolsonaro"})
+            .get("/usuario/" + Funcionario.body.id)
 
             usuarioTeste = response.body
         })

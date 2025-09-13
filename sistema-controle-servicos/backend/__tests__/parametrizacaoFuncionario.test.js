@@ -26,7 +26,7 @@ describe('Testes para as rotas de /parametrizacaoFuncionario', () => {
 
             const Funcionario = await request(app)
             .post('/Funcionario')
-            .send({nome: "Claudio", cpf: "159.456.025.42"})
+            .send({nome: "Claudio"})
 
             await request(app)
             .post("/parametrizacaoFuncionario")
@@ -59,7 +59,7 @@ describe('Testes para as rotas de /parametrizacaoFuncionario', () => {
 
             const Funcionario = await request(app)
             .post('/Funcionario')
-            .send({nome: "Jubirildo", cpf: "456.864.846-42"})
+            .send({nome: "Jubirildo"})
 
             const novaparametrizacao = {
                 id_funcionario: Funcionario.body.id,
@@ -84,7 +84,7 @@ describe('Testes para as rotas de /parametrizacaoFuncionario', () => {
 
             const Funcionario = await request(app)
             .post('/Funcionario')
-            .send({nome: "Gilberto", cpf:"97.542.013-65"})
+            .send({nome: "Gilberto"})
 
             const response = await request(app)
             .post("/parametrizacaoFuncionario")
