@@ -59,20 +59,30 @@ const CriarEditar = async (dados, id = null) => {
         // Aqui é um update
         else{
             funcionarioId = id
+            // Valida o funcionario
             const funcionario = await getComInclude(id)
+            if (!funcionario) throw new Error('Funcionario não encontrado')
+        
+            const usuarioExistente = await UsuarioRepo.findOne({ where: { id_funcionario: id } });
+
             await repo.update(id, dadosFuncionario, {transaction:t})
-            funcionarioSalvo = funcionario
-            const primeiroNome = funcionarioSalvo.nome.split(' ')[0]
-            // const usuarioExistente = await UsuarioRepo.findOne({ where: { id_funcionario: id } });
-            if(dados.status === 'ativo'){
-                const usuario = {
-                id_funcionario: funcionarioSalvo.id,
-                papel: "funcionario",
-                login: primeiroNome,
-                senha: "qwerty88"
+            if (dados.status === 'ativo'){
+                const primeiroNome = dados.nome.split(' ')[0]
+
+                if (usuarioExistente){
+                    const usuarioUpdate = { login: primeiroNome}
+                    await UsuarioRepo.update(usuarioExistente.id,usuarioUpdate, {transaction: t})
+                } else {
+                    const usuarioCreate = {
+                        id_funcionario: id,
+                        papel: "funcionario",
+                        login: primeiroNome,
+                        senha: "qwerty88"
+                    }
+                    await UsuarioRepo.save(usuarioCreate, {transaction: t})
                 }
-                await UsuarioRepo.save(usuario, {transaction: t})
             }
+            funcionarioSalvo = await getComInclude(id)
         }
         // Verifica se foi passado dados relacionados a parametrização do funcionario
         if (dados.valor_diaria){

@@ -117,11 +117,6 @@ const EquipamentoService = {
                 transaction: t
             })
 
-            // Se existir uma parametrização, deleta ela
-            if (equipamento.parametrizacao){
-                await ParaEquipRepo.delete(equipamento.parametrizacao.id, {transaction: t})
-            }
-
             // se existir alocações e seu tamanho for maior que 0, transforma o status do equipamento em inativo,
             // Necessario para não perder os dados dos serviços. (o tamanho maior que zero e necesario, sem isso não funciona)
             if(equipamento.alocacoes && equipamento.alocacoes.length > 0){
@@ -135,6 +130,10 @@ const EquipamentoService = {
             } 
             // Se não tiver nenhuma alocação para esse equipamento no sistema, ele é deletado
             else {
+            // Se existir uma parametrização, deleta ela
+            if (equipamento.parametrizacao){
+                await ParaEquipRepo.delete(equipamento.parametrizacao.id, {transaction: t})
+            }
                 await repo.delete(id, {transaction: t})
             }
 

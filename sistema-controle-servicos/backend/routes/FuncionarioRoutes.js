@@ -11,8 +11,8 @@ router.use(verifyToken)
 // Configuração das rotas, e quem pode acessa-las
 router.get('/', cont.getAll)
 router.get('/:id',cont.getById)
-router.post('/',checkRole('administrador'), cont.create)
-router.put('/:id', cont.update)
+router.post('/', checkRole('administrador'), cont.create)
+router.put('/:id',checkRole('administrador'), cont.update)
 router.delete('/:id',checkRole('administrador'), cont.delete)
 
 module.exports = router

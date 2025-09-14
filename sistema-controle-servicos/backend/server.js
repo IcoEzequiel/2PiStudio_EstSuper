@@ -30,6 +30,7 @@ const ParametrizacaoFuncionariosRoutes = require('./routes/ParametrizacaoFuncion
 const ServicoRoutes = require('./routes/ServicoRoutes')
 const UsuarioRoutes = require('./routes/UsuarioRoutes')
 const authRoutes = require('./routes/AuthRoutes')
+const dashboardRoutes = require('./routes/DashboardRoutes')
 
 app.use(cors());
 app.use(express.json());
@@ -154,6 +155,7 @@ app.use('/ParametrizacaoFuncionario',ParametrizacaoFuncionariosRoutes)
 app.use('/Servico',ServicoRoutes)
 app.use('/Usuario',UsuarioRoutes)
 app.use('/auth', authRoutes)
+app.use('/dashboard', dashboardRoutes)
 
 if (process.env.NODE_ENV !== 'test'){
     app.listen(PORT, () => {

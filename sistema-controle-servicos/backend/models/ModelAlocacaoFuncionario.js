@@ -22,6 +22,7 @@ const AlocacaoFuncionario = sequelize.define('AlocacaoFuncionario',{
     // Informa por quantas horas ele trabalhou (não à uma necessidade direta disso)
     hora: DataTypes.INTEGER,
     // Valor da diaria desse funcionario, o padrão era para ser a parametrização, mas o usuario pode alterar o valor se desejar
+    // NOTA: a pedido do cliente, agora é por hora, mas deixei o valor em dia para evitar erros futuros, o calculo do valor em dashboard já leva isso em conta
     valor_dia_alocado: DataTypes.DECIMAL(10,2)
 },
 {
