@@ -14,7 +14,11 @@ const Feedback = sequelize.define('Feedback',{
         allowNull:false
     },
     comentario: DataTypes.TEXT,
-    data: DataTypes.DATEONLY
+    data: DataTypes.DATEONLY,
+    status: {
+        type: DataTypes.ENUM('pendente','respondido'),
+        defaultValue: 'pendente'
+    }
 },
     // Como estamos usando o sequelise para definir o model, temos que informar o nome da tabela (de preferencia o mesmo do 
     // banco de dados), e definir o timestamps para falso (timestamps são campos para informar quando a instancia foi criada

@@ -1,6 +1,8 @@
 const repo = require('../repositories/FeedbackRepository')
+const ServicoRepo = require('../repositories/ServicoRepository')
 const AlocFuncRepo = require('../repositories/AlocacaoFuncionarioRepository')
 const FeedbackMapper = require('../mappers/FeedbackMapper')
+const { calcularStatus } = require('./ServicoService')
 
 // Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
 const validar = async (dados, create = false) => {
@@ -63,14 +65,33 @@ const FeedbackService = {
     },
 
     update: async (id, dados) => {
-        const existe = await repo.getById(id)
-        if(!existe){
+        if (!dados.comentario || dados.comentario.trim() === ''){
+            throw new Error('O comentário não pode estar vazio.')
+        }
+        const feedback = await repo.getById(id, {
+            include: [{
+                model: require('../models/ModelAlocacaoFuncionario'), as: 'servicoPrestado'
+            }]
+        })
+        if(!feedback){
             throw new Error('Feedback não existe')
         }
-        const edit = await repo.update(id, dados)
-        if(!edit){
-            return null
+        // Verifica o status do serviço, so pode dar update se o serviço está em execução ou concluido
+        const servico = await ServicoRepo.getById(feedback.servicoPrestado.id_servico)
+        const statusServico = calcularStatus(servico)
+
+        if(statusServico === 'agendado'){
+            throw new Error('Não é possivel enviar feedback para um serviço que não começou')
         }
+
+        const dadosUpdate = {
+            comentario: dados.comentario,
+            data: new Date(),
+            status: 'respondido'
+        }
+
+        const edit = await repo.update(id, dadosUpdate)
+
         const edit2 = await getComInclude(edit.id)
         const editDTO = FeedbackMapper.toDTO(edit2)
         return editDTO

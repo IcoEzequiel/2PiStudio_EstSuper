@@ -22,20 +22,20 @@ const FeedbackController = {
         }
     },
 
-    create: async (req, res) => {
-        try {
-            const novo = await service.create(req.body)
-            res.status(201).json(novo)
-        } catch (err) {
-            res.status(400).json({ error: err.message})
-        }
-    },
+    // O crate ficou automatico, too feedback feito pelo usuario agora é um update
+    // create: async (req, res) => {
+    //     try {
+    //         const novo = await service.create(req.body)
+    //         res.status(201).json(novo)
+    //     } catch (err) {
+    //         res.status(400).json({ error: err.message})
+    //     }
+    // },
 
     update: async (req, res) => {
         try {
             const edit = await service.update(req.params.id, req.body)
-            if (!edit) return res.status(404).json({ error: 'Serviço não encontrado'})
-            res.json(edit)
+            res.status(200).json(edit)
         } catch (err) {
             res.status(500).json({ error: err.message})
         }

@@ -10,7 +10,7 @@ router.use(verifyToken)
 
 router.get('/', cont.getAll)
 router.get('/:id',cont.getById)
-router.post('/', cont.create)
+// router.post('/', cont.create)  Post agora é criado automaticamente no Back, o feedback virou um input
 router.put('/:id', cont.update)
 router.delete('/:id', cont.delete)
 

@@ -20,10 +20,10 @@ const getComInclude = async (id) => {
 }
 
 // Valida os dados fornecido, usado no create e update para saber se o objeto do ID existe
-const validar = async (dados, create = false) => {
+const validar = async (dados, create = false, options = {}) => {
     // Valida se o funcionario existe se ele vinher nos dados, pos pode ter um usuario que não é um funcionario, como o admin
     if(dados.id_funcionario){
-        const funcionario = await FuncionarioRepo.getById(dados.id_funcionario)
+        const funcionario = await FuncionarioRepo.getById(dados.id_funcionario, options)
         if(!funcionario)
             throw new Error('O funcionario não Existe')
     }
@@ -65,9 +65,9 @@ const UsuarioService = {
             return UsuarioDTO  
     },
 
-    create: async (dados) => {
+    create: async (dados, options = {}) => {
         // Passa true para saber que é um create
-        await validar(dados,true)
+        await validar(dados,true, options)
 
         // Manda criptografar a senha antes de salvar no banco de dados
         const dadosCrip = await cripSenha(dados)
@@ -78,10 +78,10 @@ const UsuarioService = {
         
     },
 
-    update: async (id, dados) => {
+    update: async (id, dados, options = {}) => {
         await validar(dados)
         const dadosCrip = await cripSenha(dados)
-        const edit = await repo.update(id, dadosCrip)
+        const edit = await repo.update(id, dadosCrip, options)
 
         if (!edit){
             return null

@@ -4,6 +4,7 @@ const { sequelize } = require('../db');
 const ServicoRepo = require('../repositories/ServicoRepository')
 const AlocacaoFuncRepo = require('../repositories/AlocacaoFuncionarioRepository')
 const AlocacaoEquipRepo = require('../repositories/AlocacaoEquipamentoRepository')
+const FeedbackRepo = require('../repositories/FeedbackRepository')
 
 // Repositorios para validação
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
@@ -140,6 +141,9 @@ const gerenciarAlocacoes = async (servicoId, alocacoesDiarias, transaction) => {
     // verifica se veio alguma alocação
     if (!alocacoesDiarias) return
 
+    // Usado para a criação de um feedback por funcionario por serviço
+    const funcionariosComFeedback = new Set()
+
     // Looping com as datas que o serviço vai ser prestado
     for (const data in alocacoesDiarias){
         const dia = alocacoesDiarias[data]
@@ -156,7 +160,14 @@ const gerenciarAlocacoes = async (servicoId, alocacoesDiarias, transaction) => {
                     hora: horasTrabalhadas,
                     valor_dia_alocado: alocFunc.valor_dia_alocado
                     }
-                await AlocacaoFuncRepo.save(dadosAlocFunc, {transaction})
+                const novaAlocacao = await AlocacaoFuncRepo.save(dadosAlocFunc, {transaction})
+
+                // Logica do FeedBack Unico por Funcionario
+                const funcionarioId = alocFunc.id_funcionario
+                if (!funcionariosComFeedback.has(funcionarioId)){
+                    await FeedbackRepo.save({id_alocacaoFuncionario: novaAlocacao.id}, {transaction})
+                    funcionariosComFeedback.add(funcionarioId)
+                }
             }
         }
         // Looping dos equipamentos alocados para esse dia

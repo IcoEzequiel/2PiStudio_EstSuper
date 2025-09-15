@@ -1,7 +1,7 @@
 const { sequelize } = require('../db'); 
 const repo = require('../repositories/FuncionarioRepository')
 const ParaFuncRepo = require('../repositories/ParametrizacaoFuncionarioRepository')
-const UsuarioRepo = require('../repositories/UsuarioRepository')
+const UsuarioService = require('../services/UsuarioService')
 const ModelUsuario = require('../models/ModelUsuario');
 
 // Funcções auxiliares
@@ -54,7 +54,7 @@ const CriarEditar = async (dados, id = null) => {
                 login: primeiroNome,
                 senha: "qwerty88"
             }
-            await UsuarioRepo.save(usuario, {transaction: t})
+            await UsuarioService.create(usuario, {transaction: t})
         } 
         // Aqui é um update
         else{
@@ -79,7 +79,7 @@ const CriarEditar = async (dados, id = null) => {
                         login: primeiroNome,
                         senha: "qwerty88"
                     }
-                    await UsuarioRepo.save(usuarioCreate, {transaction: t})
+                    await UsuarioService.create(usuarioCreate, {transaction: t})
                 }
             }
             funcionarioSalvo = await getComInclude(id)
@@ -110,7 +110,7 @@ const CriarEditar = async (dados, id = null) => {
         // Se alguma coisa der errado, desfaz todas as alterações
         await t.rollback()
 
-        throw new Error('Erro ao criar ou editar Funcionario' + error.message)
+        throw new Error('Erro ao criar ou editar Funcionario: ' + error.message)
     }
 }
 
