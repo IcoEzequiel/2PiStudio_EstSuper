@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Studio Manager</title>
-    <link rel="stylesheet" href="login.css">
+    <title>Admin Login - Studio Manager</title>
+    <link rel="stylesheet" href="loginadmin.css"> 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -16,50 +16,42 @@
 
         <div class="branding-side">
             <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                <path d="M50,5 L95,27.5 L95,72.5 L50,95 L5,72.5 L5,27.5 Z" stroke-width="5" stroke-linecap="round"
-                    stroke-linejoin="round" />
+                <path d="M50,5 L95,27.5 L95,72.5 L50,95 L5,72.5 L5,27.5 Z" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
                 <path d="M50,5 L50,95" stroke-width="5" stroke-linecap="round" />
                 <path d="M5,27.5 L95,72.5" stroke-width="5" stroke-linecap="round" />
                 <path d="M95,27.5 L5,72.5" stroke-width="5" stroke-linecap="round" />
             </svg>
+            <h1 class="gradient-text">Painel Admin</h1>
             <h1 class="gradient-text">Studio Manager</h1>
         </div>
 
         <div class="form-side">
             <div class="login-card">
                 <div class="card-header">
-                    <p>Bem-vindo! Faça login para continuar.</p>
+                    <p>Acesso restrito ao painel de administração.</p>
                 </div>
 
-                <form id="login-form">
+                <form id="login-form-admin">
                     <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" placeholder="seuemail@exemplo.com" required>
+                        <label for="email-admin">Email de Administrador</label>
+                        <input type="email" id="email-admin" name="email" placeholder="admin@exemplo.com" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="password">Senha</label>
-                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                        <label for="password-admin">Senha</label>
+                        <input type="password" id="password-admin" name="password" placeholder="••••••••" required>
                     </div>
 
-                    <div class="form-options">
-                        <div class="remember-me">
-                            <input type="checkbox" id="remember">
-                            <label for="remember">Lembrar-me</label>
-                        </div>
-                        <a href="#">Esqueceu a senha?</a>
-                    </div>
-
-                    <button type="submit" class="submit-button">Entrar</button>
+                    <button type="submit" class="submit-button">Acessar Painel</button>
                 </form>
 
-                <div class="admin-link">
-                    <a href="loginadmin.html">Login como admin</a>
+                <div class="user-link">
+                    <!-- Link para voltar ao login normal -->
+                    <a href="login.html">Voltar para o login de funcionário</a>
                 </div>
             </div>
         </div>
-
+        
     </div>
 </body>
-
 </html>

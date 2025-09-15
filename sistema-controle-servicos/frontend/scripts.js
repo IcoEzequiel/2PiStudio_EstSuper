@@ -2,7 +2,9 @@ const authToken = localStorage.getItem('authToken');
 
 if (!authToken) {
     window.location.href = 'login/login.html';
+    window.location.href = 'login/loginadmin.html';
 }
+
 import { request } from "./shared/api.js"; // Ajuste o caminho se necessário
 
 // Variáveis globais que você já tem
@@ -543,8 +545,6 @@ function configurarFormNovoProjeto() {
         while (diaAtual <= dataFinal) {
             const dataISO = diaAtual.toISOString().split('T')[0];
             const dataFormatada = diaAtual.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-
-            // ✅ NOVA ESTRUTURA HTML PARA O CARD ✅
             const cardHTML = `
             <div class="allocation-day-card" data-date="${dataISO}">
                 <h4>Dia: ${dataFormatada}</h4>
