@@ -14,7 +14,7 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
+    "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.2",
@@ -25,7 +25,9 @@
     "jest": "^30.1.3",
     "supertest": "^7.1.4"
   },
-  "jest":{
-    "setupFiles": ["./jest.setup.js"]
+  "jest": {
+    "setupFiles": [
+      "./jest.setup.js"
+    ]
   }
 }

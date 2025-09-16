@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - Studio Manager</title>
-    <link rel="stylesheet" href="loginadmin.css"> 
+    <!-- Certifique-se de que este CSS existe ou aponte para o login.css principal -->
+    <link rel="stylesheet" href="loginadmin.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -16,7 +17,8 @@
 
         <div class="branding-side">
             <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                <path d="M50,5 L95,27.5 L95,72.5 L50,95 L5,72.5 L5,27.5 Z" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M50,5 L95,27.5 L95,72.5 L50,95 L5,72.5 L5,27.5 Z" stroke-width="5" stroke-linecap="round"
+                    stroke-linejoin="round" />
                 <path d="M50,5 L50,95" stroke-width="5" stroke-linecap="round" />
                 <path d="M5,27.5 L95,72.5" stroke-width="5" stroke-linecap="round" />
                 <path d="M95,27.5 L5,72.5" stroke-width="5" stroke-linecap="round" />
@@ -33,8 +35,8 @@
 
                 <form id="login-form-admin">
                     <div class="form-group">
-                        <label for="email-admin">Email de Administrador</label>
-                        <input type="email" id="email-admin" name="email" placeholder="admin@exemplo.com" required>
+                        <label for="login-admin">Login de Administrador</label>
+                        <input type="text" id="login-admin" name="login" placeholder="Digite o login de admin" required>
                     </div>
 
                     <div class="form-group">
@@ -46,12 +48,16 @@
                 </form>
 
                 <div class="user-link">
-                    <!-- Link para voltar ao login normal -->
                     <a href="login.html">Voltar para o login de funcionário</a>
                 </div>
             </div>
         </div>
-        
+
     </div>
+
+    <script src="loginadmin.js"></script>
+    <script src="protect.js"></script>
+    <script src="auth.js"></script>
 </body>
+
 </html>

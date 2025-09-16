@@ -1,9 +1,11 @@
-const authToken = localStorage.getItem('authToken');
+// const authToken = localStorage.getItem('authToken');
 
-if (!authToken) {
-    window.location.href = 'login/login.html';
-    window.location.href = 'login/loginadmin.html';
-}
+// if (!authToken) {
+//     window.location.href = 'login/loginadmin.html';
+//     window.location.href = 'login/login.html';
+// }
+
+
 
 import { request } from "./shared/api.js"; // Ajuste o caminho se necessário
 
