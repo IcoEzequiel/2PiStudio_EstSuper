@@ -1,15 +1,6 @@
-// const authToken = localStorage.getItem('authToken');
+import { request } from "./shared/api.js";
 
-// if (!authToken) {
-//     window.location.href = 'login/loginadmin.html';
-//     window.location.href = 'login/login.html';
-// }
-
-
-
-import { request } from "./shared/api.js"; // Ajuste o caminho se necessário
-
-// Variáveis globais que você já tem
+// Variáveis globais
 let equipment = [];
 let labor = []; // representa funcionario
 let clientes = []
@@ -103,15 +94,6 @@ async function carregarPagina(pagina) {
             document.head.appendChild(css);
         }
 
-        // if (pagina.includes("novoprojeto")) {
-        //     let css = document.createElement("link");
-        //     css.rel = "stylesheet";
-        //     css.href = "novoprojeto/novoprojeto.css";
-        //     css.id = "extra-css";
-        //     document.head.appendChild(css);
-        //     setTimeout(() => { configurarFormNovoProjeto(); }, 0);
-        // }
-
         if (pagina.includes("configuracoes")) {
             let css = document.createElement("link");
             css.rel = "stylesheet";
@@ -150,333 +132,6 @@ function configurarNavegacao() {
     }
 }
 
-// // --- Lógica do formulário de Novo Projeto ---
-// function configurarFormNovoProjeto() {
-//     console.log("Configurando o formulário de novo projeto com UI melhorada...");
-
-//     // 1. PEGAR OS ELEMENTOS DO FORMULÁRIO (sem alterações aqui)
-//     const form = document.getElementById('form-novo-servico');
-//     const clienteSelect = document.getElementById('servico-cliente');
-//     const dataInicioInput = document.getElementById('servico-data-inicio');
-//     const dataFimInput = document.getElementById('servico-data-fim');
-//     const orcamentoInput = document.getElementById('servico-orcamento');
-//     const invoiceCheckbox = document.getElementById('invoice');
-
-//     const alocacoesContainer = document.getElementById('alocacoes-diarias-container');
-//     const placeholder = document.getElementById('alocacao-placeholder');
-
-//     const totalCostsSpan = document.getElementById("totalCosts");
-//     const taxSpan = document.getElementById("tax");
-//     const profitSpan = document.getElementById("profit");
-
-//     // 2. FUNÇÃO PARA POPULAR O DROPDOWN DE CLIENTES (sem alterações aqui)
-//     function popularClientes() {
-//         if (!clientes || clientes.length === 0) {
-//             clienteSelect.innerHTML = '<option value="">Nenhum cliente cadastrado</option>';
-//             return;
-//         }
-//         clienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
-//         clientes.forEach(cliente => {
-//             const option = document.createElement('option');
-//             option.value = cliente.id;
-//             option.textContent = cliente.nome;
-//             clienteSelect.appendChild(option);
-//         });
-//     }
-
-//     // 3. FUNÇÃO PARA GERAR OS CAMPOS DE ALOCAÇÃO (GRANDES MUDANÇAS AQUI)
-//     function gerarCamposDeAlocacao() {
-//         console.log("Iniciando gerarCamposDeAlocacao (com novo layout)...");
-
-//         const dataInicioStr = dataInicioInput.value;
-//         const dataFimStr = dataFimInput.value;
-
-//         alocacoesContainer.innerHTML = '';
-
-//         if (!dataInicioStr || !dataFimStr || new Date(dataFimStr) < new Date(dataInicioStr)) {
-//             placeholder.style.display = 'block';
-//             atualizarResumoFinanceiro();
-//             return;
-//         }
-
-//         placeholder.style.display = 'none';
-
-//         try {
-//             const diaAtual = new Date(`${dataInicioStr}T00:00:00`);
-//             const dataFinal = new Date(`${dataFimStr}T00:00:00`);
-
-//             while (diaAtual <= dataFinal) {
-//                 const dataISO = diaAtual.toISOString().split('T')[0];
-//                 const dataFormatada = diaAtual.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-
-//                 const cardHTML = `
-//                 <div class="allocation-day-card" data-date="${dataISO}">
-//                     <h4>Dia: ${dataFormatada}</h4>
-//                     <div class="form-group">
-//                         <label for="horas-${dataISO}">Horas Trabalhadas</label>
-//                         <input type="number" id="horas-${dataISO}" class="horas-trabalhadas" min="1" value="8">
-//                     </div>
-
-//                     <div class="resource-columns">
-//                         <div class="column">
-//                             <div class="form-group resource-group">
-//                                 <label>Funcionários</label>
-//                                 <div class="resource-list">
-//                                     ${labor.map(f => `
-//                                         <div class="resource-item">
-//                                             <div class="resource-name-group">
-//                                                 <input type="checkbox" id="func-${f.id}-${dataISO}" value="${f.id}" class="resource-checkbox" data-target-cost="cost-func-${f.id}-${dataISO}">
-//                                                 <label for="func-${f.id}-${dataISO}">${f.nome}</label>
-//                                             </div>
-//                                             <div class="resource-cost-group">
-//                                                 <input type="number" step="0.01" id="cost-func-${f.id}-${dataISO}" class="cost-input" value="${(parseFloat(f.parametrizacao?.valor_diaria ?? 0)).toFixed(2)}" disabled>
-//                                                 <span>/dia</span>
-//                                             </div>
-//                                         </div>
-//                                     `).join('')}
-//                                 </div>
-//                             </div>
-//                         </div>
-
-//                         <div class="column">
-//                             <div class="form-group resource-group">
-//                                 <label>Equipamentos</label>
-//                                 <div class="resource-list">
-//                                     ${equipment.map(e => `
-//                                         <div class="resource-item">
-//                                             <div class="resource-name-group">
-//                                                 <input type="checkbox" id="equip-${e.id}-${dataISO}" value="${e.id}" class="resource-checkbox" data-target-cost="cost-equip-${e.id}-${dataISO}">
-//                                                 <label for="equip-${e.id}-${dataISO}">${e.nome}</label>
-//                                             </div>
-//                                             <div class="resource-cost-group">
-//                                                 <input type="number" step="0.01" id="cost-equip-${e.id}-${dataISO}" class="cost-input" value="${(parseFloat(e.parametrizacao?.valor_hora ?? 0)).toFixed(2)}" disabled>
-//                                                 <span>/hora</span>
-//                                             </div>
-//                                         </div>
-//                                     `).join('')}
-//                                 </div>
-//                             </div>
-//                         </div>
-//                     </div>
-//                 </div>
-//             `;
-//                 alocacoesContainer.insertAdjacentHTML('beforeend', cardHTML);
-//                 diaAtual.setUTCDate(diaAtual.getUTCDate() + 1);
-//             }
-//         } catch (error) {
-//             console.error("ERRO CRÍTICO ao gerar os cards de alocação:", error);
-//             alocacoesContainer.innerHTML = '<p style="color: red;">Ocorreu um erro ao gerar os campos. Verifique o console (F12) para mais detalhes.</p>';
-//         }
-
-//         atualizarResumoFinanceiro();
-//     }
-
-//     // 4. FUNÇÃO PARA ATUALIZAR O RESUMO FINANCEIRO (ATUALIZADA)
-//     function atualizarResumoFinanceiro() {
-//         let custoTotalProducao = 0;
-//         const orcamento = parseFloat(orcamentoInput.value) || 0;
-
-//         document.querySelectorAll('.allocation-day-card').forEach(card => {
-//             const horas = parseFloat(card.querySelector('.horas-trabalhadas').value) || 0;
-
-//             // Itera sobre todos os checkboxes de recursos no card
-//             card.querySelectorAll('.resource-checkbox:checked').forEach(checkbox => {
-//                 const costInput = document.getElementById(checkbox.dataset.targetCost);
-//                 const custo = parseFloat(costInput.value) || 0;
-
-//                 if (costInput.id.startsWith('cost-func-')) {
-//                     // Custo de funcionário é diário
-//                     custoTotalProducao += custo;
-//                 } else if (costInput.id.startsWith('cost-equip-')) {
-//                     // Custo de equipamento é por hora
-//                     custoTotalProducao += custo * horas;
-//                 }
-//             });
-//         });
-
-//         const imposto = invoiceCheckbox.checked ? orcamento * 0.06 : 0;
-//         const custosTotais = custoTotalProducao + imposto;
-//         const lucro = orcamento - custosTotais;
-
-//         totalCostsSpan.textContent = `R$ ${custosTotais.toFixed(2)}`;
-//         taxSpan.textContent = `R$ ${imposto.toFixed(2)}`;
-//         profitSpan.textContent = `R$ ${lucro.toFixed(2)}`;
-//         profitSpan.style.color = lucro < 0 ? '#d32f2f' : '#388e3c';
-//     }
-
-//     // 5. ADICIONAR OS EVENT LISTENERS (COM UMA NOVA LÓGICA)
-//     dataInicioInput.addEventListener('change', gerarCamposDeAlocacao);
-//     dataFimInput.addEventListener('change', gerarCamposDeAlocacao);
-//     orcamentoInput.addEventListener('input', atualizarResumoFinanceiro);
-//     invoiceCheckbox.addEventListener('change', atualizarResumoFinanceiro);
-
-//     alocacoesContainer.addEventListener('change', (e) => {
-//         // Habilita/desabilita input de custo e recalcula o resumo
-//         if (e.target.matches('.resource-checkbox')) {
-//             const costInput = document.getElementById(e.target.dataset.targetCost);
-//             costInput.disabled = !e.target.checked;
-//             atualizarResumoFinanceiro();
-//         }
-//         // Recalcula se as horas ou o custo de um item habilitado mudar
-//         if (e.target.matches('.horas-trabalhadas') || e.target.matches('.cost-input')) {
-//             atualizarResumoFinanceiro();
-//         }
-//     });
-
-//     // 6. MANIPULAR O ENVIO DO FORMULÁRIO (ATUALIZADO)
-//     form.addEventListener('submit', async (e) => {
-//         e.preventDefault();
-
-//         const payload = {
-//             id_cliente: clienteSelect.value,
-//             nome: document.getElementById('servico-nome').value,
-//             descricao: document.getElementById('servico-descricao').value,
-//             data_inicio: dataInicioInput.value,
-//             data_fim: dataFimInput.value,
-//             orcamento: orcamentoInput.value,
-//             alocacoes_diarias: {}
-//         };
-
-//         document.querySelectorAll('.allocation-day-card').forEach(card => {
-//             const data = card.dataset.date;
-//             const alocacaoDoDia = {
-//                 horas_trabalhadas: parseFloat(card.querySelector('.horas-trabalhadas').value) || 0,
-//                 funcionarios: [],
-//                 equipamentos: []
-//             };
-
-//             card.querySelectorAll('.resource-checkbox:checked').forEach(checkbox => {
-//                 const costInput = document.getElementById(checkbox.dataset.targetCost);
-//                 const custo = parseFloat(costInput.value);
-//                 const id = parseInt(checkbox.value);
-
-//                 if (costInput.id.startsWith('cost-func-')) {
-//                     alocacaoDoDia.funcionarios.push({ id_funcionario: id, valor_dia_alocado: custo });
-//                 } else if (costInput.id.startsWith('cost-equip-')) {
-//                     alocacaoDoDia.equipamentos.push({ id_equipamento: id, valor_hora_alocada: custo });
-//                 }
-//             });
-//             payload.alocacoes_diarias[data] = alocacaoDoDia;
-//         });
-
-//         console.log("JSON a ser enviado para a API:");
-//         console.log(JSON.stringify(payload, null, 2));
-
-//         try {
-//             // 1. Descomente a linha abaixo para ATIVAR a chamada à API
-//             const novoServico = await request('/servico', 'POST', payload);
-
-//             console.log('Serviço criado com sucesso no backend:', novoServico);
-//             alert('Projeto criado com sucesso!');
-
-//             // 2. Limpa o formulário e redireciona para o dashboard
-//             form.reset();
-//             gerarCamposDeAlocacao(); // Limpa os cards de alocação
-//             carregarPagina('dashboard/dashboard.html'); // Volta para a página inicial
-
-//         } catch (err) {
-//             // Se o backend retornar um erro (ex: validação), ele será exibido
-//             alert(`Erro ao salvar projeto: ${err.message}`);
-//             console.error("Detalhes do erro:", err);
-//         }
-//     });
-
-//     // --- INICIALIZAÇÃO ---
-//     popularClientes();
-// }
-
-
-// function configurarFormNovoProjeto() {
-//     console.log("Configurando o formulário de projeto simplificado...");
-//     const form = document.getElementById('form-novo-projeto');
-//     const clienteSelect = document.getElementById('servico-cliente');
-//     const equipmentSelect = document.getElementById('equipmentSelect');
-//     const laborSelect = document.getElementById('laborSelect');
-//     const orcamentoInput = document.getElementById('quote');
-//     const invoiceCheckbox = document.getElementById('invoice');
-//     const totalCostsSpan = document.getElementById("totalCosts");
-//     const taxSpan = document.getElementById("tax");
-//     const profitSpan = document.getElementById("profit");
-
-//     function popularClientes() {
-//         clienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
-//         (clientes || []).forEach(cliente => {
-//             const option = document.createElement('option');
-//             option.value = cliente.id;
-//             option.textContent = cliente.nome;
-//             clienteSelect.appendChild(option);
-//         });
-//     }
-
-//     function popularRecursos() {
-//         equipmentSelect.innerHTML = '<option value="">Selecionar Equipamentos</option>';
-//         (equipment || []).forEach(equip => {
-//             const custo = equip.parametrizacao?.valor_hora ?? 0;
-//             const option = document.createElement('option');
-//             option.value = equip.id;
-//             option.dataset.cost = custo;
-//             option.textContent = `${equip.nome} (R$ ${custo.toFixed(2)}/h)`;
-//             equipmentSelect.appendChild(option);
-//         });
-
-//         laborSelect.innerHTML = '<option value="">Selecionar Mão de Obra</option>';
-//         (labor || []).forEach(func => {
-//             const custo = (func.parametrizacao?.valor_diaria ?? 0) / 8;
-//             const option = document.createElement('option');
-//             option.value = func.id;
-//             option.dataset.cost = custo;
-//             option.textContent = `${func.nome} (R$ ${custo.toFixed(2)}/h)`;
-//             laborSelect.appendChild(option);
-//         });
-//     }
-
-//     function atualizarResumo() {
-//         const orcamento = parseFloat(orcamentoInput.value) || 0;
-//         const emiteNotaFiscal = invoiceCheckbox.checked;
-//         let custoDeProducao = 0;
-
-//         const imposto = emiteNotaFiscal ? orcamento * 0.06 : 0;
-//         const custosTotais = custoDeProducao + imposto;
-//         const lucro = orcamento - custosTotais;
-
-//         totalCostsSpan.textContent = `R$ ${custosTotais.toFixed(2)}`;
-//         taxSpan.textContent = `R$ ${imposto.toFixed(2)}`;
-//         profitSpan.textContent = `R$ ${lucro.toFixed(2)}`;
-
-//         profitSpan.style.color = lucro < 0 ? '#ef4444' : '#22c55e';
-//     }
-//     orcamentoInput.addEventListener('input', atualizarResumo);
-//     invoiceCheckbox.addEventListener('change', atualizarResumo);
-//     form.addEventListener('submit', async (e) => {
-//         e.preventDefault();
-
-//         const payload = {
-//             id_cliente: clienteSelect.value,
-//             nome: document.getElementById('servico-nome').value,
-//             descricao: document.getElementById('servico-descricao').value,
-//             data_inicio: document.getElementById('servico-data-inicio').value,
-//             data_fim: document.getElementById('servico-data-fim').value,
-//             orcamento: orcamentoInput.value,
-//         };
-
-//         try {
-//             await request('/servico', 'POST', payload);
-//             alert('Projeto criado com sucesso!');
-//             fecharModalNovoProjeto();
-//             carregarPagina('dashboard/dashboard.html');
-//         } catch (err) {
-//             alert(`Erro ao salvar projeto: ${err.message}`);
-//         }
-//     });
-
-//     popularClientes();
-//     popularRecursos();
-//     atualizarResumo();
-// }
-
-
-
-
 function configurarFormNovoProjeto() {
     console.log("Configurando formulário com switch de datas e alocação diária...");
 
@@ -498,15 +153,10 @@ function configurarFormNovoProjeto() {
     function handleMultiDayToggle() {
         const isMultiDay = multiDaySwitch.checked;
         dataFimInput.disabled = !isMultiDay;
-
-        if (isMultiDay) {
-            if (dataInicioInput.value) {
-                dataFimInput.value = dataInicioInput.value;
-            }
+        if (isMultiDay && dataInicioInput.value) {
+            dataFimInput.value = dataInicioInput.value;
             dataFimInput.focus();
         }
-
-        // Dispara o evento 'change' para que a alocação seja recalculada
         dataFimInput.dispatchEvent(new Event('change'));
     }
 
@@ -522,8 +172,6 @@ function configurarFormNovoProjeto() {
     }
 
     // 4. FUNÇÃO PARA GERAR OS CARDS DE ALOCAÇÃO
-    // EM SCRIPTS.JS
-
     function gerarCamposDeAlocacao() {
         let dataInicioStr = dataInicioInput.value;
         let dataFimStr = dataFimInput.value;
@@ -539,7 +187,7 @@ function configurarFormNovoProjeto() {
             atualizarResumoFinanceiro();
             return;
         }
-
+        
         placeholder.style.display = 'none';
         const diaAtual = new Date(`${dataInicioStr}T12:00:00Z`);
         const dataFinal = new Date(`${dataFimStr}T12:00:00Z`);
@@ -547,51 +195,46 @@ function configurarFormNovoProjeto() {
         while (diaAtual <= dataFinal) {
             const dataISO = diaAtual.toISOString().split('T')[0];
             const dataFormatada = diaAtual.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+
             const cardHTML = `
-            <div class="allocation-day-card" data-date="${dataISO}">
-                <h4>Dia: ${dataFormatada}</h4>
-                <div class="form-group">
-                    <label for="horas-${dataISO}">Horas Trabalhadas</label>
-                    <input type="number" id="horas-${dataISO}" class="horas-trabalhadas" min="1" value="8">
-                </div>
-                <div class="resource-columns">
-                    <div class="column">
-                        <label class="column-title">Funcionários</label>
-                        <div class="custom-multiselect">
-                            <div class="select-trigger">
-                                <span>Selecionar Funcionários</span>
-                                <span class="arrow"></span>
-                            </div>
-                            <div class="options-list">
-                                ${labor.map(f => `
-                                    <div class="resource-item">
-                                        <input type="checkbox" id="func-${f.id}-${dataISO}" value="${f.id}" class="resource-checkbox" data-cost="${(f.parametrizacao?.valor_diaria ?? 0)}" data-cost-type="daily">
-                                        <label for="func-${f.id}-${dataISO}">${f.nome}</label>
-                                    </div>
-                                `).join('')}
+                <div class="allocation-day-card" data-date="${dataISO}">
+                    <h4>Dia: ${dataFormatada}</h4>
+                    <div class="form-group">
+                        <label for="horas-${dataISO}">Horas Trabalhadas</label>
+                        <input type="number" id="horas-${dataISO}" class="horas-trabalhadas" min="1" value="8">
+                    </div>
+                    <div class="resource-columns">
+                        <div class="column">
+                            <label class="column-title">Funcionários</label>
+                            <div class="custom-multiselect">
+                                <div class="select-trigger"><span>Selecionar</span><span class="arrow"></span></div>
+                                <div class="options-list">
+                                    ${labor.map(f => `
+                                        <div class="resource-item">
+                                            <input type="checkbox" id="func-${f.id}-${dataISO}" value="${f.id}" class="resource-checkbox" data-cost="${(f.parametrizacao?.valor_diaria ?? 0)}" data-cost-type="daily">
+                                            <label for="func-${f.id}-${dataISO}">${f.nome}</label>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="column">
-                        <label class="column-title">Equipamentos</label>
-                        <div class="custom-multiselect">
-                            <div class="select-trigger">
-                                <span>Selecionar Equipamentos</span>
-                                <span class="arrow"></span>
-                            </div>
-                            <div class="options-list">
-                                ${equipment.map(e => `
-                                    <div class="resource-item">
-                                        <input type="checkbox" id="equip-${e.id}-${dataISO}" value="${e.id}" class="resource-checkbox" data-cost="${(e.parametrizacao?.valor_hora ?? 0)}" data-cost-type="hourly">
-                                        <label for="equip-${e.id}-${dataISO}">${e.nome}</label>
-                                    </div>
-                                `).join('')}
+                        <div class="column">
+                            <label class="column-title">Equipamentos</label>
+                            <div class="custom-multiselect">
+                                <div class="select-trigger"><span>Selecionar</span><span class="arrow"></span></div>
+                                <div class="options-list">
+                                    ${equipment.map(e => `
+                                        <div class="resource-item">
+                                            <input type="checkbox" id="equip-${e.id}-${dataISO}" value="${e.id}" class="resource-checkbox" data-cost="${(e.parametrizacao?.valor_hora ?? 0)}" data-cost-type="hourly">
+                                            <label for="equip-${e.id}-${dataISO}">${e.nome}</label>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
             alocacoesContainer.insertAdjacentHTML('beforeend', cardHTML);
             diaAtual.setUTCDate(diaAtual.getUTCDate() + 1);
         }
@@ -608,77 +251,65 @@ function configurarFormNovoProjeto() {
             card.querySelectorAll('.resource-checkbox:checked').forEach(checkbox => {
                 const custo = parseFloat(checkbox.dataset.cost) || 0;
                 const tipoCusto = checkbox.dataset.costType;
-
-                if (tipoCusto === 'daily') {
-                    custoTotalProducao += custo;
-                } else if (tipoCusto === 'hourly') {
-                    custoTotalProducao += custo * horas;
-                }
+                if (tipoCusto === 'daily') custoTotalProducao += custo;
+                else if (tipoCusto === 'hourly') custoTotalProducao += custo * horas;
             });
         });
 
         const imposto = invoiceCheckbox.checked ? orcamento * 0.06 : 0;
         const custosTotais = custoTotalProducao + imposto;
         const lucro = orcamento - custosTotais;
-
+        
         totalCostsSpan.textContent = `R$ ${custosTotais.toFixed(2).replace('.', ',')}`;
         taxSpan.textContent = `R$ ${imposto.toFixed(2).replace('.', ',')}`;
         profitSpan.textContent = `R$ ${lucro.toFixed(2).replace('.', ',')}`;
         profitSpan.style.color = lucro < 0 ? '#ef4444' : '#22c55e';
     }
 
-    // 6. ADICIONAR OS EVENT LISTENERS (VERSÃO CORRIGIDA E UNIFICADA)
+    // 6. ADICIONAR OS EVENT LISTENERS
     multiDaySwitch.addEventListener('change', handleMultiDayToggle);
     dataInicioInput.addEventListener('change', gerarCamposDeAlocacao);
     dataFimInput.addEventListener('change', gerarCamposDeAlocacao);
     orcamentoInput.addEventListener('input', atualizarResumoFinanceiro);
     invoiceCheckbox.addEventListener('change', atualizarResumoFinanceiro);
-
-    // Listener único e inteligente para o container de alocações
+    
     alocacoesContainer.addEventListener('click', (e) => {
-        // Lógica para abrir/fechar o dropdown customizado
         const trigger = e.target.closest('.select-trigger');
         if (trigger) {
-            // Fecha todos os outros dropdowns abertos antes de abrir o novo
             const currentMultiSelect = trigger.closest('.custom-multiselect');
             document.querySelectorAll('.custom-multiselect.open').forEach(select => {
-                if (select !== currentMultiSelect) {
-                    select.classList.remove('open');
-                }
+                if (select !== currentMultiSelect) select.classList.remove('open');
             });
             currentMultiSelect.classList.toggle('open');
         }
     });
-
-    // O listener de 'change' continua separado, pois lida com outra ação
+    
     alocacoesContainer.addEventListener('change', (e) => {
         if (e.target.matches('.resource-checkbox, .horas-trabalhadas')) {
             atualizarResumoFinanceiro();
         }
     });
 
-    // Listener para fechar os dropdowns se clicar fora deles
-    // Este listener deve ser adicionado QUANDO o modal abre e removido QUANDO fecha.
-    // Vamos adicioná-lo no escopo do formulário por enquanto.
-    form.addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-multiselect')) {
             document.querySelectorAll('.custom-multiselect.open').forEach(select => {
                 select.classList.remove('open');
             });
         }
-    }, true); // O 'true' ajuda a capturar o evento de forma mais eficaz
+    });
 
     // 7. ENVIO DO FORMULÁRIO
-    form.addEventListener('submit', async (e) => { /* ... sua lógica de envio ... */ });
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        // Sua lógica para coletar os dados e enviar para a API vai aqui
+        console.log("Formulário enviado!");
+    });
 
     // 8. INICIALIZAÇÃO
     popularClientes();
     atualizarResumoFinanceiro();
 }
 
-// --- Lógica da página de Configurações ---
-// --- Lógica da página de Configurações (Versão Completa com CRUD) ---
-// Em scripts.js
 
 // --- Lógica da página de Configurações ---
 function configurarPaginaConfiguracoes() {
@@ -823,7 +454,7 @@ function configurarPaginaConfiguracoes() {
 
 // --- Inicialização do Site ---
 window.onload = async () => {
-    await carregarDadosIniciais();
+    await carregarDadosIniciais(); // Descomente quando a API estiver pronta
     configurarNavegacao();
     carregarPagina("dashboard/dashboard.html");
 
