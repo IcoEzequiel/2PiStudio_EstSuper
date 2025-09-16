@@ -5,7 +5,7 @@ const service = require('../services/ServicoService')
 const ServicoController = {
     getAll: async (req, res) => {
         try {
-            const servicos = await service.getAll()
+            const servicos = await service.getAll(req.user)
             res.json(servicos)
         } catch (err) {
             res.status(500).json({ error: err.message})
@@ -14,7 +14,7 @@ const ServicoController = {
 
     getById: async (req, res) => {
         try {
-            const servico = await service.getById(req.params.id)
+            const servico = await service.getById(req.params.id, req.user)
             if (!servico) return res.status(404).json({ error: "Serviço não encontrado"})
             res.json(servico)
         } catch (err) {

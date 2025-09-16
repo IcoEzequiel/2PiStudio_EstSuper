@@ -63,7 +63,7 @@ const CriarEditar = async (dados, id = null) => {
             const funcionario = await getComInclude(id)
             if (!funcionario) throw new Error('Funcionario não encontrado')
         
-            const usuarioExistente = await UsuarioRepo.findOne({ where: { id_funcionario: id } });
+            const usuarioExistente = await ModelUsuario.findOne({ where: { id_funcionario: id } });
 
             await repo.update(id, dadosFuncionario, {transaction:t})
             if (dados.status === 'ativo'){
@@ -71,7 +71,7 @@ const CriarEditar = async (dados, id = null) => {
 
                 if (usuarioExistente){
                     const usuarioUpdate = { login: primeiroNome}
-                    await UsuarioRepo.update(usuarioExistente.id,usuarioUpdate, {transaction: t})
+                    await UsuarioService.update(usuarioExistente.id,usuarioUpdate, {transaction: t})
                 } else {
                     const usuarioCreate = {
                         id_funcionario: id,

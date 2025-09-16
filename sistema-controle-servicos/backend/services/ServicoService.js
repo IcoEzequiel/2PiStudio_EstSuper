@@ -1,4 +1,5 @@
-const { sequelize } = require('../db'); 
+const { sequelize } = require('../db');
+const { Op, where } = require('sequelize')
 
 // Repositorios para criação, edição e exclusão
 const ServicoRepo = require('../repositories/ServicoRepository')
@@ -188,8 +189,24 @@ const gerenciarAlocacoes = async (servicoId, alocacoesDiarias, transaction) => {
 }
 
 const ServicoService = {
-    getAll: async () => {
-        const Servicos = await getComInclude()
+    getAll: async (usuario) => {
+        //Logica para a separação de get servico para cliente e para administrador
+        const options = {
+            include: [{ model: require('../models/ModelCliente'), as: 'cliente'}]
+        }
+        // Filtragem
+        if (usuario.papel === 'funcionario'){
+            options.include.push({
+                model: require('../models/ModelAlocacaoFuncionario'),
+                as: 'alocacoesFuncionario',
+                where: {
+                    id_funcionario: usuario.id_funcionario
+                },
+                required: true
+            })
+        }
+        const Servicos = await ServicoRepo.getAll(options)
+
         const ServicosStatusAtt = Servicos.map(servico => {
             const servicoData = servico
             servicoData.status = calcularStatus(servicoData)
@@ -199,10 +216,24 @@ const ServicoService = {
         return ServicosDTO
     },
 
-    getById: async (id) => {
+    getById: async (id,usuario) => {
         const Servico = await getComInclude(id)
         if (!Servico){
             return null
+        }
+        //Logica para a separação de get servico para cliente e para administrador
+        if (usuario.papel === 'funcionario'){
+            const alocacoes = await AlocacaoFuncRepo.getAll({
+                where: {
+                    id_servico: id,
+                    id_funcionario: usuario.id_funcionario
+                }
+            })
+
+            // Se não achar a o serviço, ou não existe ou não tem permição para ver
+            if(!alocacoes || alocacoes.length === 0) {
+                return null;
+            }
         }
         const servicoData = Servico
         servicoData.status = calcularStatus(servicoData)

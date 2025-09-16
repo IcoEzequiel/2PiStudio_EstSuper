@@ -79,7 +79,7 @@ const UsuarioService = {
     },
 
     update: async (id, dados, options = {}) => {
-        await validar(dados)
+        await validar(dados, options)
         const dadosCrip = await cripSenha(dados)
         const edit = await repo.update(id, dadosCrip, options)
 

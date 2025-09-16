@@ -27,6 +27,11 @@ const AuthController = {
                 papel: Usuario.papel
             }
 
+            // Adiciona o id do funcionario se o usuario for um funcionario, isso é util para outras funcçoes do sistema
+            if (Usuario.papel === 'funcionario' && Usuario.id_funcionario){
+                payload.id_funcionario = Usuario.id_funcionario
+            }
+
             const token = jwt.sign(payload, process.env.JWT_SECRET, {
                 expiresIn: '8h'
             })
