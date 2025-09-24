@@ -195,7 +195,7 @@ const ServicoService = {
             include: [{ model: require('../models/ModelCliente'), as: 'cliente'}]
         }
         // Filtragem
-        if (usuario.papel === 'funcionario'){
+        if (usuario.papel && usuario === 'funcionario'){
             options.include.push({
                 model: require('../models/ModelAlocacaoFuncionario'),
                 as: 'alocacoesFuncionario',

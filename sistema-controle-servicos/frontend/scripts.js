@@ -1,4 +1,5 @@
 import { request } from "./shared/api.js";
+import { inicializarDashboard } from './dashboard/dashboard.js';
 
 // Variáveis globais
 let equipment = [];
@@ -45,7 +46,37 @@ async function carregarDadosIniciais() {
     }
 }
 
-async function abrirModalNovoProjeto() {
+// async function abrirModalNovoProjeto() {
+//     document.body.classList.add('modal-open');
+//     if (!document.getElementById('novoprojeto-css')) {
+//         const linkCSS = document.createElement("link");
+//         linkCSS.rel = "stylesheet";
+//         linkCSS.href = "novoprojeto/novoprojeto.css";
+//         linkCSS.id = "novoprojeto-css";
+//         document.head.appendChild(linkCSS);
+//     }
+//     const modalContainer = document.getElementById('novo-projeto-modal-container');
+//     const resposta = await fetch('novoprojeto/novoprojeto.html');
+//     modalContainer.innerHTML = await resposta.text();
+
+//     modalBackdrop.classList.add('active');
+//     configurarFormNovoProjeto();
+//     document.getElementById('close-modal-btn').addEventListener('click', fecharModalNovoProjeto);
+// }
+
+
+// function fecharModalNovoProjeto() {
+//     document.body.classList.remove('modal-open');
+//     modalBackdrop.classList.remove('active');
+//     modalContainer.innerHTML = '';
+//     const linkCSS = document.getElementById('novoprojeto-css');
+//     if (linkCSS) {
+//         linkCSS.remove();
+//     }
+// }
+
+// Função base para abrir o modal e carregar o HTML
+async function abrirModalBase() {
     document.body.classList.add('modal-open');
     if (!document.getElementById('novoprojeto-css')) {
         const linkCSS = document.createElement("link");
@@ -59,11 +90,11 @@ async function abrirModalNovoProjeto() {
     modalContainer.innerHTML = await resposta.text();
 
     modalBackdrop.classList.add('active');
-    configurarFormNovoProjeto();
+    // Adiciona o evento de clique ao botão de fechar
     document.getElementById('close-modal-btn').addEventListener('click', fecharModalNovoProjeto);
 }
 
-
+// Função para fechar o modal (INCLUÍDA AQUI PARA CORRIGIR O ERRO)
 function fecharModalNovoProjeto() {
     document.body.classList.remove('modal-open');
     modalBackdrop.classList.remove('active');
@@ -71,6 +102,28 @@ function fecharModalNovoProjeto() {
     const linkCSS = document.getElementById('novoprojeto-css');
     if (linkCSS) {
         linkCSS.remove();
+    }
+}
+
+// Função para abrir o modal para um NOVO projeto
+async function abrirModalNovoProjeto() {
+    await abrirModalBase();
+    configurarFormNovoProjeto(); // Configura o formulário para o modo 'criar'
+}
+
+// Função para abrir o modal para EDITAR um projeto
+async function abrirModalEdicao(projetoId) {
+    try {
+        console.log(`Buscando dados do projeto ID: ${projetoId}`);
+        const projetoParaEditar = await request(`/servico/${projetoId}`);
+        
+        await abrirModalBase();
+        // Passa os dados do projeto para a função de configuração
+        configurarFormNovoProjeto(projetoParaEditar);
+
+    } catch (error) {
+        console.error("Erro ao carregar dados para edição:", error);
+        alert(`Não foi possível carregar os dados do projeto para edição: ${error.message}`);
     }
 }
 
@@ -92,6 +145,7 @@ async function carregarPagina(pagina) {
             css.href = "dashboard/dashboard.css";
             css.id = "extra-css";
             document.head.appendChild(css);
+            inicializarDashboard();
         }
 
         if (pagina.includes("configuracoes")) {
@@ -101,6 +155,16 @@ async function carregarPagina(pagina) {
             css.id = "extra-css";
             document.head.appendChild(css);
             setTimeout(() => { configurarPaginaConfiguracoes(); }, 0);
+        }
+
+        if (pagina.includes("projetos")) {
+            let css = document.createElement("link");
+            css.rel = "stylesheet";
+            css.href = "projetos/projetos.css"; // Supondo que você tenha um CSS
+            css.id = "extra-css";
+            document.head.appendChild(css);
+            await carregarExibirProjetos();
+            configurarAcoesDosCards();
         }
 
     } catch (err) {
@@ -132,16 +196,22 @@ function configurarNavegacao() {
     }
 }
 
-function configurarFormNovoProjeto() {
-    console.log("Configurando formulário com switch de datas e alocação diária...");
+// Em scripts.js, SUBSTITUA sua função antiga por esta completa
 
-    // 1. SELECIONAR OS ELEMENTOS
+function configurarFormNovoProjeto(projetoParaEditar = null) {
+    console.log("Configurando formulário...");
+
+    // --- 1. SELEÇÃO DOS ELEMENTOS ---
     const form = document.getElementById('form-novo-projeto');
+    const tituloModal = document.getElementById('modal-title');
+    const submitButton = form.querySelector('button[type="submit"]');
     const clienteSelect = document.getElementById('servico-cliente');
+    const nomeInput = document.getElementById('servico-nome');
     const dataInicioInput = document.getElementById('servico-data-inicio');
     const dataFimInput = document.getElementById('servico-data-fim');
     const orcamentoInput = document.getElementById('quote');
     const invoiceCheckbox = document.getElementById('invoice');
+    const descricaoInput = document.getElementById('servico-descricao');
     const multiDaySwitch = document.getElementById('multi-day-switch');
     const alocacoesContainer = document.getElementById('alocacoes-diarias-container');
     const placeholder = document.getElementById('alocacao-placeholder');
@@ -149,7 +219,31 @@ function configurarFormNovoProjeto() {
     const taxSpan = document.getElementById("tax");
     const profitSpan = document.getElementById("profit");
 
-    // 2. LÓGICA DO SWITCH DE DURAÇÃO
+    const modo = projetoParaEditar ? 'editar' : 'criar';
+
+    // --- 2. LÓGICA DE EDIÇÃO vs CRIAÇÃO ---
+    if (modo === 'editar') {
+        tituloModal.textContent = 'Editar Projeto';
+        submitButton.textContent = 'Atualizar Projeto';
+        form.dataset.id = projetoParaEditar.id;
+
+        // Popula os campos do formulário
+        nomeInput.value = projetoParaEditar.nome;
+        // Espera um momento para garantir que o 'popularClientes' tenha rodado
+        setTimeout(() => {
+            clienteSelect.value = projetoParaEditar.id_cliente;
+        }, 0);
+        dataInicioInput.value = projetoParaEditar.data_inicio;
+        dataFimInput.value = projetoParaEditar.data_fim;
+        orcamentoInput.value = parseFloat(projetoParaEditar.orcamento);
+        if (descricaoInput) descricaoInput.value = projetoParaEditar.descricao;
+        
+    } else {
+        tituloModal.textContent = 'Criar Novo Projeto';
+        submitButton.textContent = 'Salvar Projeto';
+    }
+
+    // --- 3. FUNÇÕES AUXILIARES (SUA LÓGICA ORIGINAL) ---
     function handleMultiDayToggle() {
         const isMultiDay = multiDaySwitch.checked;
         dataFimInput.disabled = !isMultiDay;
@@ -160,7 +254,6 @@ function configurarFormNovoProjeto() {
         dataFimInput.dispatchEvent(new Event('change'));
     }
 
-    // 3. FUNÇÃO PARA POPULAR O DROPDOWN DE CLIENTES
     function popularClientes() {
         clienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
         (clientes || []).forEach(cliente => {
@@ -171,7 +264,6 @@ function configurarFormNovoProjeto() {
         });
     }
 
-    // 4. FUNÇÃO PARA GERAR OS CARDS DE ALOCAÇÃO
     function gerarCamposDeAlocacao() {
         let dataInicioStr = dataInicioInput.value;
         let dataFimStr = dataFimInput.value;
@@ -187,7 +279,7 @@ function configurarFormNovoProjeto() {
             atualizarResumoFinanceiro();
             return;
         }
-        
+
         placeholder.style.display = 'none';
         const diaAtual = new Date(`${dataInicioStr}T12:00:00Z`);
         const dataFinal = new Date(`${dataFimStr}T12:00:00Z`);
@@ -241,7 +333,6 @@ function configurarFormNovoProjeto() {
         atualizarResumoFinanceiro();
     }
 
-    // 5. FUNÇÃO PARA ATUALIZAR O RESUMO FINANCEIRO
     function atualizarResumoFinanceiro() {
         let custoTotalProducao = 0;
         const orcamento = parseFloat(orcamentoInput.value) || 0;
@@ -259,14 +350,90 @@ function configurarFormNovoProjeto() {
         const imposto = invoiceCheckbox.checked ? orcamento * 0.06 : 0;
         const custosTotais = custoTotalProducao + imposto;
         const lucro = orcamento - custosTotais;
-        
+
         totalCostsSpan.textContent = `R$ ${custosTotais.toFixed(2).replace('.', ',')}`;
         taxSpan.textContent = `R$ ${imposto.toFixed(2).replace('.', ',')}`;
         profitSpan.textContent = `R$ ${lucro.toFixed(2).replace('.', ',')}`;
         profitSpan.style.color = lucro < 0 ? '#ef4444' : '#22c55e';
     }
 
-    // 6. ADICIONAR OS EVENT LISTENERS
+    // --- 4. ENVIO DO FORMULÁRIO (INTELIGENTE) ---
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        submitButton.disabled = true;
+        submitButton.textContent = modo === 'editar' ? 'Atualizando...' : 'Salvando...';
+
+        const id_cliente = clienteSelect.value;
+        if (!id_cliente) {
+            alert('Por favor, selecione um cliente antes de salvar.');
+            submitButton.disabled = false;
+            submitButton.textContent = modo === 'editar' ? 'Atualizar Projeto' : 'Salvar Projeto';
+            return;
+        }
+
+        const alocacoes = [];
+        document.querySelectorAll('.allocation-day-card').forEach(card => {
+            const data = card.dataset.date;
+            const funcionarios = Array.from(card.querySelectorAll('.resource-checkbox[id^="func-"]:checked')).map(cb => cb.value);
+            const equipamentos = Array.from(card.querySelectorAll('.resource-checkbox[id^="equip-"]:checked')).map(cb => cb.value);
+
+            if (funcionarios.length > 0 || equipamentos.length > 0) {
+                alocacoes.push({ data, funcionarios, equipamentos });
+            }
+        });
+
+        const dadosDoProjeto = {
+            id_cliente,
+            nome: nomeInput.value,
+            descricao: descricaoInput ? descricaoInput.value : '',
+            data_inicio: dataInicioInput.value,
+            data_fim: dataFimInput.value,
+            orcamento: parseFloat(orcamentoInput.value),
+            emite_nota: invoiceCheckbox.checked,
+            alocacoes // Esta é a estrutura simplificada que o backend pode preferir
+        };
+
+        try {
+            if (modo === 'editar') {
+                const projetoId = form.dataset.id;
+                await request(`/servico/${projetoId}`, 'PUT', dadosDoProjeto);
+                alert('Projeto atualizado com sucesso!');
+            } else {
+                await request('/servico', 'POST', dadosDoProjeto);
+                alert('Projeto criado com sucesso!');
+            }
+            
+            fecharModalNovoProjeto();
+            await carregarPagina('projetos/projetos.html');
+
+        } catch (err) {
+            console.error("Erro ao salvar projeto:", err);
+            alert(`Não foi possível salvar o projeto: ${err.message}`);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = modo === 'editar' ? 'Atualizar Projeto' : 'Salvar Projeto';
+        }
+    });
+
+    // --- 5. INICIALIZAÇÃO DO FORMULÁRIO E EVENTOS ---
+    popularClientes();
+
+    if (modo === 'editar') {
+        gerarCamposDeAlocacao();
+
+        (projetoParaEditar.alocacoesFuncionario || []).forEach(aloc => {
+            const checkbox = document.querySelector(`input[id="func-${aloc.funcionario_id}-${aloc.data_alocacao}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+        (projetoParaEditar.alocacoesEquipamento || []).forEach(aloc => {
+            const checkbox = document.querySelector(`input[id="equip-${aloc.equipamento_id}-${aloc.data_alocacao}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+    }
+    
+    atualizarResumoFinanceiro();
+
+    // Adiciona os event listeners que você já tinha
     multiDaySwitch.addEventListener('change', handleMultiDayToggle);
     dataInicioInput.addEventListener('change', gerarCamposDeAlocacao);
     dataFimInput.addEventListener('change', gerarCamposDeAlocacao);
@@ -283,7 +450,7 @@ function configurarFormNovoProjeto() {
             currentMultiSelect.classList.toggle('open');
         }
     });
-    
+
     alocacoesContainer.addEventListener('change', (e) => {
         if (e.target.matches('.resource-checkbox, .horas-trabalhadas')) {
             atualizarResumoFinanceiro();
@@ -297,17 +464,142 @@ function configurarFormNovoProjeto() {
             });
         }
     });
+}
 
-    // 7. ENVIO DO FORMULÁRIO
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        // Sua lógica para coletar os dados e enviar para a API vai aqui
-        console.log("Formulário enviado!");
+
+async function carregarExibirProjetos() {
+    const container = document.getElementById('projects-container');
+    if (!container) return;
+
+    container.innerHTML = '<p style="text-align: center;">Carregando projetos...</p>';
+
+    try {
+        const projetos = await request('/servico');
+
+        if (!projetos || projetos.length === 0) {
+            // Usa a classe .no-projects-message que você já tem no CSS
+            container.innerHTML = `
+                <div class="no-projects-message">
+                    <h2>Nenhum projeto encontrado.</h2>
+                    <p>Clique em "+ Novo Projeto" para começar.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = ''; // Limpa a mensagem de "Carregando..."
+
+        // Mapeamento de status para classes de cor e texto
+        const statusMap = {
+            'agendado': { text: 'Agendado', class: 'badge-yellow' },
+            'em execução': { text: 'Em Execução', class: 'badge-blue' },
+            'concluido': { text: 'Concluído', class: 'badge-green' },
+            'cancelado': { text: 'Cancelado', class: 'badge-red' }
+        };
+
+        projetos.forEach(projeto => {
+            const prazoFinal = new Date(projeto.data_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+
+            // Pega as informações de status do mapa, com um valor padrão caso não encontre
+            const statusInfo = statusMap[projeto.status?.toLowerCase()] || { text: projeto.status || 'N/A', class: '' };
+
+            // O nome do cliente agora vem corretamente do objeto aninhado
+            const nomeCliente = projeto.cliente ? projeto.cliente.nome : 'Cliente não informado';
+
+            const cardHTML = `
+                <div class="project-card glass-effect" data-id="${projeto.id}">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">${projeto.nome}</h3>
+                            <p class="card-subtitle">${nomeCliente}</p>
+                        </div>
+                        <div class="dropdown-menu">
+                            <button class="card-menu-btn" aria-label="Opções do projeto">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                            <div class="dropdown-content">
+                                <a class="dropdown-item">Editar</a>
+                                <a class="dropdown-item text-red">Excluir</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-item">
+                            <span>Status</span>
+                            <span class="badge ${statusInfo.class}">${statusInfo.text}</span>
+                        </div>
+                        <div class="card-item">
+                            <span>Orçamento</span>
+                            <span class="value">R$ ${parseFloat(projeto.orcamento || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div class="card-item">
+                            <span>Lucro</span>
+                            <span class="value text-green">R$ ${parseFloat(projeto.lucro_estimado || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div class="card-item">
+                            <span>Prazo</span>
+                            <span class="value">${prazoFinal}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHTML);
+        });
+
+    } catch (err) {
+        console.error("Erro ao carregar projetos:", err);
+        container.innerHTML = `
+            <div class="no-projects-message">
+                <h2>Erro ao carregar os projetos.</h2>
+                <p>Tente novamente mais tarde.</p>
+            </div>
+        `;
+    }
+}
+
+function configurarAcoesDosCards() {
+    const todosOsMenus = document.querySelectorAll('.dropdown-menu');
+
+    todosOsMenus.forEach(menu => {
+        const btn = menu.querySelector('.card-menu-btn');
+        if (btn) {
+            btn.addEventListener('click', (event) => {
+                // Impede que o clique no botão feche o menu imediatamente
+                event.stopPropagation();
+
+                // Fecha todos os outros menus que possam estar abertos
+                todosOsMenus.forEach(outroMenu => {
+                    if (outroMenu !== menu) {
+                        outroMenu.classList.remove('active');
+                    }
+                });
+
+                // Alterna (abre/fecha) o menu atual
+                menu.classList.toggle('active');
+            });
+        }
     });
 
-    // 8. INICIALIZAÇÃO
-    popularClientes();
-    atualizarResumoFinanceiro();
+    const todosOsBotoesEditar = document.querySelectorAll('.dropdown-item:not(.text-red)');
+    todosOsBotoesEditar.forEach(btn => {
+        btn.addEventListener('click', (event) => {
+            // Pega o card pai para encontrar o ID do projeto
+            const card = event.target.closest('.project-card');
+            const projetoId = card.dataset.id;
+            if (projetoId) {
+                abrirModalEdicao(projetoId);
+            }
+        });
+    });
+
+    // Adiciona um evento para fechar os menus se clicar em qualquer outro lugar da página
+    window.addEventListener('click', () => {
+        todosOsMenus.forEach(menu => {
+            menu.classList.remove('active');
+        });
+    });
 }
 
 

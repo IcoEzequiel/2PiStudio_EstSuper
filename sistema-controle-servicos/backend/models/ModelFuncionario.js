@@ -18,11 +18,19 @@ const Funcionario = sequelize.define('Funcionario',{
     // email: DataTypes.STRING,
     // telefone: DataTypes.STRING,
     // cargo: DataTypes.STRING,
-    // Inativoé utilizado para "deletar" um funcionario mas não apagar os dados dos serviços que ele prestou,
+    // Inativo é utilizado para "deletar" um funcionario mas não apagar os dados dos serviços que ele prestou,
     // o tornado apenas inativo
-    status: DataTypes.ENUM('ativo','inativo')
+    status: { // <-- A ÚNICA ALTERAÇÃO É AQUI
+        // Adicione TODOS os valores que existem no seu banco de dados.
+        // Abaixo está um exemplo se você tiver 'pendente' além de 'ativo' e 'inativo'.
+        type: DataTypes.ENUM('ativo', 'inativo', 'pendente'), 
+        
+        // As duas linhas abaixo são boas práticas para evitar erros futuros:
+        allowNull: false,      // Garante que o status nunca será nulo.
+        defaultValue: 'ativo'  // Define 'ativo' como padrão para novos funcionários.
+    }
 },
-    // Como estamos usando o sequelise para definir o model, temos que informar o nome da tabela (de preferencia o mesmo do 
+    // Como estamos usando o sequelize para definir o model, temos que informar o nome da tabela (de preferencia o mesmo do 
     // banco de dados), e definir o timestamps para falso (timestamps são campos para informar quando a instancia foi criada
     // e qual a ultima data que ela foi alterada)
 {

@@ -1,3 +1,5 @@
+// Salve este código como: dashboard/dashboard.js (VERSÃO CORRIGIDA)
+
 import { request } from '../shared/api.js';
 
 // Função para formatar valores em moeda brasileira (Real)
@@ -17,21 +19,31 @@ async function inicializarDashboard() {
         document.getElementById('receita-total').textContent = formatarMoeda(data.receita);
         document.getElementById('lucro-total').textContent = formatarMoeda(data.lucro);
 
+        // Mapeamento de status para classes de cor e texto
+        const statusMap = {
+            'agendado': { text: 'Agendado', class: 'amarelo' },
+            'em execução': { text: 'Em Execução', class: 'azul' },
+            'concluido': { text: 'Concluído', class: 'verde' },
+            'quoting': { text: 'Orçamento', class: 'laranja' }, // Adicionado
+            'cancelado': { text: 'Cancelado', class: 'vermelho' }
+        };
+
         // Cria e insere a lista de projetos recentes
         const listaProjetosRecentesEl = document.getElementById('lista-projetos-recentes');
         if (data.projetosRecentes && data.projetosRecentes.length > 0) {
             listaProjetosRecentesEl.innerHTML = data.projetosRecentes.map(projeto => {
-                // Define a classe de cor com base no status do projeto
-                const statusClass = projeto.status === 'concluido' ? 'verde' : 'azul';
-                
+                const statusInfo = statusMap[projeto.status?.toLowerCase()] || { text: projeto.status, class: 'azul' };
+
+                // --- HTML CORRIGIDO PARA CORRESPONDER AO LAYOUT DA IMAGEM ---
                 return `
-                    <div class="projeto-item">
-                        <div class="info-projeto">
-                            <span class="nome-projeto">${projeto.nome}</span>
-                            <span class="nome-cliente">${projeto.cliente?.nome || 'Cliente não definido'}</span>
+                    <div class="projeto">
+                        <div>
+                            <div class="nome-projeto">${projeto.nome}</div>
+                            <div class="cliente-projeto">${projeto.cliente?.nome || 'Cliente não definido'}</div>
                         </div>
                         <div class="status-projeto">
-                            <span class="etiqueta ${statusClass}">${projeto.status}</span>
+                            <span class="etiqueta ${statusInfo.class}">${statusInfo.text}</span>
+                            <div class="orcamento-projeto">${formatarMoeda(projeto.orcamento)}</div>
                         </div>
                     </div>
                 `;
@@ -48,4 +60,3 @@ async function inicializarDashboard() {
 
 // Exporta a função para que o scripts.js possa chamá-la
 export { inicializarDashboard };
-
