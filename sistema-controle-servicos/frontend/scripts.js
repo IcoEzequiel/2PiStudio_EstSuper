@@ -116,7 +116,7 @@ async function abrirModalEdicao(projetoId) {
     try {
         console.log(`Buscando dados do projeto ID: ${projetoId}`);
         const projetoParaEditar = await request(`/servico/${projetoId}`);
-        
+
         await abrirModalBase();
         // Passa os dados do projeto para a função de configuração
         configurarFormNovoProjeto(projetoParaEditar);
@@ -167,6 +167,16 @@ async function carregarPagina(pagina) {
             configurarAcoesDosCards();
         }
 
+        if (pagina.includes("alocacoes")) { 
+            let css = document.createElement("link");
+            css.rel = "stylesheet";
+            css.href = "alocacoes/alocacoes.css";
+            css.id = "extra-css";
+            document.head.appendChild(css);
+
+            carregarExibirAlocacoes();
+        }
+
     } catch (err) {
         document.getElementById("conteudo").innerHTML = "<p>Erro ao carregar página</p>";
         console.error(err);
@@ -175,7 +185,10 @@ async function carregarPagina(pagina) {
 
 // Navegação
 function configurarNavegacao() {
-    document.getElementById('btn-abrir-modal-projeto').addEventListener('click', abrirModalNovoProjeto);
+    const btnNovoProjeto = document.getElementById('btn-abrir-modal-projeto');
+    if (btnNovoProjeto) { // Verifica se o botão existe antes de adicionar o evento
+        btnNovoProjeto.addEventListener('click', abrirModalNovoProjeto);
+    }
 
     const links = document.querySelectorAll(".nav-btn");
     links.forEach(link => {
@@ -191,6 +204,7 @@ function configurarNavegacao() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('authToken');
+            localStorage.removeItem('userProfile'); // Limpa também o perfil
             window.location.href = 'login/login.html';
         });
     }
@@ -237,7 +251,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
         dataFimInput.value = projetoParaEditar.data_fim;
         orcamentoInput.value = parseFloat(projetoParaEditar.orcamento);
         if (descricaoInput) descricaoInput.value = projetoParaEditar.descricao;
-        
+
     } else {
         tituloModal.textContent = 'Criar Novo Projeto';
         submitButton.textContent = 'Salvar Projeto';
@@ -402,7 +416,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
                 await request('/servico', 'POST', dadosDoProjeto);
                 alert('Projeto criado com sucesso!');
             }
-            
+
             fecharModalNovoProjeto();
             await carregarPagina('projetos/projetos.html');
 
@@ -430,7 +444,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
             if (checkbox) checkbox.checked = true;
         });
     }
-    
+
     atualizarResumoFinanceiro();
 
     // Adiciona os event listeners que você já tinha
@@ -439,7 +453,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
     dataFimInput.addEventListener('change', gerarCamposDeAlocacao);
     orcamentoInput.addEventListener('input', atualizarResumoFinanceiro);
     invoiceCheckbox.addEventListener('change', atualizarResumoFinanceiro);
-    
+
     alocacoesContainer.addEventListener('click', (e) => {
         const trigger = e.target.closest('.select-trigger');
         if (trigger) {
@@ -464,6 +478,57 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
             });
         }
     });
+}
+
+// Adicione esta nova função ao seu scripts.js
+
+async function carregarExibirAlocacoes() {
+    const container = document.getElementById('allocations-list');
+    if (!container) return;
+
+    container.innerHTML = '<p>Carregando alocações...</p>';
+
+    try {
+        // Esta rota precisa ser criada no seu back-end.
+        // Ela deve retornar as alocações do funcionário logado.
+        const alocacoes = await request('/alocacoes/minhas');
+
+        if (!alocacoes || alocacoes.length === 0) {
+            container.innerHTML = '<p>Nenhuma alocação encontrada para você.</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+
+        alocacoes.forEach(aloc => {
+            const dataFormatada = new Date(aloc.data_alocacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+
+            // Lógica condicional para o botão/badge
+            const actionHtml = aloc.relatorio_feito // Supondo que a API envie este campo booleano
+                ? `<span class="badge badge-green">Relatório Feito</span>`
+                : `<button class="btn-action btn-report" data-id="${aloc.id}">
+                       <svg></svg>
+                       Realizar Relatório
+                   </button>`;
+
+            const itemHtml = `
+                <div class="allocation-item">
+                    <div class="allocation-details">
+                        <span class="allocation-project-name">${aloc.servico.nome}</span>
+                        <span class="allocation-date">Data: ${dataFormatada}</span>
+                    </div>
+                    <div class="allocation-actions">
+                        ${actionHtml}
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', itemHtml);
+        });
+
+    } catch (err) {
+        console.error("Erro ao carregar alocações:", err);
+        container.innerHTML = '<p>Erro ao carregar suas alocações.</p>';
+    }
 }
 
 
@@ -599,6 +664,23 @@ function configurarAcoesDosCards() {
         todosOsMenus.forEach(menu => {
             menu.classList.remove('active');
         });
+    });
+}
+
+function configurarAcessoPorPerfil() {
+    const perfil = localStorage.getItem('userProfile');
+
+    if (!perfil || (perfil !== 'admin' && perfil !== 'funcionario')) {
+        window.location.href = 'login/login.html';
+        return;
+    }
+
+    const todosOsItensControlados = document.querySelectorAll('[data-roles]');
+    todosOsItensControlados.forEach(item => {
+        const rolesPermitidas = item.dataset.roles.split(',');
+        if (!rolesPermitidas.includes(perfil)) {
+            item.style.display = 'none';
+        }
     });
 }
 
@@ -756,3 +838,30 @@ window.onload = async () => {
         }
     });
 };
+
+// --- INICIALIZAÇÃO DO SITE ---
+// window.onload = async () => {
+//     // 1. PRIMEIRO, configura o que o usuário pode ver na interface
+//     configurarAcessoPorPerfil();
+
+//     // 2. DEPOIS, carrega os dados iniciais que a aplicação precisa
+//     await carregarDadosIniciais();
+//     configurarNavegacao();
+
+//     // 3. FINALMENTE, carrega a página inicial correta para o perfil
+//     const perfil = localStorage.getItem('userProfile');
+
+//     if (perfil === 'admin') {
+//         // Se for admin, a página inicial é o Dashboard
+//         carregarPagina("dashboard/dashboard.html");
+//     } else if (perfil === 'funcionario') {
+//         // Se for funcionário, a página inicial é a de Alocações
+//         carregarPagina("alocacoes/alocacoes.html");
+//     }
+
+//     modalBackdrop.addEventListener('click', (event) => {
+//         if (event.target === modalBackdrop) {
+//             fecharModalNovoProjeto();
+//         }
+//     });
+// };

@@ -1,0 +1,95 @@
+/* Salve este código como: relatorios/relatorios.css */
+
+.reports-container {
+    width: 100%;
+    max-width: 1280px;
+    padding: 24px 32px;
+    box-sizing: border-box;
+}
+
+.reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.reports-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.btn-novo-relatorio {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    color: var(--text-color);
+    background: linear-gradient(to right, #3B82F6, #10B981);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-novo-relatorio:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.reports-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.report-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    transition: background-color 0.2s;
+}
+
+.report-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.report-title {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.report-date {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 4px;
+}
+
+.report-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.view-report-btn {
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-color);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.view-report-btn:hover {
+    background-color: var(--glass-bg);
+    border-color: #ffffff;
+}
