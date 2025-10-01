@@ -70,7 +70,7 @@ const AuthController = {
             const Usuario = await UsuarioRepo.findByLogin(login);
 
             // Log de depuração que confirma que o usuário foi encontrado corretamente
-            console.log('Objeto de Usuário retornado pelo Repositório:', Usuario);
+            // console.log('Objeto de Usuário retornado pelo Repositório:', Usuario);
 
             if (!Usuario) {
                 return res.status(401).json({ error: 'Credenciais Inválidas' });

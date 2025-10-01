@@ -852,7 +852,7 @@ window.onload = async () => {
     // 3. FINALMENTE, carrega a página inicial correta para o perfil
     const perfil = localStorage.getItem('userProfile');
 
-    if (perfil === 'admin') {
+    if (perfil === 'administrador') {
         carregarPagina("dashboard/dashboard.html");
     } else if (perfil === 'funcionario') {
         carregarPagina("alocacoes/alocacoes.html");
