@@ -167,7 +167,7 @@ async function carregarPagina(pagina) {
             configurarAcoesDosCards();
         }
 
-        if (pagina.includes("alocacoes")) { 
+        if (pagina.includes("alocacoes")) {
             let css = document.createElement("link");
             css.rel = "stylesheet";
             css.href = "alocacoes/alocacoes.css";
@@ -670,12 +670,13 @@ function configurarAcoesDosCards() {
 function configurarAcessoPorPerfil() {
     const perfil = localStorage.getItem('userProfile');
 
-    if (!perfil || (perfil !== 'admin' && perfil !== 'funcionario')) {
+    if (!perfil) {
         window.location.href = 'login/login.html';
         return;
     }
 
     const todosOsItensControlados = document.querySelectorAll('[data-roles]');
+
     todosOsItensControlados.forEach(item => {
         const rolesPermitidas = item.dataset.roles.split(',');
         if (!rolesPermitidas.includes(perfil)) {
@@ -827,37 +828,10 @@ function configurarPaginaConfiguracoes() {
 }
 
 // --- Inicialização do Site ---
-window.onload = async () => {
-    await carregarDadosIniciais(); // Descomente quando a API estiver pronta
-    configurarNavegacao();
-    carregarPagina("dashboard/dashboard.html");
-
-    modalBackdrop.addEventListener('click', (event) => {
-        if (event.target === modalBackdrop) {
-            fecharModalNovoProjeto();
-        }
-    });
-};
-
-// --- INICIALIZAÇÃO DO SITE ---
 // window.onload = async () => {
-//     // 1. PRIMEIRO, configura o que o usuário pode ver na interface
-//     configurarAcessoPorPerfil();
-
-//     // 2. DEPOIS, carrega os dados iniciais que a aplicação precisa
-//     await carregarDadosIniciais();
+//     await carregarDadosIniciais(); // Descomente quando a API estiver pronta
 //     configurarNavegacao();
-
-//     // 3. FINALMENTE, carrega a página inicial correta para o perfil
-//     const perfil = localStorage.getItem('userProfile');
-
-//     if (perfil === 'admin') {
-//         // Se for admin, a página inicial é o Dashboard
-//         carregarPagina("dashboard/dashboard.html");
-//     } else if (perfil === 'funcionario') {
-//         // Se for funcionário, a página inicial é a de Alocações
-//         carregarPagina("alocacoes/alocacoes.html");
-//     }
+//     carregarPagina("dashboard/dashboard.html");
 
 //     modalBackdrop.addEventListener('click', (event) => {
 //         if (event.target === modalBackdrop) {
@@ -865,3 +839,22 @@ window.onload = async () => {
 //         }
 //     });
 // };
+
+// --- INICIALIZAÇÃO DO SITE ---
+window.onload = async () => {
+    // 1. PRIMEIRO, configura o que o usuário pode ver na interface
+    configurarAcessoPorPerfil();
+
+    // 2. DEPOIS, carrega os dados iniciais que a aplicação precisa
+    await carregarDadosIniciais();
+    configurarNavegacao();
+
+    // 3. FINALMENTE, carrega a página inicial correta para o perfil
+    const perfil = localStorage.getItem('userProfile');
+
+    if (perfil === 'admin') {
+        carregarPagina("dashboard/dashboard.html");
+    } else if (perfil === 'funcionario') {
+        carregarPagina("alocacoes/alocacoes.html");
+    }
+};

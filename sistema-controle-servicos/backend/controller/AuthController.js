@@ -1,3 +1,62 @@
+// const bcrypt = require('bcrypt');
+// const jwt = require('jsonwebtoken');
+// const UsuarioRepo = require('../repositories/UsuarioRepository');
+
+// const AuthController = {
+//     login: async (req, res) => {
+//         const { login, senha } = req.body;
+
+//         try {
+//             const Usuario = await UsuarioRepo.findByLogin(login);
+
+//             console.log('Objeto de Usuário retornado pelo Repositório:', Usuario);
+
+//             if (!Usuario) {
+//                 return res.status(401).json({ error: 'Credenciais Inválidas' });
+//             }
+
+//             const senhaCorreta = await bcrypt.compare(senha, Usuario.senha);
+//             if (!senhaCorreta) {
+//                 return res.status(401).json({ error: 'Credenciais Inválidas' });
+//             }
+
+//             const payload = {
+//                 id: Usuario.id,
+//                 papel: Usuario.papel
+//             };
+
+//             if (Usuario.papel === 'funcionario' && Usuario.id_funcionario) {
+//                 payload.id_funcionario = Usuario.id_funcionario;
+//             }
+
+//             const token = jwt.sign(payload, process.env.JWT_SECRET, {
+//                 expiresIn: '8h'
+//             });
+
+//             // --- GARANTA QUE ESTA PARTE ESTEJA EXATAMENTE ASSIM ---
+//             const userResponse = {
+//                 id: Usuario.id,
+//                 nome: Usuario.login,
+//                 profile: Usuario.papel, // VERIFIQUE: A chave é 'profile' e o valor é 'Usuario.papel'
+//                 id_funcionario: Usuario.id_funcionario
+//             };
+
+//             // Envia a resposta ÚNICA e COMPLETA
+//             res.json({
+//                 token: token,
+//                 user: userResponse
+//             });
+
+//         } catch (error) {
+//             res.status(500).json({ error: "Erro interno no servidor ao logar: " + error.message });
+//         }
+//     }
+// };
+
+// module.exports = AuthController;
+
+// Arquivo: controller/AuthController.js (VERSÃO FINAL E CORRETA)
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const UsuarioRepo = require('../repositories/UsuarioRepository');
@@ -7,48 +66,52 @@ const AuthController = {
         const { login, senha } = req.body;
 
         try {
+            // 1. Busca o usuário pelo login
             const Usuario = await UsuarioRepo.findByLogin(login);
 
+            // Log de depuração que confirma que o usuário foi encontrado corretamente
             console.log('Objeto de Usuário retornado pelo Repositório:', Usuario);
 
             if (!Usuario) {
                 return res.status(401).json({ error: 'Credenciais Inválidas' });
             }
 
+            // 2. Compara a senha enviada com a senha hasheada no banco
             const senhaCorreta = await bcrypt.compare(senha, Usuario.senha);
             if (!senhaCorreta) {
                 return res.status(401).json({ error: 'Credenciais Inválidas' });
             }
 
+            // 3. Cria o payload para o token JWT
             const payload = {
                 id: Usuario.id,
                 papel: Usuario.papel
             };
-
             if (Usuario.papel === 'funcionario' && Usuario.id_funcionario) {
                 payload.id_funcionario = Usuario.id_funcionario;
             }
 
+            // 4. Gera o token
             const token = jwt.sign(payload, process.env.JWT_SECRET, {
                 expiresIn: '8h'
             });
 
-            // --- GARANTA QUE ESTA PARTE ESTEJA EXATAMENTE ASSIM ---
+            // 5. Monta o objeto de resposta para o front-end
             const userResponse = {
                 id: Usuario.id,
                 nome: Usuario.login,
-                profile: Usuario.papel, // VERIFIQUE: A chave é 'profile' e o valor é 'Usuario.papel'
-                id_funcionario: Usuario.id_funcionario
+                profile: Usuario.papel // A chave 'profile' que o front-end espera
             };
 
-            // Envia a resposta ÚNICA e COMPLETA
-            res.json({
+            // 6. Envia a resposta final e completa
+            return res.json({
                 token: token,
                 user: userResponse
             });
 
         } catch (error) {
-            res.status(500).json({ error: "Erro interno no servidor ao logar: " + error.message });
+            console.error("Erro grave no login:", error);
+            return res.status(500).json({ error: "Erro interno no servidor ao logar: " + error.message });
         }
     }
 };
