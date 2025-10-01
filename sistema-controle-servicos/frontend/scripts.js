@@ -131,6 +131,16 @@ async function abrirModalEdicao(projetoId) {
 async function carregarPagina(pagina) {
     console.log("Carregando:", pagina);
     try {
+        const links = document.querySelectorAll('.nav-btn');
+        links.forEach(link => {
+            // Verifica se o data-page do link corresponde à página que está sendo carregada
+            if (link.getAttribute('data-page') === pagina) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
         const resposta = await fetch(pagina);
         if (!resposta.ok) throw new Error("Erro ao carregar " + pagina);
         const html = await resposta.text();
@@ -195,6 +205,8 @@ function configurarNavegacao() {
         link.addEventListener("click", () => {
             const pagina = link.getAttribute("data-page");
             if (pagina) {
+                links.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
                 carregarPagina(pagina);
             }
         });
