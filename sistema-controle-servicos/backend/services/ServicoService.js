@@ -44,7 +44,9 @@ const calcularStatus = (servico) => {
 const getComInclude = async (id) => {
     // Determina quais objetos vão ser inclusos no objeto principal
     const inclusao = {include:[
-                {model: require('../models/ModelCliente'), as: 'cliente'}
+                { model: require('../models/ModelCliente'), as: 'cliente'},
+                { model: require('../models/ModelAlocacaoEquipamento'), as: 'alocacoesEquipamento'},
+                { model: require('../models/ModelAlocacaoFuncionario'), as: 'alocacoesFuncionario'}
             ]}
             // realiza a requisição para o banco de dados com o as inclusões, o repositorio precisa aceitar um "options" para funcionar
             if(!id)
@@ -303,7 +305,7 @@ const ServicoService = {
 
             // Recriação das alocações
             if(dados.alocacoes_diarias)
-                await gerenciarAlocacoes(id, dados.alocacoes_diarias,{transaction: t})
+                await gerenciarAlocacoes(id, dados.alocacoes_diarias,t)
 
             const dadosServico = {
                 ...servico.get({plain: true}),
@@ -316,6 +318,7 @@ const ServicoService = {
             return servicoEditDTO
         } catch(error){
             await t.rollback()
+            console.error('Erro detalhado ao atualizar o serviço: ', error)
             throw new Error('Erro ao atualizar serviço: ' + error.message)
         }
     },

@@ -252,33 +252,50 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
         tituloModal.textContent = 'Editar Projeto';
         submitButton.textContent = 'Atualizar Projeto';
         form.dataset.id = projetoParaEditar.id;
-
-        // Popula os campos do formulário
         nomeInput.value = projetoParaEditar.nome;
-        // Espera um momento para garantir que o 'popularClientes' tenha rodado
-        setTimeout(() => {
-            clienteSelect.value = projetoParaEditar.id_cliente;
-        }, 0);
+        setTimeout(() => { clienteSelect.value = projetoParaEditar.cliente.id; }, 100);
         dataInicioInput.value = projetoParaEditar.data_inicio;
         dataFimInput.value = projetoParaEditar.data_fim;
         orcamentoInput.value = parseFloat(projetoParaEditar.orcamento);
         if (descricaoInput) descricaoInput.value = projetoParaEditar.descricao;
-
+        if (projetoParaEditar.data_inicio !== projetoParaEditar.data_fim) {
+            multiDaySwitch.checked = true;
+        }
     } else {
         tituloModal.textContent = 'Criar Novo Projeto';
         submitButton.textContent = 'Salvar Projeto';
     }
 
-    // --- 3. FUNÇÕES AUXILIARES (SUA LÓGICA ORIGINAL) ---
+    // --- 3. FUNÇÕES AUXILIARES ---
+    function preencherAlocacoesSalvas() {
+        (projetoParaEditar.alocacoesFuncionario || []).forEach(aloc => {
+            const checkbox = document.querySelector(`#func-${aloc.id_funcionario}-${aloc.data}`);
+            if (checkbox) checkbox.checked = true;
+        });
+        (projetoParaEditar.alocacoesEquipamento || []).forEach(aloc => {
+            const checkbox = document.querySelector(`#equip-${aloc.id_equipamento}-${aloc.data}`);
+            if (checkbox) checkbox.checked = true;
+        });
+        document.querySelectorAll('.custom-multiselect').forEach(atualizarTextoSeletor);
+    }
+
+    function atualizarTextoSeletor(multiselect) {
+        const trigger = multiselect.querySelector('.select-trigger span:first-child');
+        const count = multiselect.querySelectorAll('.resource-checkbox:checked').length;
+        trigger.textContent = count > 0 ? `${count} selecionado(s)` : 'Selecionar';
+    }
+
+    // **INÍCIO DA CORREÇÃO 1: Lógica do "switch" de datas**
     function handleMultiDayToggle() {
         const isMultiDay = multiDaySwitch.checked;
         dataFimInput.disabled = !isMultiDay;
-        if (isMultiDay && dataInicioInput.value) {
+        if (!isMultiDay) {
             dataFimInput.value = dataInicioInput.value;
-            dataFimInput.focus();
         }
-        dataFimInput.dispatchEvent(new Event('change'));
+        // Ao ativar, não alteramos a data final, permitindo que o utilizador escolha.
+        gerarCamposDeAlocacao();
     }
+    // **FIM DA CORREÇÃO 1**
 
     function popularClientes() {
         clienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
@@ -293,11 +310,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
     function gerarCamposDeAlocacao() {
         let dataInicioStr = dataInicioInput.value;
         let dataFimStr = dataFimInput.value;
-
-        if (!multiDaySwitch.checked && dataInicioStr) {
-            dataFimStr = dataInicioStr;
-        }
-
+        if (!multiDaySwitch.checked && dataInicioStr) dataFimStr = dataInicioStr;
         alocacoesContainer.innerHTML = '';
 
         if (!dataInicioStr || !dataFimStr || new Date(dataFimStr) < new Date(dataInicioStr)) {
@@ -313,7 +326,6 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
         while (diaAtual <= dataFinal) {
             const dataISO = diaAtual.toISOString().split('T')[0];
             const dataFormatada = diaAtual.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-
             const cardHTML = `
                 <div class="allocation-day-card" data-date="${dataISO}">
                     <h4>Dia: ${dataFormatada}</h4>
@@ -327,12 +339,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
                             <div class="custom-multiselect">
                                 <div class="select-trigger"><span>Selecionar</span><span class="arrow"></span></div>
                                 <div class="options-list">
-                                    ${labor.map(f => `
-                                        <div class="resource-item">
-                                            <input type="checkbox" id="func-${f.id}-${dataISO}" value="${f.id}" class="resource-checkbox" data-cost="${(f.parametrizacao?.valor_diaria ?? 0)}" data-cost-type="daily">
-                                            <label for="func-${f.id}-${dataISO}">${f.nome}</label>
-                                        </div>
-                                    `).join('')}
+                                    ${labor.map(f => `<div class="resource-item"><input type="checkbox" id="func-${f.id}-${dataISO}" value="${f.id}" class="resource-checkbox" data-cost="${(f.parametrizacao?.valor_diaria || 0)}" data-cost-type="daily"><label for="func-${f.id}-${dataISO}">${f.nome}</label></div>`).join('')}
                                 </div>
                             </div>
                         </div>
@@ -341,28 +348,23 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
                             <div class="custom-multiselect">
                                 <div class="select-trigger"><span>Selecionar</span><span class="arrow"></span></div>
                                 <div class="options-list">
-                                    ${equipment.map(e => `
-                                        <div class="resource-item">
-                                            <input type="checkbox" id="equip-${e.id}-${dataISO}" value="${e.id}" class="resource-checkbox" data-cost="${(e.parametrizacao?.valor_hora ?? 0)}" data-cost-type="hourly">
-                                            <label for="equip-${e.id}-${dataISO}">${e.nome}</label>
-                                        </div>
-                                    `).join('')}
+                                    ${equipment.map(e => `<div class="resource-item"><input type="checkbox" id="equip-${e.id}-${dataISO}" value="${e.id}" class="resource-checkbox" data-cost="${(e.parametrizacao?.valor_hora || 0)}" data-cost-type="hourly"><label for="equip-${e.id}-${dataISO}">${e.nome}</label></div>`).join('')}
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
             alocacoesContainer.insertAdjacentHTML('beforeend', cardHTML);
             diaAtual.setUTCDate(diaAtual.getUTCDate() + 1);
         }
+        
+        if (modo === 'editar' && projetoParaEditar) preencherAlocacoesSalvas();
         atualizarResumoFinanceiro();
     }
-
+    
     function atualizarResumoFinanceiro() {
         let custoTotalProducao = 0;
         const orcamento = parseFloat(orcamentoInput.value) || 0;
-
         document.querySelectorAll('.allocation-day-card').forEach(card => {
             const horas = parseFloat(card.querySelector('.horas-trabalhadas').value) || 0;
             card.querySelectorAll('.resource-checkbox:checked').forEach(checkbox => {
@@ -372,23 +374,20 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
                 else if (tipoCusto === 'hourly') custoTotalProducao += custo * horas;
             });
         });
-
         const imposto = invoiceCheckbox.checked ? orcamento * 0.06 : 0;
         const custosTotais = custoTotalProducao + imposto;
         const lucro = orcamento - custosTotais;
-
         totalCostsSpan.textContent = `R$ ${custosTotais.toFixed(2).replace('.', ',')}`;
         taxSpan.textContent = `R$ ${imposto.toFixed(2).replace('.', ',')}`;
         profitSpan.textContent = `R$ ${lucro.toFixed(2).replace('.', ',')}`;
         profitSpan.style.color = lucro < 0 ? '#ef4444' : '#22c55e';
     }
 
-    // --- 4. ENVIO DO FORMULÁRIO (INTELIGENTE) ---
+    // --- 4. ENVIO DO FORMULÁRIO ---
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         submitButton.disabled = true;
         submitButton.textContent = modo === 'editar' ? 'Atualizando...' : 'Salvando...';
-
         const id_cliente = clienteSelect.value;
         if (!id_cliente) {
             alert('Por favor, selecione um cliente antes de salvar.');
@@ -396,42 +395,41 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
             submitButton.textContent = modo === 'editar' ? 'Atualizar Projeto' : 'Salvar Projeto';
             return;
         }
-
-        const alocacoes = [];
+        const alocacoes_diarias = {};
         document.querySelectorAll('.allocation-day-card').forEach(card => {
             const data = card.dataset.date;
-            const funcionarios = Array.from(card.querySelectorAll('.resource-checkbox[id^="func-"]:checked')).map(cb => cb.value);
-            const equipamentos = Array.from(card.querySelectorAll('.resource-checkbox[id^="equip-"]:checked')).map(cb => cb.value);
-
+            const horas_trabalhadas = parseInt(card.querySelector('.horas-trabalhadas').value, 10) || 0;
+            const funcionarios = Array.from(card.querySelectorAll('.resource-checkbox[id^="func-"]:checked')).map(cb => ({
+                id_funcionario: parseInt(cb.value, 10),
+                valor_dia_alocado: parseFloat(cb.dataset.cost) || 0
+            }));
+            const equipamentos = Array.from(card.querySelectorAll('.resource-checkbox[id^="equip-"]:checked')).map(cb => ({
+                id_equipamento: parseInt(cb.value, 10),
+                valor_hora_alocada: parseFloat(cb.dataset.cost) || 0
+            }));
             if (funcionarios.length > 0 || equipamentos.length > 0) {
-                alocacoes.push({ data, funcionarios, equipamentos });
+                alocacoes_diarias[data] = { horas_trabalhadas, funcionarios, equipamentos };
             }
         });
-
         const dadosDoProjeto = {
-            id_cliente,
+            id_cliente: parseInt(id_cliente, 10),
             nome: nomeInput.value,
             descricao: descricaoInput ? descricaoInput.value : '',
             data_inicio: dataInicioInput.value,
-            data_fim: dataFimInput.value,
+            data_fim: multiDaySwitch.checked ? dataFimInput.value : dataInicioInput.value,
             orcamento: parseFloat(orcamentoInput.value),
-            emite_nota: invoiceCheckbox.checked,
-            alocacoes // Esta é a estrutura simplificada que o backend pode preferir
+            alocacoes_diarias
         };
-
         try {
             if (modo === 'editar') {
-                const projetoId = form.dataset.id;
-                await request(`/servico/${projetoId}`, 'PUT', dadosDoProjeto);
+                await request(`/servico/${form.dataset.id}`, 'PUT', dadosDoProjeto);
                 alert('Projeto atualizado com sucesso!');
             } else {
                 await request('/servico', 'POST', dadosDoProjeto);
                 alert('Projeto criado com sucesso!');
             }
-
             fecharModalNovoProjeto();
             await carregarPagina('projetos/projetos.html');
-
         } catch (err) {
             console.error("Erro ao salvar projeto:", err);
             alert(`Não foi possível salvar o projeto: ${err.message}`);
@@ -441,31 +439,22 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
         }
     });
 
-    // --- 5. INICIALIZAÇÃO DO FORMULÁRIO E EVENTOS ---
+    // --- 5. INICIALIZAÇÃO E EVENTOS ---
     popularClientes();
+    handleMultiDayToggle(); // Chama para configurar o estado inicial
 
-    if (modo === 'editar') {
-        gerarCamposDeAlocacao();
+    // **INÍCIO DA CORREÇÃO 2: Remover o bloco 'if (modo === 'editar')' daqui**
+    // O código que estava aqui era redundante e incorreto, pois a lógica já é tratada
+    // dentro de `gerarCamposDeAlocacao` através da chamada a `preencherAlocacoesSalvas`.
+    // **FIM DA CORREÇÃO 2**
 
-        (projetoParaEditar.alocacoesFuncionario || []).forEach(aloc => {
-            const checkbox = document.querySelector(`input[id="func-${aloc.funcionario_id}-${aloc.data_alocacao}"]`);
-            if (checkbox) checkbox.checked = true;
-        });
-        (projetoParaEditar.alocacoesEquipamento || []).forEach(aloc => {
-            const checkbox = document.querySelector(`input[id="equip-${aloc.equipamento_id}-${aloc.data_alocacao}"]`);
-            if (checkbox) checkbox.checked = true;
-        });
-    }
-
-    atualizarResumoFinanceiro();
-
-    // Adiciona os event listeners que você já tinha
+    // Adiciona os event listeners
     multiDaySwitch.addEventListener('change', handleMultiDayToggle);
     dataInicioInput.addEventListener('change', gerarCamposDeAlocacao);
     dataFimInput.addEventListener('change', gerarCamposDeAlocacao);
     orcamentoInput.addEventListener('input', atualizarResumoFinanceiro);
     invoiceCheckbox.addEventListener('change', atualizarResumoFinanceiro);
-
+    
     alocacoesContainer.addEventListener('click', (e) => {
         const trigger = e.target.closest('.select-trigger');
         if (trigger) {
@@ -476,18 +465,20 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
             currentMultiSelect.classList.toggle('open');
         }
     });
-
+    
     alocacoesContainer.addEventListener('change', (e) => {
         if (e.target.matches('.resource-checkbox, .horas-trabalhadas')) {
             atualizarResumoFinanceiro();
+        }
+        if(e.target.matches('.resource-checkbox')) {
+            const multiselect = e.target.closest('.custom-multiselect');
+            if (multiselect) atualizarTextoSeletor(multiselect);
         }
     });
 
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-multiselect')) {
-            document.querySelectorAll('.custom-multiselect.open').forEach(select => {
-                select.classList.remove('open');
-            });
+            document.querySelectorAll('.custom-multiselect.open').forEach(select => select.classList.remove('open'));
         }
     });
 }
