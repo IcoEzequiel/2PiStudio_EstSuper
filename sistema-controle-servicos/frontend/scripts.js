@@ -370,7 +370,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
             card.querySelectorAll('.resource-checkbox:checked').forEach(checkbox => {
                 const custo = parseFloat(checkbox.dataset.cost) || 0;
                 const tipoCusto = checkbox.dataset.costType;
-                if (tipoCusto === 'daily') custoTotalProducao += custo;
+                if (tipoCusto === 'daily') custoTotalProducao += custo * horas;
                 else if (tipoCusto === 'hourly') custoTotalProducao += custo * horas;
             });
         });
@@ -732,7 +732,7 @@ function configurarPaginaConfiguracoes() {
                 detailsHtml = `<span>${item.tipo_cliente || ''}: ${item.cpf_cnpj || ''}</span>`;
             } else {
                 const isEquipment = type === 'equipment';
-                const cost = item.parametrizacao ? (isEquipment ? item.parametrizacao.valor_hora : item.parametrizacao.valor_diaria / 8) : 0;
+                const cost = item.parametrizacao ? (isEquipment ? item.parametrizacao.valor_hora : item.parametrizacao.valor_diaria) : 0;
                 detailsHtml = `<span class="cost">R$ ${parseFloat(cost).toFixed(2)}/h</span>`;
             }
 
@@ -767,7 +767,7 @@ function configurarPaginaConfiguracoes() {
         } else {
             const cost = parseFloat(document.getElementById(config.inputs.valor).value) || 0;
             if (type === 'equipment') dados.valor_hora = cost;
-            else dados.valor_diaria = cost * 8;
+            else dados.valor_diaria = cost;
         }
 
         try {
@@ -797,7 +797,7 @@ function configurarPaginaConfiguracoes() {
             } else {
                 const costInput = document.getElementById(config.inputs.valor);
                 const isEquipment = type === 'equipment';
-                costInput.value = item.parametrizacao ? (isEquipment ? item.parametrizacao.valor_hora : item.parametrizacao.valor_diaria / 8) : '';
+                costInput.value = item.parametrizacao ? (isEquipment ? item.parametrizacao.valor_hora : item.parametrizacao.valor_diaria) : '';
             }
         } catch (err) { alert(`Erro ao carregar item para edição: ${err.message}`); }
     }

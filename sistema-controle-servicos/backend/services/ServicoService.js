@@ -15,6 +15,34 @@ const ClienteRepo = require('../repositories/ClienteRepository')
 // Para transformar o os dados em DTOs
 const ServicoMapper = require('../mappers/servicoMapper')
 
+// ** FUNÇÕES AUXILIARES
+
+//Calcula o Lucro do Servico
+const calcularLucriEstimado = (servico) => {
+    const orcamento = parseFloat(servico.orcamento) || 0;
+    let custoTotal = 0
+
+    //Calculo do valor dos funcionarios
+    if (servico.alocacoesFuncionario && Array.isArray(servico.alocacoesFuncionario)){
+        for (const aloc of servico.alocacoesFuncionario){
+            const valor = parseFloat(aloc.valor_dia_alocado) || 0
+            const horas = parseInt(aloc.hora) || 0
+            custoTotal += valor * horas
+        }
+    }
+    if (servico.alocacoesEquipamento && Array.isArray(servico.alocacoesEquipamento)){
+        for (const aloc of servico.alocacoesEquipamento){
+            const valor = parseFloat(aloc.valor_hora_alocada) || 0
+            const horas = parseInt(aloc.hora) || 0
+            custoTotal += valor * horas
+        }
+    }
+
+    return orcamento - custoTotal;
+}
+
+
+
 // Para calcular o status do serviço, ele vai salvar no backEnd quase todas como agendado,
 // mas na hora de mostrar os serviços, transforma conforme a data de hoje. (Se for uma data futura,
 // vai ser 'agendado', se for durante a realização do serviço, recebe 'em execução',
@@ -190,6 +218,8 @@ const gerenciarAlocacoes = async (servicoId, alocacoesDiarias, transaction) => {
     }
 }
 
+// ** FUNÇÕES PRINCIPAIS **
+
 const ServicoService = {
     getAll: async (usuario) => {
         //Logica para a separação de get servico para cliente e para administrador
@@ -201,22 +231,18 @@ const ServicoService = {
             ]
         }
         // Filtragem
-        if (usuario.papel && usuario === 'funcionario'){
-            options.include.push({
-                model: require('../models/ModelAlocacaoFuncionario'),
-                as: 'alocacoesFuncionario',
-                where: {
-                    id_funcionario: usuario.id_funcionario
-                },
-                required: true
-            })
+        if (usuario.papel && usuario.papel === 'funcionario'){
+            options.include.find( inc => inc.as === 'alocacoesFuncionario').where = {
+                id_funcionario: usuario.id_funcionario
+            }
+              options.include.find(inc => inc.as === 'alocacoesFuncionario').require = true; 
         }
         const Servicos = await ServicoRepo.getAll(options)
 
         const ServicosStatusAtt = Servicos.map(servico => {
-            const servicoData = servico
-            servicoData.status = calcularStatus(servicoData)
-            return servicoData
+            servico.dataValues.status = calcularStatus(servico)
+            servico.dataValues.lucro_estimado = calcularLucriEstimado(servico)
+            return servico
         })
         const ServicosDTO = ServicosStatusAtt.map(S => ServicoMapper.toDTO(S))
         return ServicosDTO
@@ -241,10 +267,10 @@ const ServicoService = {
                 return null;
             }
         }
-        const servicoData = Servico
-        servicoData.status = calcularStatus(servicoData)
+        Servico.dataValues.status = calcularStatus(Servico)
+        Servico.dataValues.lucro_estimado = calcularLucriEstimado(Servico)
 
-        const ServicoDTO = ServicoMapper.toDTO(servicoData)
+        const ServicoDTO = ServicoMapper.toDTO(Servico)
         return ServicoDTO
     },
 
