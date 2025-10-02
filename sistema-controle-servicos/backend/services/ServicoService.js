@@ -192,7 +192,11 @@ const ServicoService = {
     getAll: async (usuario) => {
         //Logica para a separação de get servico para cliente e para administrador
         const options = {
-            include: [{ model: require('../models/ModelCliente'), as: 'cliente'}]
+            include: [
+                { model: require('../models/ModelCliente'), as: 'cliente'},
+                { model: require('../models/ModelAlocacaoEquipamento'), as: 'alocacoesEquipamento'},
+                { model: require('../models/ModelAlocacaoFuncionario'), as: 'alocacoesFuncionario'}
+            ]
         }
         // Filtragem
         if (usuario.papel && usuario === 'funcionario'){
