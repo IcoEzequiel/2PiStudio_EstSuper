@@ -46,94 +46,127 @@ async function carregarDadosIniciais() {
     }
 }
 
-// async function abrirModalNovoProjeto() {
-//     document.body.classList.add('modal-open');
-//     if (!document.getElementById('novoprojeto-css')) {
-//         const linkCSS = document.createElement("link");
-//         linkCSS.rel = "stylesheet";
-//         linkCSS.href = "novoprojeto/novoprojeto.css";
-//         linkCSS.id = "novoprojeto-css";
-//         document.head.appendChild(linkCSS);
-//     }
-//     const modalContainer = document.getElementById('novo-projeto-modal-container');
-//     const resposta = await fetch('novoprojeto/novoprojeto.html');
-//     modalContainer.innerHTML = await resposta.text();
-
-//     modalBackdrop.classList.add('active');
-//     configurarFormNovoProjeto();
-//     document.getElementById('close-modal-btn').addEventListener('click', fecharModalNovoProjeto);
-// }
-
-
-// function fecharModalNovoProjeto() {
-//     document.body.classList.remove('modal-open');
-//     modalBackdrop.classList.remove('active');
-//     modalContainer.innerHTML = '';
-//     const linkCSS = document.getElementById('novoprojeto-css');
-//     if (linkCSS) {
-//         linkCSS.remove();
-//     }
-// }
-
-// Função base para abrir o modal e carregar o HTML
-async function abrirModalBase() {
+/**
+ * Função genérica para abrir qualquer modal.
+ * @param {object} config - Objeto de configuração com os caminhos e IDs.
+ */
+async function abrirModalGenerico(config) {
     document.body.classList.add('modal-open');
-    if (!document.getElementById('novoprojeto-css')) {
+    modalBackdrop.classList.add('active');
+
+    // Carrega o CSS específico do modal, se ainda não estiver carregado
+    if (!document.getElementById(config.cssId)) {
         const linkCSS = document.createElement("link");
         linkCSS.rel = "stylesheet";
-        linkCSS.href = "novoprojeto/novoprojeto.css";
-        linkCSS.id = "novoprojeto-css";
+        linkCSS.href = config.cssPath;
+        linkCSS.id = config.cssId;
         document.head.appendChild(linkCSS);
     }
-    const modalContainer = document.getElementById('novo-projeto-modal-container');
-    const resposta = await fetch('novoprojeto/novoprojeto.html');
+
+    // Carrega o HTML do modal a partir do arquivo
+    const resposta = await fetch(config.htmlPath);
     modalContainer.innerHTML = await resposta.text();
 
-    modalBackdrop.classList.add('active');
     // Adiciona o evento de clique ao botão de fechar
-    document.getElementById('close-modal-btn').addEventListener('click', fecharModalNovoProjeto);
+    document.getElementById(config.closeBtnId).addEventListener('click', config.closeFn);
 }
 
-// Função para fechar o modal (INCLUÍDA AQUI PARA CORRIGIR O ERRO)
-function fecharModalNovoProjeto() {
+/**
+ * Função genérica para fechar qualquer modal.
+ * @param {string} cssId - O ID do arquivo CSS a ser removido.
+ */
+function fecharModalGenerico(cssId) {
     document.body.classList.remove('modal-open');
     modalBackdrop.classList.remove('active');
     modalContainer.innerHTML = '';
-    const linkCSS = document.getElementById('novoprojeto-css');
+    const linkCSS = document.getElementById(cssId);
     if (linkCSS) {
         linkCSS.remove();
     }
 }
 
-// Função para abrir o modal para um NOVO projeto
+
+// --- Funções Específicas para o Modal de PROJETO ---
+
+function fecharModalNovoProjeto() {
+    fecharModalGenerico('novoprojeto-css');
+}
+
 async function abrirModalNovoProjeto() {
-    await abrirModalBase();
+    await abrirModalGenerico({
+        htmlPath: 'novoprojeto/novoprojeto.html',
+        cssPath: 'novoprojeto/novoprojeto.css',
+        cssId: 'novoprojeto-css',
+        closeBtnId: 'close-modal-btn',
+        closeFn: fecharModalNovoProjeto
+    });
     configurarFormNovoProjeto(); // Configura o formulário para o modo 'criar'
 }
 
-// Função para abrir o modal para EDITAR um projeto
 async function abrirModalEdicao(projetoId) {
     try {
-        console.log(`Buscando dados do projeto ID: ${projetoId}`);
         const projetoParaEditar = await request(`/servico/${projetoId}`);
-
-        await abrirModalBase();
-        // Passa os dados do projeto para a função de configuração
-        configurarFormNovoProjeto(projetoParaEditar);
-
+        await abrirModalGenerico({
+            htmlPath: 'novoprojeto/novoprojeto.html',
+            cssPath: 'novoprojeto/novoprojeto.css',
+            cssId: 'novoprojeto-css',
+            closeBtnId: 'close-modal-btn',
+            closeFn: fecharModalNovoProjeto
+        });
+        configurarFormNovoProjeto(projetoParaEditar); // Configura com os dados para edição
     } catch (error) {
-        console.error("Erro ao carregar dados para edição:", error);
         alert(`Não foi possível carregar os dados do projeto para edição: ${error.message}`);
     }
+}
+
+
+// --- Funções Específicas para o Modal de RELATÓRIO ---
+
+function fecharModalNovoRelatorio() {
+    fecharModalGenerico('novorelatorio-css');
+}
+
+async function abrirModalNovoRelatorio() {
+    await abrirModalGenerico({
+        htmlPath: 'novorelatorio/novorelatorio.html',
+        cssPath: 'novorelatorio/novorelatorio.css',
+        cssId: 'novorelatorio-css',
+        closeBtnId: 'close-report-modal-btn',
+        closeFn: fecharModalNovoRelatorio
+    });
+
+    // O resto da sua lógica para popular o dropdown e configurar o form
+    try {
+        const alocacoes = await request('/alocacoes/minhas');
+        const selectAlocacao = document.getElementById('relatorio-alocacao');
+        const alocacoesPendentes = alocacoes ? alocacoes.filter(a => !a.relatorio_feito) : [];
+
+        if (alocacoesPendentes.length > 0) {
+            selectAlocacao.innerHTML = '<option value="">Selecione uma tarefa/data...</option>';
+            alocacoesPendentes.forEach(aloc => {
+                const dataFormatada = new Date(aloc.data_alocacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                const option = document.createElement('option');
+                option.value = aloc.id;
+                option.textContent = `${aloc.servico.nome} - ${dataFormatada}`;
+                selectAlocacao.appendChild(option);
+            });
+        } else {
+            selectAlocacao.innerHTML = '<option value="">Nenhuma alocação com relatório pendente</option>';
+        }
+    } catch (error) {
+        console.error("Erro ao carregar alocações para o modal:", error);
+    }
+
+    configurarFormNovoRelatorio();
 }
 
 // Lógica para carregar páginas no "conteudo"
 async function carregarPagina(pagina) {
     console.log("Carregando:", pagina);
     try {
+        // Lógica de ativação do botão de navegação
         const links = document.querySelectorAll('.nav-btn');
         links.forEach(link => {
-            // Verifica se o data-page do link corresponde à página que está sendo carregada
             if (link.getAttribute('data-page') === pagina) {
                 link.classList.add('active');
             } else {
@@ -149,42 +182,35 @@ async function carregarPagina(pagina) {
         const linkCSS = document.querySelector("#extra-css");
         if (linkCSS) linkCSS.remove();
 
+        let css = document.createElement("link");
+        css.rel = "stylesheet";
+        css.id = "extra-css";
+
         if (pagina.includes("dashboard")) {
-            let css = document.createElement("link");
-            css.rel = "stylesheet";
             css.href = "dashboard/dashboard.css";
-            css.id = "extra-css";
             document.head.appendChild(css);
             inicializarDashboard();
         }
-
-        if (pagina.includes("configuracoes")) {
-            let css = document.createElement("link");
-            css.rel = "stylesheet";
+        else if (pagina.includes("configuracoes")) {
             css.href = "configuracoes/configuracoes.css";
-            css.id = "extra-css";
             document.head.appendChild(css);
-            setTimeout(() => { configurarPaginaConfiguracoes(); }, 0);
+            configurarPaginaConfiguracoes();
         }
-
-        if (pagina.includes("projetos")) {
-            let css = document.createElement("link");
-            css.rel = "stylesheet";
-            css.href = "projetos/projetos.css"; // Supondo que você tenha um CSS
-            css.id = "extra-css";
+        else if (pagina.includes("projetos")) {
+            css.href = "projetos/projetos.css";
             document.head.appendChild(css);
             await carregarExibirProjetos();
             configurarAcoesDosCards();
         }
-
-        if (pagina.includes("alocacoes")) {
-            let css = document.createElement("link");
-            css.rel = "stylesheet";
+        else if (pagina.includes("alocacoes")) {
             css.href = "alocacoes/alocacoes.css";
-            css.id = "extra-css";
             document.head.appendChild(css);
-
             carregarExibirAlocacoes();
+        }
+        else if (pagina.includes("relatorios")) {
+            css.href = "relatorios/relatorios.css";
+            document.head.appendChild(css);
+            // carregarExibirRelatorios(); 
         }
 
     } catch (err) {
@@ -196,8 +222,14 @@ async function carregarPagina(pagina) {
 // Navegação
 function configurarNavegacao() {
     const btnNovoProjeto = document.getElementById('btn-abrir-modal-projeto');
-    if (btnNovoProjeto) { // Verifica se o botão existe antes de adicionar o evento
+    if (btnNovoProjeto) {
         btnNovoProjeto.addEventListener('click', abrirModalNovoProjeto);
+    }
+    // Adicione aqui a lógica para o botão "Novo Relatório" se necessário
+    const btnNovoRelatorio = document.getElementById('btn-novo-relatorio');
+    if (btnNovoRelatorio) {
+        // Garanta que ele chama a função correta
+        btnNovoRelatorio.addEventListener('click', abrirModalNovoRelatorio);
     }
 
     const links = document.querySelectorAll(".nav-btn");
@@ -205,8 +237,6 @@ function configurarNavegacao() {
         link.addEventListener("click", () => {
             const pagina = link.getAttribute("data-page");
             if (pagina) {
-                links.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
                 carregarPagina(pagina);
             }
         });
@@ -216,7 +246,7 @@ function configurarNavegacao() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('authToken');
-            localStorage.removeItem('userProfile'); // Limpa também o perfil
+            localStorage.removeItem('userProfile');
             window.location.href = 'login/login.html';
         });
     }
@@ -357,11 +387,11 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
             alocacoesContainer.insertAdjacentHTML('beforeend', cardHTML);
             diaAtual.setUTCDate(diaAtual.getUTCDate() + 1);
         }
-        
+
         if (modo === 'editar' && projetoParaEditar) preencherAlocacoesSalvas();
         atualizarResumoFinanceiro();
     }
-    
+
     function atualizarResumoFinanceiro() {
         let custoTotalProducao = 0;
         const orcamento = parseFloat(orcamentoInput.value) || 0;
@@ -454,7 +484,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
     dataFimInput.addEventListener('change', gerarCamposDeAlocacao);
     orcamentoInput.addEventListener('input', atualizarResumoFinanceiro);
     invoiceCheckbox.addEventListener('change', atualizarResumoFinanceiro);
-    
+
     alocacoesContainer.addEventListener('click', (e) => {
         const trigger = e.target.closest('.select-trigger');
         if (trigger) {
@@ -465,12 +495,12 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
             currentMultiSelect.classList.toggle('open');
         }
     });
-    
+
     alocacoesContainer.addEventListener('change', (e) => {
         if (e.target.matches('.resource-checkbox, .horas-trabalhadas')) {
             atualizarResumoFinanceiro();
         }
-        if(e.target.matches('.resource-checkbox')) {
+        if (e.target.matches('.resource-checkbox')) {
             const multiselect = e.target.closest('.custom-multiselect');
             if (multiselect) atualizarTextoSeletor(multiselect);
         }
@@ -483,8 +513,6 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
     });
 }
 
-// Adicione esta nova função ao seu scripts.js
-
 async function carregarExibirAlocacoes() {
     const container = document.getElementById('allocations-list');
     if (!container) return;
@@ -492,8 +520,6 @@ async function carregarExibirAlocacoes() {
     container.innerHTML = '<p>Carregando alocações...</p>';
 
     try {
-        // Esta rota precisa ser criada no seu back-end.
-        // Ela deve retornar as alocações do funcionário logado.
         const alocacoes = await request('/alocacoes/minhas');
 
         if (!alocacoes || alocacoes.length === 0) {
@@ -674,12 +700,12 @@ function configurarAcessoPorPerfil() {
     const perfil = localStorage.getItem('userProfile');
 
     if (!perfil) {
+        console.warn("Nenhum perfil encontrado, redirecionando para login.");
         window.location.href = 'login/login.html';
         return;
     }
 
     const todosOsItensControlados = document.querySelectorAll('[data-roles]');
-
     todosOsItensControlados.forEach(item => {
         const rolesPermitidas = item.dataset.roles.split(',');
         if (!rolesPermitidas.includes(perfil)) {
@@ -830,34 +856,22 @@ function configurarPaginaConfiguracoes() {
     });
 }
 
-// --- Inicialização do Site ---
-// window.onload = async () => {
-//     await carregarDadosIniciais(); // Descomente quando a API estiver pronta
-//     configurarNavegacao();
-//     carregarPagina("dashboard/dashboard.html");
-
-//     modalBackdrop.addEventListener('click', (event) => {
-//         if (event.target === modalBackdrop) {
-//             fecharModalNovoProjeto();
-//         }
-//     });
-// };
-
 // --- INICIALIZAÇÃO DO SITE ---
 window.onload = async () => {
-    // 1. PRIMEIRO, configura o que o usuário pode ver na interface
     configurarAcessoPorPerfil();
-
-    // 2. DEPOIS, carrega os dados iniciais que a aplicação precisa
     await carregarDadosIniciais();
     configurarNavegacao();
 
-    // 3. FINALMENTE, carrega a página inicial correta para o perfil
     const perfil = localStorage.getItem('userProfile');
 
     if (perfil === 'administrador') {
         carregarPagina("dashboard/dashboard.html");
     } else if (perfil === 'funcionario') {
         carregarPagina("alocacoes/alocacoes.html");
+    } else {
+        // Se o perfil for inválido ou nulo, a função configurarAcessoPorPerfil()
+        // já terá redirecionado para o login. Este bloco é uma segurança extra.
+        console.error("Perfil de usuário inválido:", perfil);
+        document.getElementById("conteudo").innerHTML = "<p>Erro: Perfil de usuário inválido. Faça login novamente.</p>";
     }
 };

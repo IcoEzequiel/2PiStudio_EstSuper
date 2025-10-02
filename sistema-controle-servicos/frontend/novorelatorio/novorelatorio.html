@@ -1,0 +1,23 @@
+<form id="form-novo-relatorio" class="form-relatorio">
+    
+    <div class="modal-header">
+        <h2 id="modal-title" class="gradient-text">Gerar Novo Relatório</h2>
+        <button id="close-report-modal-btn" class="close-button" type="button">&times;</button>
+    </div>
+
+    <div class="form-group">
+        <label for="relatorio-alocacao">Selecione a Alocação (Projeto e Data)</label>
+        <select id="relatorio-alocacao" required>
+            <option value="">Carregando alocações...</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="relatorio-texto">Descreva o trabalho realizado e o feedback</label>
+        <textarea id="relatorio-texto" rows="8"
+            placeholder="Detalhe as atividades executadas, dificuldades encontradas, etc."
+            required></textarea>
+    </div>
+
+    <button type="submit" class="submit-button">Enviar Relatório</button>
+</form>
