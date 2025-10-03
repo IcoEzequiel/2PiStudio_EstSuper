@@ -22,6 +22,8 @@ const calcularLucriEstimado = (servico) => {
     const orcamento = parseFloat(servico.orcamento) || 0;
     let custoTotal = 0
 
+    const valorImposto = servico.imposto ? orcamento * 0.06 : 0
+
     //Calculo do valor dos funcionarios
     if (servico.alocacoesFuncionario && Array.isArray(servico.alocacoesFuncionario)){
         for (const aloc of servico.alocacoesFuncionario){
@@ -38,7 +40,7 @@ const calcularLucriEstimado = (servico) => {
         }
     }
 
-    return orcamento - custoTotal;
+    return orcamento - custoTotal - valorImposto;
 }
 
 
@@ -286,7 +288,8 @@ const ServicoService = {
                 data_inicio: dados.data_inicio, 
                 data_fim: dados.data_fim,
                 status: dados.status || 'agendado',
-                orcamento: dados.orcamento
+                orcamento: dados.orcamento,
+                imposto: dados.imposto || false
             }
 
             const novoServico = await ServicoRepo.save(dadosServico, {transaction: t})

@@ -14,6 +14,7 @@ class servicoDTO {
         this.alocacoesEquipamento = alocacoesEquipamento
         this.alocacoesFuncionario = alocacoesFuncionario
         this.lucro_estimado = servico.lucro_estimado
+        this.imposto = servico.imposto
     }
 }
 

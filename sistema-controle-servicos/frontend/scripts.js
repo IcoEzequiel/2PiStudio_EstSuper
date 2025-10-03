@@ -288,6 +288,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
         dataFimInput.value = projetoParaEditar.data_fim;
         orcamentoInput.value = parseFloat(projetoParaEditar.orcamento);
         if (descricaoInput) descricaoInput.value = projetoParaEditar.descricao;
+        invoiceCheckbox.checked = projetoParaEditar.imposto
         if (projetoParaEditar.data_inicio !== projetoParaEditar.data_fim) {
             multiDaySwitch.checked = true;
         }
@@ -448,6 +449,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
             data_inicio: dataInicioInput.value,
             data_fim: multiDaySwitch.checked ? dataFimInput.value : dataInicioInput.value,
             orcamento: parseFloat(orcamentoInput.value),
+            imposto: invoiceCheckbox.checked,
             alocacoes_diarias
         };
         try {
@@ -654,45 +656,77 @@ async function carregarExibirProjetos() {
 }
 
 function configurarAcoesDosCards() {
-    const todosOsMenus = document.querySelectorAll('.dropdown-menu');
+    const container = document.getElementById('projects-container');
+    if (!container) return;
 
-    todosOsMenus.forEach(menu => {
-        const btn = menu.querySelector('.card-menu-btn');
-        if (btn) {
-            btn.addEventListener('click', (event) => {
-                // Impede que o clique no botão feche o menu imediatamente
-                event.stopPropagation();
-
-                // Fecha todos os outros menus que possam estar abertos
-                todosOsMenus.forEach(outroMenu => {
-                    if (outroMenu !== menu) {
-                        outroMenu.classList.remove('active');
-                    }
-                });
-
-                // Alterna (abre/fecha) o menu atual
-                menu.classList.toggle('active');
-            });
+    container.addEventListener('click', async (event) => {
+        // Lógica para abrir/fechar o menu dropdown
+        const menuBtn = event.target.closest('.card-menu-btn');
+        if (menuBtn) {
+            event.stopPropagation();
+            const menu = menuBtn.closest('.dropdown-menu');
+            const estavaAtivo = menu.classList.contains('active');
+            
+            // Fecha todos os menus
+            document.querySelectorAll('.dropdown-menu.active').forEach(m => m.classList.remove('active'));
+            
+            // Abre ou fecha o menu atual
+            if (!estavaAtivo) {
+                menu.classList.add('active');
+            }
+            return;
         }
-    });
 
-    const todosOsBotoesEditar = document.querySelectorAll('.dropdown-item:not(.text-red)');
-    todosOsBotoesEditar.forEach(btn => {
-        btn.addEventListener('click', (event) => {
-            // Pega o card pai para encontrar o ID do projeto
-            const card = event.target.closest('.project-card');
+        // Lógica para o botão de Editar
+        const editBtn = event.target.closest('.dropdown-item:not(.text-red)');
+        if (editBtn) {
+            const card = editBtn.closest('.project-card');
             const projetoId = card.dataset.id;
             if (projetoId) {
                 abrirModalEdicao(projetoId);
             }
-        });
+            return;
+        }
+
+        // **INÍCIO DA NOVA LÓGICA PARA DELETAR**
+        const deleteBtn = event.target.closest('.dropdown-item.text-red');
+        if (deleteBtn) {
+            const card = deleteBtn.closest('.project-card');
+            const projetoId = card.dataset.id;
+            
+            if (projetoId) {
+                // Pede confirmação ao utilizador
+                const confirmar = confirm('Tem a certeza de que deseja excluir este projeto? Esta ação não pode ser desfeita.');
+
+                if (confirmar) {
+                    try {
+                        // Envia a requisição DELETE para o backend
+                        await request(`/servico/${projetoId}`, 'DELETE');
+                        
+                        // Remove o card do projeto da tela com uma animação
+                        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.95)';
+                        setTimeout(() => card.remove(), 300);
+
+                    } catch (err) {
+                        console.error('Erro ao excluir o projeto:', err);
+                        alert(`Não foi possível excluir o projeto: ${err.message}`);
+                    }
+                }
+            }
+            return;
+        }
+        // **FIM DA NOVA LÓGICA**
     });
 
     // Adiciona um evento para fechar os menus se clicar em qualquer outro lugar da página
-    window.addEventListener('click', () => {
-        todosOsMenus.forEach(menu => {
-            menu.classList.remove('active');
-        });
+    window.addEventListener('click', (event) => {
+        if (!event.target.closest('.dropdown-menu')) {
+            document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
+                menu.classList.remove('active');
+            });
+        }
     });
 }
 

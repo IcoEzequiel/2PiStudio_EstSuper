@@ -20,7 +20,11 @@ const Servico = sequelize.define('Servico',{
     status: {
         type: DataTypes.ENUM('agendado','em execução','concluido','cancelado')
     },
-    orcamento: DataTypes.DECIMAL(10,2)
+    orcamento: DataTypes.DECIMAL(10,2),
+    imposto: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
 },
     // Como estamos usando o sequelise para definir o model, temos que informar o nome da tabela (de preferencia o mesmo do 
     // banco de dados), e definir o timestamps para falso (timestamps são campos para informar quando a instancia foi criada
