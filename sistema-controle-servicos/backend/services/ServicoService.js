@@ -229,7 +229,9 @@ const ServicoService = {
             include: [
                 { model: require('../models/ModelCliente'), as: 'cliente'},
                 { model: require('../models/ModelAlocacaoEquipamento'), as: 'alocacoesEquipamento'},
-                { model: require('../models/ModelAlocacaoFuncionario'), as: 'alocacoesFuncionario'}
+                { model: require('../models/ModelAlocacaoFuncionario'), as: 'alocacoesFuncionario',
+                include: [{ model: require('../models/ModelFeedback'), as: 'feedback'}]
+                }
             ]
         }
         // Filtragem
@@ -384,4 +386,6 @@ const ServicoService = {
     }
 }
 
-module.exports = ServicoService
+module.exports = {
+    ...ServicoService,
+    calcularStatus}

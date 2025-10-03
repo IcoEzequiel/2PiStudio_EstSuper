@@ -135,18 +135,29 @@ async function abrirModalNovoRelatorio() {
         closeFn: fecharModalNovoRelatorio
     });
 
-    // O resto da sua lógica para popular o dropdown e configurar o form
+    const selectAlocacao = document.getElementById('relatorio-alocacao');
+    const tituloModal = document.getElementById('modal-title');
+    tituloModal.textContent = 'Gerar Novo Relatório';
+    selectAlocacao.parentElement.style.display = 'block'; // Garante que o dropdown esteja visível
+
     try {
-        const alocacoes = await request('/alocacoes/minhas');
-        const selectAlocacao = document.getElementById('relatorio-alocacao');
-        const alocacoesPendentes = alocacoes ? alocacoes.filter(a => !a.relatorio_feito) : [];
+        const servicos = await request('/servico');
+        const alocacoesPendentes = servicos
+            .flatMap(servico => 
+                (servico.alocacoesFuncionario || []).map(aloc => ({
+                    ...aloc, // Copia todas as propriedades da alocação
+                    servico: { nome: servico.nome } // Garante que o nome do serviço está presente
+                }))
+            )
+            .filter(aloc => aloc.feedback && aloc.feedback.status === 'pendente');
 
         if (alocacoesPendentes.length > 0) {
             selectAlocacao.innerHTML = '<option value="">Selecione uma tarefa/data...</option>';
             alocacoesPendentes.forEach(aloc => {
-                const dataFormatada = new Date(aloc.data_alocacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                const dataFormatada = new Date(aloc.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
                 const option = document.createElement('option');
-                option.value = aloc.id;
+                // O valor da opção será o ID do feedback
+                option.value = aloc.feedback.id;
                 option.textContent = `${aloc.servico.nome} - ${dataFormatada}`;
                 selectAlocacao.appendChild(option);
             });
@@ -155,9 +166,10 @@ async function abrirModalNovoRelatorio() {
         }
     } catch (error) {
         console.error("Erro ao carregar alocações para o modal:", error);
+        selectAlocacao.innerHTML = '<option value="">Erro ao carregar alocações</option>';
     }
 
-    configurarFormNovoRelatorio();
+    configurarFormNovoRelatorio(); // Chama a configuração do formulário
 }
 
 // Lógica para carregar páginas no "conteudo"
@@ -522,24 +534,37 @@ async function carregarExibirAlocacoes() {
     container.innerHTML = '<p>Carregando alocações...</p>';
 
     try {
-        const alocacoes = await request('/alocacoes/minhas');
+        // 1. Busca os SERVIÇOS filtrados para o funcionário logado
+        const servicos = await request('/servico');
 
-        if (!alocacoes || alocacoes.length === 0) {
+        // 2. Extrai todas as alocações de todos os serviços
+        const todasAlocacoes = servicos.flatMap(servico => 
+            (servico.alocacoesFuncionario || []).map(aloc => ({
+                ...aloc, // Copia todas as propriedades da alocação
+                servico: { nome: servico.nome } // Adiciona o nome do serviço à alocação
+            }))
+        );
+
+        if (todasAlocacoes.length === 0) {
             container.innerHTML = '<p>Nenhuma alocação encontrada para você.</p>';
             return;
         }
 
-        container.innerHTML = '';
+        container.innerHTML = ''; // Limpa a mensagem de "Carregando"
 
-        alocacoes.forEach(aloc => {
-            const dataFormatada = new Date(aloc.data_alocacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        // 3. Renderiza cada alocação individualmente
+        todasAlocacoes.forEach(aloc => {
+            const dataFormatada = new Date(aloc.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-            // Lógica condicional para o botão/badge
-            const actionHtml = aloc.relatorio_feito // Supondo que a API envie este campo booleano
+            // A lógica do botão de relatório virá na próxima etapa
+            const relatorioFeito = aloc.feedback && aloc.feedback.status === 'respondido';
+            
+            // Define o HTML do botão ou do status com base na verificação
+            const actionHtml = relatorioFeito
                 ? `<span class="badge badge-green">Relatório Feito</span>`
-                : `<button class="btn-action btn-report" data-id="${aloc.id}">
-                       <svg></svg>
-                       Realizar Relatório
+                : `<button class="btn-action btn-report" data-feedback-id="${aloc.feedback?.id}">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                      Realizar Relatório
                    </button>`;
 
             const itemHtml = `
@@ -654,6 +679,86 @@ async function carregarExibirProjetos() {
         `;
     }
 }
+
+async function abrirModalRelatorioEspecifico(feedbackId, alocacaoInfo) {
+    if (!feedbackId) {
+        alert("Erro: ID do feedback não encontrado. Não é possível criar o relatório.");
+        return;
+    }
+
+    await abrirModalGenerico({
+        htmlPath: 'novorelatorio/novorelatorio.html',
+        cssPath: 'novorelatorio/novorelatorio.css',
+        cssId: 'novorelatorio-css',
+        closeBtnId: 'close-report-modal-btn',
+        closeFn: fecharModalNovoRelatorio
+    });
+
+    // Esconde o dropdown de seleção de alocação, pois já sabemos qual é
+    const selectAlocacao = document.getElementById('relatorio-alocacao');
+     selectAlocacao.parentElement.style.display = 'none';
+    // Desativa o select para que a validação 'required' do navegador o ignore
+    selectAlocacao.disabled = true;
+
+    // Configura o título com as informações da alocação
+    const tituloModal = document.getElementById('modal-title');
+    tituloModal.textContent = `Relatório de: ${alocacaoInfo}`;
+
+    configurarFormNovoRelatorio(feedbackId);
+}
+
+function configurarFormNovoRelatorio(feedbackId = null) {
+    const form = document.getElementById('form-novo-relatorio');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const selectAlocacao = document.getElementById('relatorio-alocacao');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Determina qual feedback ID usar
+        const idParaAtualizar = feedbackId || selectAlocacao.value;
+
+        if (!idParaAtualizar) {
+            alert('Por favor, selecione uma alocação para enviar o relatório.');
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = 'Enviando...';
+
+        const comentario = document.getElementById('relatorio-texto').value;
+
+        try {
+            await request(`/feedback/${idParaAtualizar}`, 'PUT', { comentario });
+            alert('Relatório enviado com sucesso!');
+            fecharModalNovoRelatorio();
+            carregarPagina('alocacoes/alocacoes.html'); // Recarrega a lista para mostrar o status atualizado
+        } catch (err) {
+            alert(`Erro ao enviar relatório: ${err.message}`);
+            submitButton.disabled = false;
+            submitButton.textContent = 'Enviar Relatório';
+        }
+    });
+}
+
+document.addEventListener('click', (event) => {
+    // Procura se o clique foi num botão "Realizar Relatório"
+    const reportButton = event.target.closest('.btn-report');
+    
+    if (reportButton) {
+        // Pega o ID do feedback guardado no botão
+        const feedbackId = reportButton.dataset.feedbackId;
+        
+        // Pega as informações do card para mostrar um título informativo no modal
+        const alocItem = reportButton.closest('.allocation-item');
+        const nomeProjeto = alocItem.querySelector('.allocation-project-name').textContent;
+        const dataProjeto = alocItem.querySelector('.allocation-date').textContent;
+        const infoCabecalho = `${nomeProjeto} (${dataProjeto.replace('Data: ', '')})`;
+
+        // Chama a função para abrir o modal, passando o ID e as informações
+        abrirModalRelatorioEspecifico(feedbackId, infoCabecalho);
+    }
+});
 
 function configurarAcoesDosCards() {
     const container = document.getElementById('projects-container');
@@ -889,6 +994,7 @@ function configurarPaginaConfiguracoes() {
         else if (button.classList.contains('delete-btn')) handleDelete(type, id);
     });
 }
+
 
 // --- INICIALIZAÇÃO DO SITE ---
 window.onload = async () => {

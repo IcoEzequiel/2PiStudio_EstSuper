@@ -34,7 +34,7 @@ Equipamento.hasOne(ParametrizacaoEquipamento, { foreignKey: 'id_equipamento', as
 ParametrizacaoEquipamento.belongsTo(Equipamento, { foreignKey: 'id_equipamento', as: 'equipamento' });
 
 Feedback.belongsTo(AlocacaoFuncionario, { foreignKey: 'id_alocacaoFuncionario', as: 'servicoPrestado' });
-// AlocacaoFuncionario.hasOne(Feedback, ...); // Se precisar da relação inversa
+AlocacaoFuncionario.hasOne(Feedback,{ foreignKey: 'id_alocacaoFuncionario', as: 'feedback'});
 
 Funcionario.hasOne(Usuario, { foreignKey: 'id_funcionario', as: 'usuario' });
 Usuario.belongsTo(Funcionario, { foreignKey: 'id_funcionario', as: 'funcionario' });
