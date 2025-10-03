@@ -142,14 +142,19 @@ async function abrirModalNovoRelatorio() {
 
     try {
         const servicos = await request('/servico');
-        const alocacoesPendentes = servicos
+                const alocacoesPendentes = servicos
             .flatMap(servico => 
                 (servico.alocacoesFuncionario || []).map(aloc => ({
-                    ...aloc, // Copia todas as propriedades da alocação
-                    servico: { nome: servico.nome } // Garante que o nome do serviço está presente
+                    ...aloc,
+                    servico: { nome: servico.nome, status: servico.status } // Garante que temos o status
                 }))
             )
-            .filter(aloc => aloc.feedback && aloc.feedback.status === 'pendente');
+            // Adiciona o filtro para o status do serviço
+            .filter(aloc => 
+                aloc.feedback && 
+                aloc.feedback.status === 'pendente' && 
+                aloc.servico.status !== 'agendado'
+            );
 
         if (alocacoesPendentes.length > 0) {
             selectAlocacao.innerHTML = '<option value="">Selecione uma tarefa/data...</option>';
@@ -222,13 +227,94 @@ async function carregarPagina(pagina) {
         else if (pagina.includes("relatorios")) {
             css.href = "relatorios/relatorios.css";
             document.head.appendChild(css);
-            // carregarExibirRelatorios(); 
+            carregarExibirRelatorios(); 
+            configurarAcoesRelatorios();
         }
 
     } catch (err) {
         document.getElementById("conteudo").innerHTML = "<p>Erro ao carregar página</p>";
         console.error(err);
     }
+}
+
+async function carregarExibirRelatorios() {
+    const container = document.getElementById('reports-list');
+    if (!container) return;
+
+    container.innerHTML = '<p>Carregando relatórios...</p>';
+    try {
+        const relatorios = await request('/feedback');
+
+        if (!relatorios || relatorios.length === 0) {
+            container.innerHTML = '<p>Nenhum relatório encontrado.</p>';
+            return;
+        }
+
+        const statusMap = {
+            'respondido': { text: 'Pendente', class: 'badge-yellow' },
+            'aprovado': { text: 'Aprovado', class: 'badge-green' }
+        };
+
+        container.innerHTML = relatorios.map(rel => {
+            const dataFormatada = new Date(rel.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const statusInfo = statusMap[rel.status] || { text: rel.status, class: '' };
+            
+            // Define o botão de ação: "Editar" se pendente, "Visualizar" se aprovado
+            const actionButton = rel.status === 'respondido'
+                ? `<button class="btn-action edit-report-btn" data-feedback-id="${rel.id}">Editar</button>`
+                : `<button class="btn-action view-report-btn" data-feedback-id="${rel.id}">Visualizar</button>`;
+
+            return `
+                <div class="report-item">
+                    <div class="report-info">
+                        <span class="report-title">Relatório: ${rel.servico.nome}</span>
+                        <span class="report-date">Enviado em: ${dataFormatada}</span>
+                    </div>
+                    <div class="report-actions">
+                        <span class="badge ${statusInfo.class}">${statusInfo.text}</span>
+                        ${actionButton}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (err) {
+        console.error("Erro ao carregar relatórios:", err);
+        container.innerHTML = '<p>Erro ao carregar seus relatórios.</p>';
+    }
+}
+
+function configurarAcoesRelatorios() {
+    const container = document.getElementById('reports-list');
+    if (!container) return;
+
+    container.addEventListener('click', async (event) => {
+        const editButton = event.target.closest('.edit-report-btn');
+        const viewButton = event.target.closest('.view-report-btn');
+
+        if (editButton) {
+            const feedbackId = editButton.dataset.feedbackId;
+            try {
+                // Busca o feedback para obter o comentário atual
+                const feedback = await request(`/feedback/${feedbackId}`);
+                
+                // Pega as informações do card para o título
+                const reportItem = editButton.closest('.report-item');
+                const alocacaoInfo = reportItem.querySelector('.report-title').textContent;
+
+                // Abre o modal de relatório, passando o ID e o texto atual
+                abrirModalRelatorioEspecifico(feedbackId, alocacaoInfo, feedback.comentario);
+
+            } catch (err) {
+                alert(`Erro ao carregar dados para edição: ${err.message}`);
+            }
+        }
+
+        if (viewButton) {
+            // Lógica de visualização (por agora, apenas um alerta)
+            alert("A funcionalidade de visualização de relatórios aprovados será implementada no futuro.");
+        }
+    });
 }
 
 // Navegação
@@ -541,7 +627,7 @@ async function carregarExibirAlocacoes() {
         const todasAlocacoes = servicos.flatMap(servico => 
             (servico.alocacoesFuncionario || []).map(aloc => ({
                 ...aloc, // Copia todas as propriedades da alocação
-                servico: { nome: servico.nome } // Adiciona o nome do serviço à alocação
+                servico: { nome: servico.nome, status: servico.status } // Adiciona o nome do serviço à alocação
             }))
         );
 
@@ -550,22 +636,54 @@ async function carregarExibirAlocacoes() {
             return;
         }
 
+         const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0); // Zera as horas para uma comparação justa
+
+        todasAlocacoes.sort((a, b) => {
+            const relatorioAFeito = a.feedback && a.feedback.status === 'respondido';
+            const relatorioBFeito = b.feedback && b.feedback.status === 'respondido';
+
+            // Critério 1: Relatórios feitos vão para o final da lista
+            if (relatorioAFeito && !relatorioBFeito) {
+                return 1; // 'a' vai para depois de 'b'
+            }
+            if (!relatorioAFeito && relatorioBFeito) {
+                return -1; // 'a' vem antes de 'b'
+            }
+
+            // Critério 2: Proximidade da data (para itens com o mesmo status de relatório)
+            const dataA = new Date(a.data);
+            const dataB = new Date(b.data);
+            
+            // Calcula a diferença absoluta em dias entre hoje e a data da alocação
+            const diffA = Math.abs(dataA.getTime() - hoje.getTime());
+            const diffB = Math.abs(dataB.getTime() - hoje.getTime());
+
+            return diffA - diffB; // Ordena pela menor diferença (mais próximo de hoje)
+        });
+
         container.innerHTML = ''; // Limpa a mensagem de "Carregando"
 
         // 3. Renderiza cada alocação individualmente
         todasAlocacoes.forEach(aloc => {
             const dataFormatada = new Date(aloc.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-            // A lógica do botão de relatório virá na próxima etapa
+            let actionHtml = '';
             const relatorioFeito = aloc.feedback && aloc.feedback.status === 'respondido';
-            
-            // Define o HTML do botão ou do status com base na verificação
-            const actionHtml = relatorioFeito
-                ? `<span class="badge badge-green">Relatório Feito</span>`
-                : `<button class="btn-action btn-report" data-feedback-id="${aloc.feedback?.id}">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                      Realizar Relatório
-                   </button>`;
+
+            if (relatorioFeito) {
+                // Caso 1: O relatório já foi feito.
+                actionHtml = `<span class="badge badge-green">Relatório Feito</span>`;
+            } else if (aloc.servico.status === 'agendado') {
+                // Caso 2: O serviço ainda não começou.
+                actionHtml = `<span class="badge badge-yellow">Aguardando Início</span>`;
+            } else {
+                // Caso 3: O serviço está em execução ou concluído, e o relatório está pendente.
+                actionHtml = `<button class="btn-action btn-report" data-feedback-id="${aloc.feedback?.id}">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                  Realizar Relatório
+                               </button>`;
+            }
 
             const itemHtml = `
                 <div class="allocation-item">
@@ -680,9 +798,9 @@ async function carregarExibirProjetos() {
     }
 }
 
-async function abrirModalRelatorioEspecifico(feedbackId, alocacaoInfo) {
+async function abrirModalRelatorioEspecifico(feedbackId, alocacaoInfo, comentarioExistente = '') {
     if (!feedbackId) {
-        alert("Erro: ID do feedback não encontrado. Não é possível criar o relatório.");
+        alert("Erro: ID do feedback não encontrado. Não é possível abrir o relatório.");
         return;
     }
 
@@ -694,15 +812,14 @@ async function abrirModalRelatorioEspecifico(feedbackId, alocacaoInfo) {
         closeFn: fecharModalNovoRelatorio
     });
 
-    // Esconde o dropdown de seleção de alocação, pois já sabemos qual é
+    // Esconde o dropdown e desativa-o
     const selectAlocacao = document.getElementById('relatorio-alocacao');
-     selectAlocacao.parentElement.style.display = 'none';
-    // Desativa o select para que a validação 'required' do navegador o ignore
+    selectAlocacao.parentElement.style.display = 'none';
     selectAlocacao.disabled = true;
 
-    // Configura o título com as informações da alocação
-    const tituloModal = document.getElementById('modal-title');
-    tituloModal.textContent = `Relatório de: ${alocacaoInfo}`;
+    // Configura o título e o texto do comentário
+    document.getElementById('modal-title').textContent = `Relatório de: ${alocacaoInfo}`;
+    document.getElementById('relatorio-texto').value = comentarioExistente; // <-- Preenche com o texto existente
 
     configurarFormNovoRelatorio(feedbackId);
 }

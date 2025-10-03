@@ -5,7 +5,7 @@ const service = require('../services/FeedbackService')
 const FeedbackController = {
     getAll: async (req, res) => {
         try {
-            const Feedbacks = await service.getAll()
+            const Feedbacks = await service.getAll(req.user)
             res.json(Feedbacks)
         } catch (err) {
             res.status(500).json({ error: err.message})
@@ -34,7 +34,7 @@ const FeedbackController = {
 
     update: async (req, res) => {
         try {
-            const edit = await service.update(req.params.id, req.body)
+            const edit = await service.update(req.params.id, req.body, req.user)
             res.status(200).json(edit)
         } catch (err) {
             res.status(500).json({ error: err.message})

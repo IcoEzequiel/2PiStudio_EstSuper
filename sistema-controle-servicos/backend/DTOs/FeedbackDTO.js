@@ -2,10 +2,11 @@
 class FeedbackDTO {
     constructor(feedback, servicoPrestado){
         this.id = feedback.id
-        this.servico = servicoPrestado.servico
-        this.funcionario = servicoPrestado.funcionario
+        this.servico = servicoPrestado?.servico
+        this.funcionario = servicoPrestado?.funcionario
         this.comentario = feedback.comentario
         this.data = feedback.data
+        this.status = feedback.status
     }
 }
 

@@ -16,7 +16,7 @@ const Feedback = sequelize.define('Feedback',{
     comentario: DataTypes.TEXT,
     data: DataTypes.DATEONLY,
     status: {
-        type: DataTypes.ENUM('pendente','respondido'),
+        type: DataTypes.ENUM('pendente','respondido','aprovado'),
         defaultValue: 'pendente'
     }
 },

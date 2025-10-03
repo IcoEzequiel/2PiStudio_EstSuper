@@ -1,6 +1,8 @@
+const { sequelize} = require('../db')
 const repo = require('../repositories/AlocacaoFuncionarioRepository')
 const ServicoRepo = require('../repositories/ServicoRepository')
 const FuncionarioRepo = require('../repositories/FuncionarioRepository')
+const FeedBackRepo = require('../repositories/FeedbackRepository')
 const AlocFuncMapper = require('../mappers/AlocacaoFuncionarioMapper')
 
 // Funcões auxiliares
@@ -80,7 +82,30 @@ const AlocacaoFuncionarioService = {
     },
 
     delete: async (id) => {
-        return await repo.delete(id)
+        const t = await sequelize.transaction()
+        // Deleta qualquer feedback associado a esta alocação
+        try {
+            const FeedbackModel = require('../models/ModelFeedback')
+            const FeedbackToDelete = await FeedbackModel.findOne({
+                where: {id_alocacaoFuncionario: id},
+                transaction: t
+            })
+            if (FeedbackToDelete){
+                await FeedBackRepo.delete(FeedbackToDelete.id, {transaction: t})
+            }
+
+            const deleted = await repo.delete(id, {transaction: t})
+
+            if (!deleted){
+                throw new Error('Alocação de Funcionario não encontrada.')
+            }
+            await t.commit()
+            return true
+        } catch (error) {
+            await t.rollback()
+            console.error("Erro ao deletar alocação e feedback: ", error)
+            throw new Error('Erro ao deletar alocação: ' + error.message)
+        }
     }
 }
 
