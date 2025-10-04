@@ -1,37 +1,55 @@
 <div class="reports-container">
-  <div class="reports-header">
-    <h1>Meus Relatórios</h1>
-    <!-- <button class="btn-novo-relatorio">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
-      </svg>
-      Gerar Novo Relatório
-    </button> -->
+  <div class="page-header">
+    <h2 class="gradient-text">Meus Relatórios</h2>
+    <p>Revise os relatórios enviados e acompanhe o status de aprovação.</p>
   </div>
 
-  <div id="reports-list" class="reports-list-container">
-    
-    <div class="report-item">
-      <div class="report-info">
-        <span class="report-title">Relatório Semanal - 22/09 a 28/09/2025</span>
-        <span class="report-date">Enviado em: 23/09/2025</span>
-      </div>
-      <div class="report-actions">
-        <span class="badge badge-green">Aprovado</span>
-        <button class="view-report-btn">Visualizar</button>
-      </div>
-    </div>
+  <div class="table-container">
+    <table class="reports-table">
+      <thead>
+        <tr>
+          <th>Projeto</th>
+          <th>Data de Envio</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="reports-list-body">
 
-    <div class="report-item">
-      <div class="report-info">
-        <span class="report-title">Relatório do Projeto "Web"</span>
-        <span class="report-date">Enviado em: 18/09/2025</span>
-      </div>
-      <div class="report-actions">
-        <span class="badge badge-yellow">Pendente</span>
-        <button class="view-report-btn">Visualizar</button>
-      </div>
-    </div>
-    
-    </div>
+        <!-- Exemplo 1: Relatório Pendente -->
+        <tr>
+          <td>
+            <div class="project-name">Relatório do Projeto "Web"</div>
+          </td>
+          <td>
+            <div class="date-cell">18/09/2025</div>
+          </td>
+          <td>
+            <span class="badge badge-yellow">Pendente</span>
+          </td>
+          <td>
+            <button class="btn-action edit-report-btn">Editar</button>
+          </td>
+        </tr>
+
+        <!-- Exemplo 2: Relatório Aprovado -->
+        <tr>
+          <td>
+            <div class="project-name">Relatório Semanal</div>
+          </td>
+          <td>
+            <div class="date-cell">23/09/2025</div>
+          </td>
+          <td>
+            <span class="badge badge-green">Aprovado</span>
+          </td>
+          <td>
+            <button class="btn-action view-report-btn">Visualizar</button>
+          </td>
+        </tr>
+
+        <!-- O JavaScript irá preencher este corpo da tabela com os dados da API -->
+      </tbody>
+    </table>
+  </div>
 </div>

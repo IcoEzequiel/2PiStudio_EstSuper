@@ -92,6 +92,7 @@ main {
     align-items: center;
     font-size: 0.875rem;
     color: var(--text-muted);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 
@@ -102,6 +103,9 @@ main {
 .navbar {
     opacity: 1;
     transform: none;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .area-nav {

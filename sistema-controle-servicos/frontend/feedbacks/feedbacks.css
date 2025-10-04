@@ -1,0 +1,145 @@
+.feedbacks-container {
+    width: 100%;
+    padding: 24px 32px;
+    box-sizing: border-box;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.page-header h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.page-header .gradient-text {
+    background-image: linear-gradient(to right, #4ade80, #3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.page-header p {
+    font-size: 1rem;
+    color: #94a3b8;
+    max-width: 60ch;
+    margin: 0 auto;
+}
+
+.table-container {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.feedbacks-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.feedbacks-table th,
+.feedbacks-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feedbacks-table thead {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.feedbacks-table th {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+
+.feedbacks-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.feedbacks-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.item-primary-text {
+    font-weight: 500;
+    color: var(--foreground, #f8fafc);
+}
+
+.item-secondary-text {
+    color: var(--text-muted, #94a3b8);
+}
+
+/* --- ESTILOS DE BADGE --- */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    border: 1px solid;
+    background-color: rgba(var(--badge-rgb), 0.15);
+    color: rgb(var(--badge-rgb));
+    border-color: rgba(var(--badge-rgb), 0.25);
+}
+
+.badge-yellow {
+    --badge-rgb: 253, 224, 71;
+}
+
+.badge-green {
+    --badge-rgb: 72, 229, 155;
+}
+
+.badge-blue {
+    --badge-rgb: 96, 165, 250;
+}
+
+.badge-red {
+    --badge-rgb: 255, 107, 107;
+}
+
+/* --- ESTILOS DE BOTÃO DE AÇÃO --- */
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    border: 1px solid #334155;
+    /* Cor de borda padrão */
+    color: #94a3b8;
+    /* Cor de texto padrão */
+}
+
+.btn-action.review-feedback-btn:hover {
+    background-color: #3b82f6;
+    /* Azul */
+    border-color: #3b82f6;
+    color: #ffffff;
+}

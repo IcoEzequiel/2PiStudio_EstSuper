@@ -26,6 +26,71 @@
     width: 100%;
 }
 
+/* --- ESTILOS DO CABEÇALHO E FILTROS --- */
+.page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.page-header h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.page-header .gradient-text {
+    background-image: linear-gradient(to right, #4ade80, #3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.page-header p {
+    font-size: 1rem;
+    color: #94a3b8;
+    max-width: 60ch;
+    margin: 0 auto;
+}
+
+.filters-container {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background-color: transparent;
+    color: #94a3b8;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.filter-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+/* --- ESTILO DO FILTRO ATIVO CORRIGIDO --- */
+.filter-btn.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    /* Fundo sutil, como na navegação */
+    color: #ffffff;
+    box-shadow: none;
+    /* Remove a sombra azul */
+}
+
+
 .project-grid {
     display: grid;
     gap: 1.5rem;
@@ -118,8 +183,6 @@
     --badge-rgb: var(--rgb-red);
 }
 
-/* --- FIM DAS REGRAS DE BADGE --- */
-
 .glass-effect {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
@@ -142,7 +205,7 @@
     position: absolute;
     right: 0;
     z-index: 20;
-    background: rgba(22, 33, 62, 0.9);
+    background: rgba(30, 41, 59, 0.9);
     border: 1px solid rgba(153, 102, 255, 0.2);
     border-radius: 0.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -166,10 +229,6 @@
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-.dropdown-item.text-red {
-    color: var(--red-text);
-}
-
 .no-projects-message {
     text-align: center;
     padding: 2rem;
@@ -179,4 +238,45 @@
 
 .dropdown-menu.active .dropdown-content {
     display: block;
+}
+
+/* ================================================================ */
+/* ===         ESTILOS PARA O MENU DE AÇÕES                   === */
+/* ================================================================ */
+
+.card-menu-btn {
+    background-color: transparent;
+    border: none;
+    padding: 4px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease-in-out;
+    color: var(--text-color);
+    /* --- CORREÇÃO: Garante que o ícone SVG fique branco --- */
+}
+
+.card-menu-btn:hover,
+.dropdown-menu.active .card-menu-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item.text-yellow {
+    color: rgb(var(--rgb-yellow));
+    font-weight: 500;
+}
+
+.dropdown-item.text-red {
+    color: rgb(var(--rgb-red));
+    font-weight: 500;
+}
+
+.dropdown-item.text-yellow:hover {
+    background-color: rgba(var(--rgb-yellow), 0.15);
+}
+
+.dropdown-item.text-red:hover {
+    background-color: rgba(var(--rgb-red), 0.15);
 }

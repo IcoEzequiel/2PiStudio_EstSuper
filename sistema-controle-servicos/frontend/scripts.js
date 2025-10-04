@@ -12,49 +12,36 @@ const modalContainer = document.getElementById('novo-projeto-modal-container');
 async function carregarDadosIniciais() {
     console.log("Buscando dados iniciais da API...");
     try {
-        // Promise.all faz as requisições em paralelo
-
         const results = await Promise.allSettled([
             request('/equipamento'),
             request('/funcionario'),
             request('/cliente')
         ]);
-        // Agora verificamos cada resultado individualmente
         if (results[0].status === 'fulfilled') {
             equipment = results[0].value || [];
         } else {
             console.error("Erro ao buscar equipamentos:", results[0].reason);
         }
-
         if (results[1].status === 'fulfilled') {
             labor = results[1].value || [];
         } else {
             console.error("Erro ao buscar funcionários:", results[1].reason);
         }
-
         if (results[2].status === 'fulfilled') {
             clientes = results[2].value || [];
         } else {
             console.error("Erro ao buscar clientes:", results[2].reason);
         }
-
         console.log("Dados carregados com sucesso!", { equipment, labor, clientes });
-
     } catch (err) {
         console.error("Erro ao carregar dados iniciais:", err);
         alert("Não foi possível carregar os recursos do servidor. Usando dados de exemplo.");
     }
 }
 
-/**
- * Função genérica para abrir qualquer modal.
- * @param {object} config - Objeto de configuração com os caminhos e IDs.
- */
 async function abrirModalGenerico(config) {
     document.body.classList.add('modal-open');
     modalBackdrop.classList.add('active');
-
-    // Carrega o CSS específico do modal, se ainda não estiver carregado
     if (!document.getElementById(config.cssId)) {
         const linkCSS = document.createElement("link");
         linkCSS.rel = "stylesheet";
@@ -62,19 +49,11 @@ async function abrirModalGenerico(config) {
         linkCSS.id = config.cssId;
         document.head.appendChild(linkCSS);
     }
-
-    // Carrega o HTML do modal a partir do arquivo
     const resposta = await fetch(config.htmlPath);
     modalContainer.innerHTML = await resposta.text();
-
-    // Adiciona o evento de clique ao botão de fechar
     document.getElementById(config.closeBtnId).addEventListener('click', config.closeFn);
 }
 
-/**
- * Função genérica para fechar qualquer modal.
- * @param {string} cssId - O ID do arquivo CSS a ser removido.
- */
 function fecharModalGenerico(cssId) {
     document.body.classList.remove('modal-open');
     modalBackdrop.classList.remove('active');
@@ -84,9 +63,6 @@ function fecharModalGenerico(cssId) {
         linkCSS.remove();
     }
 }
-
-
-// --- Funções Específicas para o Modal de PROJETO ---
 
 function fecharModalNovoProjeto() {
     fecharModalGenerico('novoprojeto-css');
@@ -100,7 +76,7 @@ async function abrirModalNovoProjeto() {
         closeBtnId: 'close-modal-btn',
         closeFn: fecharModalNovoProjeto
     });
-    configurarFormNovoProjeto(); // Configura o formulário para o modo 'criar'
+    configurarFormNovoProjeto();
 }
 
 async function abrirModalEdicao(projetoId) {
@@ -113,14 +89,11 @@ async function abrirModalEdicao(projetoId) {
             closeBtnId: 'close-modal-btn',
             closeFn: fecharModalNovoProjeto
         });
-        configurarFormNovoProjeto(projetoParaEditar); // Configura com os dados para edição
+        configurarFormNovoProjeto(projetoParaEditar);
     } catch (error) {
         alert(`Não foi possível carregar os dados do projeto para edição: ${error.message}`);
     }
 }
-
-
-// --- Funções Específicas para o Modal de RELATÓRIO ---
 
 function fecharModalNovoRelatorio() {
     fecharModalGenerico('novorelatorio-css');
@@ -134,35 +107,16 @@ async function abrirModalNovoRelatorio() {
         closeBtnId: 'close-report-modal-btn',
         closeFn: fecharModalNovoRelatorio
     });
-
     const selectAlocacao = document.getElementById('relatorio-alocacao');
-    const tituloModal = document.getElementById('modal-title');
-    tituloModal.textContent = 'Gerar Novo Relatório';
-    selectAlocacao.parentElement.style.display = 'block'; // Garante que o dropdown esteja visível
-
     try {
-        const servicos = await request('/servico');
-                const alocacoesPendentes = servicos
-            .flatMap(servico => 
-                (servico.alocacoesFuncionario || []).map(aloc => ({
-                    ...aloc,
-                    servico: { nome: servico.nome, status: servico.status } // Garante que temos o status
-                }))
-            )
-            // Adiciona o filtro para o status do serviço
-            .filter(aloc => 
-                aloc.feedback && 
-                aloc.feedback.status === 'pendente' && 
-                aloc.servico.status !== 'agendado'
-            );
-
+        const alocacoes = await request('/alocacoes/minhas');
+        const alocacoesPendentes = alocacoes ? alocacoes.filter(a => !a.relatorio_feito) : [];
         if (alocacoesPendentes.length > 0) {
             selectAlocacao.innerHTML = '<option value="">Selecione uma tarefa/data...</option>';
             alocacoesPendentes.forEach(aloc => {
-                const dataFormatada = new Date(aloc.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                const dataFormatada = new Date(aloc.data_alocacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
                 const option = document.createElement('option');
-                // O valor da opção será o ID do feedback
-                option.value = aloc.feedback.id;
+                option.value = aloc.id;
                 option.textContent = `${aloc.servico.nome} - ${dataFormatada}`;
                 selectAlocacao.appendChild(option);
             });
@@ -171,17 +125,13 @@ async function abrirModalNovoRelatorio() {
         }
     } catch (error) {
         console.error("Erro ao carregar alocações para o modal:", error);
-        selectAlocacao.innerHTML = '<option value="">Erro ao carregar alocações</option>';
     }
-
-    configurarFormNovoRelatorio(); // Chama a configuração do formulário
+    configurarFormNovoRelatorio();
 }
 
-// Lógica para carregar páginas no "conteudo"
 async function carregarPagina(pagina) {
     console.log("Carregando:", pagina);
     try {
-        // Lógica de ativação do botão de navegação
         const links = document.querySelectorAll('.nav-btn');
         links.forEach(link => {
             if (link.getAttribute('data-page') === pagina) {
@@ -190,45 +140,44 @@ async function carregarPagina(pagina) {
                 link.classList.remove('active');
             }
         });
-
         const resposta = await fetch(pagina);
         if (!resposta.ok) throw new Error("Erro ao carregar " + pagina);
         const html = await resposta.text();
         document.getElementById("conteudo").innerHTML = html;
-
         const linkCSS = document.querySelector("#extra-css");
         if (linkCSS) linkCSS.remove();
-
         let css = document.createElement("link");
         css.rel = "stylesheet";
         css.id = "extra-css";
-
         if (pagina.includes("dashboard")) {
             css.href = "dashboard/dashboard.css";
             document.head.appendChild(css);
             inicializarDashboard();
-        }
-        else if (pagina.includes("configuracoes")) {
+        } else if (pagina.includes("configuracoes")) {
             css.href = "configuracoes/configuracoes.css";
             document.head.appendChild(css);
             configurarPaginaConfiguracoes();
-        }
-        else if (pagina.includes("projetos")) {
+        } else if (pagina.includes("projetos")) {
             css.href = "projetos/projetos.css";
             document.head.appendChild(css);
             await carregarExibirProjetos();
-            configurarAcoesDosCards();
-        }
-        else if (pagina.includes("alocacoes")) {
+            // configurarAcoesDosCards();
+            configurarPaginaProjetos();
+        } else if (pagina.includes("alocacoes")) {
             css.href = "alocacoes/alocacoes.css";
             document.head.appendChild(css);
-            carregarExibirAlocacoes();
-        }
-        else if (pagina.includes("relatorios")) {
+            await carregarExibirAlocacoes();
+            configurarAcoesAlocacoes();
+        } else if (pagina.includes("relatorios")) {
             css.href = "relatorios/relatorios.css";
             document.head.appendChild(css);
-            carregarExibirRelatorios(); 
+            await carregarExibirRelatorios();
             configurarAcoesRelatorios();
+        } else if (pagina.includes("feedbacks")) {
+            css.href = "feedbacks/feedbacks.css";
+            document.head.appendChild(css);
+            await carregarExibirFeedbacks();
+            configurarAcoesFeedbacks();
         }
 
     } catch (err) {
@@ -238,51 +187,66 @@ async function carregarPagina(pagina) {
 }
 
 async function carregarExibirRelatorios() {
-    const container = document.getElementById('reports-list');
+    // 1. O alvo agora é o CORPO da tabela
+    const container = document.getElementById('reports-list-body');
     if (!container) return;
 
-    container.innerHTML = '<p>Carregando relatórios...</p>';
+    // Mensagem de "carregando" formatada para uma tabela
+    container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Carregando relatórios...</td></tr>';
+
     try {
+        // 2. A busca de dados continua a mesma
         const relatorios = await request('/feedback');
 
         if (!relatorios || relatorios.length === 0) {
-            container.innerHTML = '<p>Nenhum relatório encontrado.</p>';
+            container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Nenhum relatório encontrado.</td></tr>';
             return;
         }
 
+        container.innerHTML = ''; // Limpa a mensagem
+
+        // 3. A lógica de status e botões continua a mesma
         const statusMap = {
             'respondido': { text: 'Pendente', class: 'badge-yellow' },
             'aprovado': { text: 'Aprovado', class: 'badge-green' }
         };
 
-        container.innerHTML = relatorios.map(rel => {
+        // 4. O loop agora gera o HTML de uma LINHA DE TABELA (<tr>)
+        relatorios.forEach(rel => {
             const dataFormatada = new Date(rel.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const statusInfo = statusMap[rel.status] || { text: rel.status, class: '' };
-            
-            // Define o botão de ação: "Editar" se pendente, "Visualizar" se aprovado
+
             const actionButton = rel.status === 'respondido'
                 ? `<button class="btn-action edit-report-btn" data-feedback-id="${rel.id}">Editar</button>`
                 : `<button class="btn-action view-report-btn" data-feedback-id="${rel.id}">Visualizar</button>`;
 
-            return `
-                <div class="report-item">
-                    <div class="report-info">
-                        <span class="report-title">Relatório: ${rel.servico.nome}</span>
-                        <span class="report-date">Enviado em: ${dataFormatada}</span>
-                    </div>
-                    <div class="report-actions">
+            // --- O HTML gerado agora é para <tr> e <td> ---
+            const rowHtml = `
+                <tr>
+                    <td>
+                        <div class="project-name">Relatório: ${rel.servico.nome}</div>
+                    </td>
+                    <td>
+                        <div class="date-cell">${dataFormatada}</div>
+                    </td>
+                    <td>
                         <span class="badge ${statusInfo.class}">${statusInfo.text}</span>
+                    </td>
+                    <td>
                         ${actionButton}
-                    </div>
-                </div>
+                    </td>
+                </tr>
             `;
-        }).join('');
+            container.insertAdjacentHTML('beforeend', rowHtml);
+        });
 
     } catch (err) {
         console.error("Erro ao carregar relatórios:", err);
-        container.innerHTML = '<p>Erro ao carregar seus relatórios.</p>';
+        container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--red-text);">Erro ao carregar seus relatórios.</td></tr>';
     }
 }
+
+
 
 function configurarAcoesRelatorios() {
     const container = document.getElementById('reports-list');
@@ -297,7 +261,7 @@ function configurarAcoesRelatorios() {
             try {
                 // Busca o feedback para obter o comentário atual
                 const feedback = await request(`/feedback/${feedbackId}`);
-                
+
                 // Pega as informações do card para o título
                 const reportItem = editButton.closest('.report-item');
                 const alocacaoInfo = reportItem.querySelector('.report-title').textContent;
@@ -614,97 +578,93 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
 }
 
 async function carregarExibirAlocacoes() {
-    const container = document.getElementById('allocations-list');
+    const container = document.getElementById('allocations-grid'); // O contêiner correto dos cards
     if (!container) return;
-
-    container.innerHTML = '<p>Carregando alocações...</p>';
+    container.innerHTML = '<p style="color: var(--text-secondary);">Carregando alocações...</p>';
 
     try {
-        // 1. Busca os SERVIÇOS filtrados para o funcionário logado
         const servicos = await request('/servico');
-
-        // 2. Extrai todas as alocações de todos os serviços
-        const todasAlocacoes = servicos.flatMap(servico => 
+        const todasAlocacoes = servicos.flatMap(servico =>
             (servico.alocacoesFuncionario || []).map(aloc => ({
-                ...aloc, // Copia todas as propriedades da alocação
-                servico: { nome: servico.nome, status: servico.status } // Adiciona o nome do serviço à alocação
+                ...aloc,
+                servico: { nome: servico.nome, status: servico.status, descricao: servico.descricao }
             }))
         );
 
+        console.log('Dados das alocações para renderizar:', todasAlocacoes); // Log para depuração
+
         if (todasAlocacoes.length === 0) {
-            container.innerHTML = '<p>Nenhuma alocação encontrada para você.</p>';
+            container.innerHTML = '<p style="color: var(--text-secondary);">Nenhuma alocação encontrada para você.</p>';
             return;
         }
 
-         const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0); // Zera as horas para uma comparação justa
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
 
         todasAlocacoes.sort((a, b) => {
             const relatorioAFeito = a.feedback && a.feedback.status === 'respondido';
             const relatorioBFeito = b.feedback && b.feedback.status === 'respondido';
+            if (relatorioAFeito && !relatorioBFeito) return 1;
+            if (!relatorioAFeito && relatorioBFeito) return -1;
 
-            // Critério 1: Relatórios feitos vão para o final da lista
-            if (relatorioAFeito && !relatorioBFeito) {
-                return 1; // 'a' vai para depois de 'b'
-            }
-            if (!relatorioAFeito && relatorioBFeito) {
-                return -1; // 'a' vem antes de 'b'
-            }
-
-            // Critério 2: Proximidade da data (para itens com o mesmo status de relatório)
-            const dataA = new Date(a.data);
+            const dataA = new Date(a.data); // Usando 'data' como na sua lógica original
             const dataB = new Date(b.data);
-            
-            // Calcula a diferença absoluta em dias entre hoje e a data da alocação
             const diffA = Math.abs(dataA.getTime() - hoje.getTime());
             const diffB = Math.abs(dataB.getTime() - hoje.getTime());
-
-            return diffA - diffB; // Ordena pela menor diferença (mais próximo de hoje)
+            return diffA - diffB;
         });
 
-        container.innerHTML = ''; // Limpa a mensagem de "Carregando"
+        container.innerHTML = '';
 
-        // 3. Renderiza cada alocação individualmente
+        // Mapeamento de status para as classes do badge
+        const statusMap = {
+            'agendado': { text: 'Agendado', class: 'badge-yellow' },
+            'em execução': { text: 'Em Execução', class: 'badge-blue' },
+            'concluido': { text: 'Concluído', class: 'badge-green' },
+        };
+
         todasAlocacoes.forEach(aloc => {
             const dataFormatada = new Date(aloc.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-            let actionHtml = '';
+            // Lógica do rodapé (botão ou badge de relatório)
             const relatorioFeito = aloc.feedback && aloc.feedback.status === 'respondido';
-
+            let footerHtml = '';
             if (relatorioFeito) {
-                // Caso 1: O relatório já foi feito.
-                actionHtml = `<span class="badge badge-green">Relatório Feito</span>`;
+                footerHtml = `<span class="report-done-badge"><svg width="16" height="16" viewBox="0 0 24 24" ...></svg>Relatório Feito</span>`;
             } else if (aloc.servico.status === 'agendado') {
-                // Caso 2: O serviço ainda não começou.
-                actionHtml = `<span class="badge badge-yellow">Aguardando Início</span>`;
+                footerHtml = `<span class="report-pending-badge">Aguardando Início</span>`;
             } else {
-                // Caso 3: O serviço está em execução ou concluído, e o relatório está pendente.
-                actionHtml = `<button class="btn-action btn-report" data-feedback-id="${aloc.feedback?.id}">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                  Realizar Relatório
-                               </button>`;
+                footerHtml = `<button class="btn-action btn-report" data-feedback-id="${aloc.feedback?.id}" data-aloc-id="${aloc.id}" data-alocacao-info="${aloc.servico.nome} - ${dataFormatada}">Realizar Relatório</button>`;
             }
 
-            const itemHtml = `
-                <div class="allocation-item">
-                    <div class="allocation-details">
-                        <span class="allocation-project-name">${aloc.servico.nome}</span>
-                        <span class="allocation-date">Data: ${dataFormatada}</span>
+            // Lógica do badge do cabeçalho
+            const statusInfo = statusMap[aloc.servico.status] || { text: aloc.servico.status, class: '' };
+            const statusBadgeHtml = `<span class="badge ${statusInfo.class}">${statusInfo.text}</span>`;
+
+            // HTML do card (seguindo o padrão de sucesso)
+            const cardHtml = `
+                <div class="allocation-card">
+                    <div class="card-header">
+                        <h3 class="card-title">${aloc.servico.nome}</h3>
+                        ${statusBadgeHtml}
                     </div>
-                    <div class="allocation-actions">
-                        ${actionHtml}
+                    <div class="card-content">
+                        <span class="card-date">Data: ${dataFormatada}</span>
+                        <p class="card-description">${aloc.servico.descricao || 'Nenhuma descrição para esta tarefa.'}</p>
+                    </div>
+                    <div class="card-footer">
+                        ${footerHtml}
                     </div>
                 </div>
             `;
-            container.insertAdjacentHTML('beforeend', itemHtml);
+            container.insertAdjacentHTML('beforeend', cardHtml);
         });
 
     } catch (err) {
         console.error("Erro ao carregar alocações:", err);
-        container.innerHTML = '<p>Erro ao carregar suas alocações.</p>';
+        container.innerHTML = '<div class="no-projects-message"><h2>Erro ao carregar suas alocações.</h2></div>';
     }
 }
-
 
 async function carregarExibirProjetos() {
     const container = document.getElementById('projects-container');
@@ -831,7 +791,7 @@ function configurarFormNovoRelatorio(feedbackId = null) {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         // Determina qual feedback ID usar
         const idParaAtualizar = feedbackId || selectAlocacao.value;
 
@@ -858,96 +818,215 @@ function configurarFormNovoRelatorio(feedbackId = null) {
     });
 }
 
+// document.addEventListener('click', (event) => {
+//     // Procura se o clique foi num botão "Realizar Relatório"
+//     const reportButton = event.target.closest('.btn-report');
+
+//     if (reportButton) {
+//         // Pega o ID do feedback guardado no botão
+//         const feedbackId = reportButton.dataset.feedbackId;
+
+//         // Pega as informações do card para mostrar um título informativo no modal
+//         const alocItem = reportButton.closest('.allocation-item');
+//         const nomeProjeto = alocItem.querySelector('.allocation-project-name').textContent;
+//         const dataProjeto = alocItem.querySelector('.allocation-date').textContent;
+//         const infoCabecalho = `${nomeProjeto} (${dataProjeto.replace('Data: ', '')})`;
+
+//         // Chama a função para abrir o modal, passando o ID e as informações
+//         abrirModalRelatorioEspecifico(feedbackId, infoCabecalho);
+//     }
+// });
+
+async function carregarExibirFeedbacks() {
+    const container = document.getElementById('feedbacks-list-body');
+    if (!container) return;
+
+    container.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">A carregar feedbacks...</td></tr>';
+
+    try {
+        const feedbacks = await request('/feedback');
+
+        if (!feedbacks || feedbacks.length === 0) {
+            container.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Nenhum feedback encontrado.</td></tr>';
+            return;
+        }
+
+        container.innerHTML = ''; // Limpa a mensagem
+
+        const statusMap = {
+            'pendente': { text: 'Pendente', class: 'badge-yellow' },
+            'respondido': { text: 'Pendente', class: 'badge-yellow' },
+            'aprovado': { text: 'Aprovado', class: 'badge-green' },
+            'recusado': { text: 'Recusado', class: 'badge-red' }
+        };
+
+        feedbacks.forEach(feedback => {
+            const dataFormatada = new Date(feedback.data || new Date()).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const statusInfo = statusMap[feedback.status] || { text: feedback.status, class: '' };
+
+            const nomeFuncionario = feedback.alocacaoFuncionario?.funcionario?.nome || 'Funcionário não encontrado';
+            const nomeProjeto = feedback.alocacaoFuncionario?.servico?.nome || 'Projeto não encontrado'
+
+            const rowHtml = `
+                <tr>
+                    <td>
+                        <div class="item-primary-text">${nomeFuncionario}</div>
+                    </td>
+                    <td>
+                        <div class="item-secondary-text">${nomeProjeto}</div>
+                    </td>
+                    <td>
+                        <div class="item-secondary-text">${dataFormatada}</div>
+                    </td>
+                    <td>
+                        <span class="badge ${statusInfo.class}">${statusInfo.text}</span>
+                    </td>
+                    <td>
+                        <button class="btn-action review-feedback-btn" data-feedback-id="${feedback.id}">Revisar</button>
+                    </td>
+                </tr>
+            `;
+            container.insertAdjacentHTML('beforeend', rowHtml);
+        });
+
+    } catch (err) {
+        console.error("Erro ao carregar feedbacks:", err);
+        container.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--red-text);">Erro ao carregar os feedbacks.</td></tr>';
+    }
+}
+
+function configurarAcoesFeedbacks() {
+    const container = document.getElementById('feedbacks-list-body');
+    if (!container) return;
+
+    container.addEventListener('click', async (event) => {
+        const reviewButton = event.target.closest('.review-feedback-btn');
+        if (reviewButton) {
+            const feedbackId = reviewButton.dataset.feedbackId;
+            // Aqui, futuramente, você abrirá um modal para revisar o feedback
+            alert(`Funcionalidade "Revisar Feedback" para o ID ${feedbackId} a ser implementada.`);
+        }
+    });
+}
+
 document.addEventListener('click', (event) => {
     // Procura se o clique foi num botão "Realizar Relatório"
     const reportButton = event.target.closest('.btn-report');
-    
+
     if (reportButton) {
         // Pega o ID do feedback guardado no botão
         const feedbackId = reportButton.dataset.feedbackId;
-        
-        // Pega as informações do card para mostrar um título informativo no modal
-        const alocItem = reportButton.closest('.allocation-item');
-        const nomeProjeto = alocItem.querySelector('.allocation-project-name').textContent;
-        const dataProjeto = alocItem.querySelector('.allocation-date').textContent;
+
+        const alocItem = reportButton.closest('.allocation-card');
+        if (!alocItem) {
+            console.error("Não foi possível encontrar o card da alocação.");
+            return;
+        }
+
+        const nomeProjeto = alocItem.querySelector('.card-title').textContent;
+        const dataProjeto = alocItem.querySelector('.card-date').textContent;
+
+        // --- ADICIONE ESTA LINHA PARA CORRIGIR O ERRO ---
         const infoCabecalho = `${nomeProjeto} (${dataProjeto.replace('Data: ', '')})`;
 
-        // Chama a função para abrir o modal, passando o ID e as informações
+        // Agora a variável existe e pode ser passada para a função
         abrirModalRelatorioEspecifico(feedbackId, infoCabecalho);
     }
 });
 
-function configurarAcoesDosCards() {
-    const container = document.getElementById('projects-container');
+// function configurarAcoesDosCards() {
+//     const container = document.getElementById('projects-container');
+//     if (!container) return;
+
+//     container.addEventListener('click', async (event) => {
+//         // Lógica para abrir/fechar o menu dropdown
+//         const menuBtn = event.target.closest('.card-menu-btn');
+//         if (menuBtn) {
+//             event.stopPropagation();
+//             const menu = menuBtn.closest('.dropdown-menu');
+//             const estavaAtivo = menu.classList.contains('active');
+
+//             // Fecha todos os menus
+//             document.querySelectorAll('.dropdown-menu.active').forEach(m => m.classList.remove('active'));
+
+//             // Abre ou fecha o menu atual
+//             if (!estavaAtivo) {
+//                 menu.classList.add('active');
+//             }
+//             return;
+//         }
+
+//         // Lógica para o botão de Editar
+//         const editBtn = event.target.closest('.dropdown-item:not(.text-red)');
+//         if (editBtn) {
+//             const card = editBtn.closest('.project-card');
+//             const projetoId = card.dataset.id;
+//             if (projetoId) {
+//                 abrirModalEdicao(projetoId);
+//             }
+//             return;
+//         }
+
+//         // **INÍCIO DA NOVA LÓGICA PARA DELETAR**
+//         const deleteBtn = event.target.closest('.dropdown-item.text-red');
+//         if (deleteBtn) {
+//             const card = deleteBtn.closest('.project-card');
+//             const projetoId = card.dataset.id;
+
+//             if (projetoId) {
+//                 // Pede confirmação ao utilizador
+//                 const confirmar = confirm('Tem a certeza de que deseja excluir este projeto? Esta ação não pode ser desfeita.');
+
+//                 if (confirmar) {
+//                     try {
+//                         // Envia a requisição DELETE para o backend
+//                         await request(`/servico/${projetoId}`, 'DELETE');
+
+//                         // Remove o card do projeto da tela com uma animação
+//                         card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+//                         card.style.opacity = '0';
+//                         card.style.transform = 'scale(0.95)';
+//                         setTimeout(() => card.remove(), 300);
+
+//                     } catch (err) {
+//                         console.error('Erro ao excluir o projeto:', err);
+//                         alert(`Não foi possível excluir o projeto: ${err.message}`);
+//                     }
+//                 }
+//             }
+//             return;
+//         }
+//         // **FIM DA NOVA LÓGICA**
+//     });
+
+//     // Adiciona um evento para fechar os menus se clicar em qualquer outro lugar da página
+//     window.addEventListener('click', (event) => {
+//         if (!event.target.closest('.dropdown-menu')) {
+//             document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
+//                 menu.classList.remove('active');
+//             });
+//         }
+//     });
+// }
+
+function configurarAcoesAlocacoes() {
+    const container = document.getElementById('allocations-grid');
     if (!container) return;
 
-    container.addEventListener('click', async (event) => {
-        // Lógica para abrir/fechar o menu dropdown
-        const menuBtn = event.target.closest('.card-menu-btn');
-        if (menuBtn) {
-            event.stopPropagation();
-            const menu = menuBtn.closest('.dropdown-menu');
-            const estavaAtivo = menu.classList.contains('active');
-            
-            // Fecha todos os menus
-            document.querySelectorAll('.dropdown-menu.active').forEach(m => m.classList.remove('active'));
-            
-            // Abre ou fecha o menu atual
-            if (!estavaAtivo) {
-                menu.classList.add('active');
-            }
-            return;
-        }
+    // Adiciona um único 'escutador' de eventos ao contêiner pai
+    container.addEventListener('click', (event) => {
+        const target = event.target;
 
-        // Lógica para o botão de Editar
-        const editBtn = event.target.closest('.dropdown-item:not(.text-red)');
-        if (editBtn) {
-            const card = editBtn.closest('.project-card');
-            const projetoId = card.dataset.id;
-            if (projetoId) {
-                abrirModalEdicao(projetoId);
-            }
-            return;
-        }
+        // Verifica se o elemento clicado (ou um parente próximo) é o botão de relatório
+        const reportButton = target.closest('.btn-report');
 
-        // **INÍCIO DA NOVA LÓGICA PARA DELETAR**
-        const deleteBtn = event.target.closest('.dropdown-item.text-red');
-        if (deleteBtn) {
-            const card = deleteBtn.closest('.project-card');
-            const projetoId = card.dataset.id;
-            
-            if (projetoId) {
-                // Pede confirmação ao utilizador
-                const confirmar = confirm('Tem a certeza de que deseja excluir este projeto? Esta ação não pode ser desfeita.');
+        if (reportButton) {
+            // Se for o botão, pega os dados que guardamos nele
+            const { feedbackId, alocId, alocacaoInfo } = reportButton.dataset;
 
-                if (confirmar) {
-                    try {
-                        // Envia a requisição DELETE para o backend
-                        await request(`/servico/${projetoId}`, 'DELETE');
-                        
-                        // Remove o card do projeto da tela com uma animação
-                        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                        card.style.opacity = '0';
-                        card.style.transform = 'scale(0.95)';
-                        setTimeout(() => card.remove(), 300);
-
-                    } catch (err) {
-                        console.error('Erro ao excluir o projeto:', err);
-                        alert(`Não foi possível excluir o projeto: ${err.message}`);
-                    }
-                }
-            }
-            return;
-        }
-        // **FIM DA NOVA LÓGICA**
-    });
-
-    // Adiciona um evento para fechar os menus se clicar em qualquer outro lugar da página
-    window.addEventListener('click', (event) => {
-        if (!event.target.closest('.dropdown-menu')) {
-            document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
-                menu.classList.remove('active');
-            });
+            // Chama a função para abrir o modal, passando os dados corretos
+            // Usaremos a função mais inteligente que já pre-seleciona a alocação
+            abrirModalNovoRelatorio(alocId);
         }
     });
 }
@@ -1112,6 +1191,151 @@ function configurarPaginaConfiguracoes() {
     });
 }
 
+async function configurarPaginaProjetos() {
+    const container = document.getElementById('projects-container');
+    const filtersContainer = document.getElementById('project-filters');
+    if (!container || !filtersContainer) return;
+
+    let todosOsProjetos = []; // Guarda os projetos para filtrar sem chamar a API de novo
+
+    // Função interna que desenha os cards na tela com base no filtro
+    const renderizarProjetos = (filtro = 'all') => {
+        
+        // Limpa o container de projetos antes de adicionar os novos cards.
+        // Esta linha é essencial para que o filtro funcione corretamente.
+        container.innerHTML = '';
+
+        const projetosFiltrados = filtro === 'all'
+            ? todosOsProjetos
+            : todosOsProjetos.filter(p => p.status === filtro);
+
+        if (projetosFiltrados.length === 0) {
+            container.innerHTML = `<div class="no-projects-message"><h2>Nenhum projeto encontrado para este filtro.</h2></div>`;
+            return;
+        }
+
+        const statusMap = {
+            'agendado': { text: 'Agendado', class: 'badge-yellow' },
+            'em execução': { text: 'Em Execução', class: 'badge-blue' },
+            'concluido': { text: 'Concluído', class: 'badge-green' },
+            'cancelado': { text: 'Cancelado', class: 'badge-red' }
+        };
+
+        projetosFiltrados.forEach(projeto => {
+            const prazoFinal = new Date(projeto.data_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const statusInfo = statusMap[projeto.status?.toLowerCase()] || { text: projeto.status || 'N/A', class: '' };
+            const nomeCliente = projeto.cliente ? projeto.cliente.nome : 'Cliente não informado';
+
+            const cardHTML = `
+                <div class="project-card glass-effect" data-id="${projeto.id}">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">${projeto.nome}</h3>
+                            <p class="card-subtitle">${nomeCliente}</p>
+                        </div>
+                        <div class="dropdown-menu">
+                            <button class="card-menu-btn" aria-label="Opções do projeto">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                            </button>
+                            <div class="dropdown-content">
+                                <a class="dropdown-item btn-editar text-yellow">Editar</a>
+                                <a class="dropdown-item text-red btn-excluir">Excluir</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-item"><span>Status</span><span class="badge ${statusInfo.class}">${statusInfo.text}</span></div>
+                        <div class="card-item"><span>Orçamento</span><span class="value">R$ ${parseFloat(projeto.orcamento || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+                        <div class="card-item"><span>Lucro</span><span class="value text-green">R$ ${parseFloat(projeto.lucro_estimado || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+                        <div class="card-item"><span>Prazo</span><span class="value">${prazoFinal}</span></div>
+                    </div>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', cardHTML);
+        });
+    };
+
+    // Adiciona o listener para os botões de filtro (lógica da nova função)
+    filtersContainer.addEventListener('click', (event) => {
+        const target = event.target;
+        if (target.classList.contains('filter-btn')) {
+            filtersContainer.querySelector('.filter-btn.active')?.classList.remove('active');
+            target.classList.add('active');
+            renderizarProjetos(target.dataset.filter);
+        }
+    });
+
+    // Adiciona um único listener para todas as ações nos cards (usando a sua lógica robusta)
+    container.addEventListener('click', async (event) => {
+        const target = event.target;
+
+        // Lógica para abrir/fechar o menu dropdown (da sua função)
+        const menuBtn = target.closest('.card-menu-btn');
+        if (menuBtn) {
+            event.stopPropagation();
+            const menu = menuBtn.closest('.dropdown-menu');
+            const estavaAtivo = menu.classList.contains('active');
+
+            // Fecha todos os outros menus antes de abrir o novo
+            document.querySelectorAll('.dropdown-menu.active').forEach(m => m.classList.remove('active'));
+
+            if (!estavaAtivo) {
+                menu.classList.add('active');
+            }
+            return;
+        }
+
+        const card = target.closest('.project-card');
+        if (!card) return;
+        const projetoId = card.dataset.id;
+
+        // Lógica para o botão de Editar (adaptada da sua função)
+        if (target.closest('.btn-editar')) {
+            abrirModalEdicao(projetoId);
+            return;
+        }
+
+        // Lógica para o botão de Excluir (da sua função, com animação)
+        if (target.closest('.btn-excluir')) {
+            const confirmar = confirm('Tem a certeza de que deseja excluir este projeto? Esta ação não pode ser desfeita.');
+            if (confirmar) {
+                try {
+                    await request(`/servico/${projetoId}`, 'DELETE');
+
+                    // Animação de remoção
+                    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => card.remove(), 300);
+
+                } catch (err) {
+                    alert(`Não foi possível excluir o projeto: ${err.message}`);
+                }
+            }
+            return;
+        }
+    });
+
+    // Evento global para fechar os menus dropdown (da sua função)
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest('.dropdown-menu')) {
+            document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
+                menu.classList.remove('active');
+            });
+        }
+    });
+
+    // Busca os dados iniciais da API e renderiza pela primeira vez
+    try {
+        container.innerHTML = '<p style="text-align: center;">A carregar projetos...</p>';
+        todosOsProjetos = await request('/servico');
+        renderizarProjetos('all'); // Mostra 'todos' por defeito
+    } catch (err) {
+        console.error("Erro ao carregar projetos:", err);
+        container.innerHTML = `<div class="no-projects-message"><h2>Erro ao carregar os projetos.</h2></div>`;
+    }
+}
+
+
 
 // --- INICIALIZAÇÃO DO SITE ---
 window.onload = async () => {
@@ -1126,8 +1350,6 @@ window.onload = async () => {
     } else if (perfil === 'funcionario') {
         carregarPagina("alocacoes/alocacoes.html");
     } else {
-        // Se o perfil for inválido ou nulo, a função configurarAcessoPorPerfil()
-        // já terá redirecionado para o login. Este bloco é uma segurança extra.
         console.error("Perfil de usuário inválido:", perfil);
         document.getElementById("conteudo").innerHTML = "<p>Erro: Perfil de usuário inválido. Faça login novamente.</p>";
     }

@@ -1,93 +1,152 @@
 .reports-container {
     width: 100%;
-    max-width: 1280px;
     padding: 24px 32px;
     box-sizing: border-box;
+    animation: fadeIn 0.5s ease-out;
 }
 
-.reports-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- CABEÇALHO ATUALIZADO --- */
+.page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.page-header h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.page-header .gradient-text {
+    background-image: linear-gradient(to right, #4ade80, #3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.page-header p {
+    font-size: 1rem;
+    color: #94a3b8;
+    max-width: 60ch;
+    margin: 0 auto;
+}
+
+/* --- FIM DO CABEÇALHO --- */
+
+
+.table-container {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.reports-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.reports-table th,
+.reports-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
     border-bottom: 1px solid var(--glass-border);
+    vertical-align: middle;
+    /* Alinha o conteúdo verticalmente */
 }
 
-.reports-header h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-color);
+/* ===============================================================
+   === PARA ADICIONAR LINHAS VERTICAIS, REMOVA ESTE COMENTÁRIO ===
+   ===============================================================
+
+.reports-table th,
+.reports-table td {
+    border-right: 1px solid var(--glass-border);
 }
 
-.btn-novo-relatorio {
-    display: flex;
+.reports-table th:last-child,
+.reports-table td:last-child {
+    border-right: none;
+}
+
+*/
+
+.reports-table th {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: rgba(255, 255, 255, 0.03);
+    /* Fundo sutil para o cabeçalho */
+}
+
+.reports-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.reports-table tbody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+.reports-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.project-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.btn-action {
+    display: inline-flex;
+    /* Permite alinhar o ícone e o texto */
     align-items: center;
     gap: 0.5rem;
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
     font-weight: 500;
-    color: var(--text-color);
-    background: linear-gradient(to right, #3B82F6, #10B981);
+    font-size: 14px;
+    /* Tamanho da fonte consistente */
+    font-family: inherit;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.2s;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
 }
 
-.btn-novo-relatorio:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+.btn-action svg {
+    width: 16px;
+    height: 16px;
 }
 
-.reports-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+/* Estilo para o botão EDITAR */
+.btn-action.edit-report-btn {
+    border-color: #3b82f6;
+    /* Cor azul do tema */
+    color: #3b82f6;
 }
 
-.report-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    transition: background-color 0.2s;
-}
-
-.report-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.report-title {
-    font-weight: 500;
+.btn-action.edit-report-btn:hover {
+    background-color: #3b82f6;
     color: #ffffff;
 }
 
-.report-date {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin-top: 4px;
-}
-
-.report-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.view-report-btn {
-    padding: 0.4rem 1rem;
-    border: 1px solid var(--glass-border);
-    background: transparent;
-    color: var(--text-color);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
-}
-
-.view-report-btn:hover {
-    background-color: var(--glass-bg);
-    border-color: #ffffff;
+/* Estilo para o botão VISUALIZAR */
+.btn-action.view-report-btn:hover {
+    background-color: var(--glass-border);
+    border-color: var(--text-secondary);
 }
