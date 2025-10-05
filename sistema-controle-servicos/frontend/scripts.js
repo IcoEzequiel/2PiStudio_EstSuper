@@ -359,6 +359,63 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
         submitButton.textContent = 'Salvar Projeto';
     }
 
+    function atualizarResumoSelecao() {
+        const summaryContainer = document.getElementById('selection-summary');
+        const laborContainer = document.getElementById('selected-labor-summary');
+        const equipmentContainer = document.getElementById('selected-equipment-summary');
+
+        const selectedLabor = new Set();
+        const selectedEquipment = new Set();
+
+        // Encontra todos os checkboxes de recursos selecionados
+        const checkedBoxes = document.querySelectorAll('.resource-checkbox:checked');
+
+        checkedBoxes.forEach(checkbox => {
+            const label = document.querySelector(`label[for="${checkbox.id}"]`);
+            if (label) {
+                const name = label.textContent;
+                const cost = parseFloat(checkbox.dataset.cost || 0);
+                const costType = checkbox.dataset.costType;
+
+                // Formata o custo como moeda
+                const formattedCost = cost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                // Determina a unidade (por dia ou por hora)
+                const unit = costType === 'daily' ? '/h' : '/h';
+
+                // Cria o texto completo com nome e valor
+                const fullText = `${name} (${formattedCost}${unit})`;
+
+                if (checkbox.id.startsWith('func-')) {
+                    selectedLabor.add(fullText);
+                } else if (checkbox.id.startsWith('equip-')) {
+                    selectedEquipment.add(fullText);
+                }
+            }
+        });
+
+        // Limpa os resumos anteriores
+        laborContainer.innerHTML = '';
+        equipmentContainer.innerHTML = '';
+
+        // Se houver algum recurso selecionado, mostra o resumo
+        if (selectedLabor.size > 0 || selectedEquipment.size > 0) {
+            summaryContainer.style.display = 'block';
+
+            if (selectedLabor.size > 0) {
+                const laborItems = Array.from(selectedLabor).map(name => `<li>${name}</li>`).join('');
+                laborContainer.innerHTML = `<h4>Mão de Obra</h4><ul>${laborItems}</ul>`;
+            }
+
+            if (selectedEquipment.size > 0) {
+                const equipmentItems = Array.from(selectedEquipment).map(name => `<li>${name}</li>`).join('');
+                equipmentContainer.innerHTML = `<h4>Equipamentos</h4><ul>${equipmentItems}</ul>`;
+            }
+        } else {
+            summaryContainer.style.display = 'none'; // Esconde se nada estiver selecionado
+        }
+    }
+
     // --- 3. FUNÇÕES AUXILIARES ---
     function preencherAlocacoesSalvas() {
         (projetoParaEditar.alocacoesFuncionario || []).forEach(aloc => {
@@ -452,7 +509,9 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
         }
 
         if (modo === 'editar' && projetoParaEditar) preencherAlocacoesSalvas();
+
         atualizarResumoFinanceiro();
+        atualizarResumoSelecao();
     }
 
     function atualizarResumoFinanceiro() {
@@ -563,6 +622,7 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
     alocacoesContainer.addEventListener('change', (e) => {
         if (e.target.matches('.resource-checkbox, .horas-trabalhadas')) {
             atualizarResumoFinanceiro();
+            atualizarResumoSelecao();
         }
         if (e.target.matches('.resource-checkbox')) {
             const multiselect = e.target.closest('.custom-multiselect');
@@ -1200,7 +1260,7 @@ async function configurarPaginaProjetos() {
 
     // Função interna que desenha os cards na tela com base no filtro
     const renderizarProjetos = (filtro = 'all') => {
-        
+
         // Limpa o container de projetos antes de adicionar os novos cards.
         // Esta linha é essencial para que o filtro funcione corretamente.
         container.innerHTML = '';
