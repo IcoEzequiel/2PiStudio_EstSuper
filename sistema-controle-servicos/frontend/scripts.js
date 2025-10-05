@@ -855,7 +855,7 @@ async function carregarExibirFeedbacks() {
 
         const statusMap = {
             'pendente': { text: 'Pendente', class: 'badge-yellow' },
-            'respondido': { text: 'Pendente', class: 'badge-yellow' },
+            'respondido': { text: 'Respondido', class: 'badge-blue' },
             'aprovado': { text: 'Aprovado', class: 'badge-green' },
             'recusado': { text: 'Recusado', class: 'badge-red' }
         };
@@ -864,8 +864,8 @@ async function carregarExibirFeedbacks() {
             const dataFormatada = new Date(feedback.data || new Date()).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const statusInfo = statusMap[feedback.status] || { text: feedback.status, class: '' };
 
-            const nomeFuncionario = feedback.alocacaoFuncionario?.funcionario?.nome || 'Funcionário não encontrado';
-            const nomeProjeto = feedback.alocacaoFuncionario?.servico?.nome || 'Projeto não encontrado'
+            const nomeFuncionario = feedback.funcionario?.nome || 'Funcionário não encontrado';
+            const nomeProjeto = feedback.servico?.nome || 'Projeto não encontrado'
 
             const rowHtml = `
                 <tr>
