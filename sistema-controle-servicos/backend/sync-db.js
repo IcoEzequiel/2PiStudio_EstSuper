@@ -22,7 +22,7 @@ sequelize.sync({ alter: true })  // ou { force: true } para recriar as tabelas (
   .catch(err => {
     console.error('Erro ao sincronizar banco:', err);
   })
-  .finally(()=> {
+  .finally(() => {
     console.log('Fechando conexão...')
     sequelize.close()
   });
