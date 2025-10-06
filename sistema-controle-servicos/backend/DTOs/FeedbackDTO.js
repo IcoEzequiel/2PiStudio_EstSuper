@@ -6,6 +6,7 @@ class FeedbackDTO {
         this.funcionario = servicoPrestado?.funcionario
         this.comentario = feedback.comentario
         this.data = feedback.data
+        this.resposta = feedback.resposta
         this.status = feedback.status
     }
 }

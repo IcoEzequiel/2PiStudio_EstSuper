@@ -15,6 +15,9 @@ const ClienteRepo = require('../repositories/ClienteRepository')
 // Para transformar o os dados em DTOs
 const ServicoMapper = require('../mappers/servicoMapper')
 
+// Chamada de Models (para o feedback)
+const ModelFeedback = require('../models/ModelFeedback');
+
 // ** FUNÇÕES AUXILIARES
 
 //Calcula o Lucro do Servico
@@ -59,8 +62,8 @@ const calcularStatus = (servico) => {
 
     // Elimina as horas para não gerar conflito
     hoje.setHours(0,0,0,0)
-    dataInicio.setHours(0,0,0,0)
-    dataFim.setHours(0,0,0,0)
+    dataInicio.setUTCHours(0,0,0,0)
+    dataFim.setUTCHours(23, 59, 59, 999)
 
     if (hoje > dataFim)
         return 'concluido'
@@ -170,6 +173,7 @@ const validarEquipamento = async (dados, data) => {
 }
 
 // Funcção auxiliar para gerenciar as alocações, criando elas com os dados fornecidos
+// Criar isto foi um erro, mas é
 const gerenciarAlocacoes = async (servicoId, alocacoesDiarias, transaction) => {
     // verifica se veio alguma alocação
     if (!alocacoesDiarias) return
@@ -313,19 +317,36 @@ const ServicoService = {
 
         try{
             await validarServico(dados,id)
-            // Pega o serviço com suas alocações
+            // Pega o serviço com suas alocações e feedback
             const servico = await ServicoRepo.getById(id, {
-                include: [
-                    { model: require('../models/ModelAlocacaoFuncionario'), as: 'alocacoesFuncionario'},
-                    { model: require('../models/ModelAlocacaoEquipamento'), as: 'alocacoesEquipamento'}
-                ], 
+                include: [{
+                    model: require('../models/ModelAlocacaoFuncionario'), as: 'alocacoesFuncionario',
+                    include: [{ model: ModelFeedback, as: 'feedback' }] // Inclui o feedback na busca
+                }, {
+                    model: require('../models/ModelAlocacaoEquipamento'), as: 'alocacoesEquipamento'
+                }],
                 transaction: t
-            })
+            });
+
+            if (!servico) {
+                throw new Error('Serviço não encontrado');
+            }
 
             // Apaga todas as alocações para depois recriar
-            if(servico.alocacoesFuncionario){
-                for(const aloc of servico.alocacoesFuncionario || []){
-                    await AlocacaoFuncRepo.delete(aloc.id, {transaction: t})
+            const feedbackMap = new Map();
+            if (servico.alocacoesFuncionario) {
+                for (const aloc of servico.alocacoesFuncionario) {
+                    // 1. Encontrar o feedback associado
+                     const feedbackToDelete = await ModelFeedback.findOne({
+                        where: { id_alocacaoFuncionario: aloc.id },
+                        transaction: t
+                    });
+                    // 2. Deletar o feedback se existir
+                    if (feedbackToDelete) {
+                        await FeedbackRepo.delete(feedbackToDelete.id, { transaction: t });
+                    }
+                    // 3. Deletar a alocação
+                    await AlocacaoFuncRepo.delete(aloc.id, { transaction: t });
                 }
             }
             if(servico.alocacoesEquipamento){
@@ -335,8 +356,9 @@ const ServicoService = {
             }
 
             // Recriação das alocações
-            if(dados.alocacoes_diarias)
-                await gerenciarAlocacoes(id, dados.alocacoes_diarias,t)
+            if (dados.alocacoes_diarias) {
+            await gerenciarAlocacoes(id, dados.alocacoes_diarias, t, feedbackMap);
+            }
 
             const dadosServico = {
                 ...servico.get({plain: true}),
@@ -367,9 +389,18 @@ const ServicoService = {
                 transaction: t
             })
             // Deleta as alocações
-            for (const aloc of servico.alocacoesFuncionario || []){
-                await AlocacaoFuncRepo.delete(aloc.id, {transaction: t})
-            }
+            for (const aloc of servico.alocacoesFuncionario || []) {
+                const feedbackToDelete = await ModelFeedback.findOne({
+                    where: { id_alocacaoFuncionario: aloc.id },
+                    transaction: t
+                });
+
+                if (feedbackToDelete) {
+                    await FeedbackRepo.delete(feedbackToDelete.id, { transaction: t });
+                }
+
+                await AlocacaoFuncRepo.delete(aloc.id, { transaction: t });
+                }
             for (const aloc of servico.alocacoesEquipamento || []){
                 await AlocacaoEquipRepo.delete(aloc.id, {transaction: t})
             }

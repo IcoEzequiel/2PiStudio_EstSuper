@@ -146,3 +146,28 @@
     background-color: rgba(245, 159, 11, 0.1);
 }
 
+.btn-revisar {
+    border-color: #f59e0b; /* Laranja */
+    color: #f59e0b;
+}
+
+.btn-revisar:hover {
+    background-color: #f59e0b;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(245, 159, 11, 0.3);
+}
+
+.report-rejected-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 8px;
+    font-weight: 500;
+    color: #f59e0b; /* Laranja/Amarelo para atenção */
+    background-color: rgba(245, 159, 11, 0.1);
+    cursor: default; /* Garante que não pareça clicável */
+}
+

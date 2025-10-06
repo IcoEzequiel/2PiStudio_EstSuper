@@ -1,0 +1,35 @@
+<div class="review-modal-content">
+    <div class="modal-header">
+        <h2 id="review-modal-title" class="gradient-text">Revisar Relatório</h2>
+        <button id="close-review-modal-btn" class="close-button" type="button">&times;</button>
+    </div>
+
+    <div class="review-details">
+        <div class="detail-item">
+            <span class="detail-label">Funcionário:</span>
+            <span id="review-funcionario-nome" class="detail-value"></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Projeto:</span>
+            <span id="review-projeto-nome" class="detail-value"></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Data de Envio:</span>
+            <span id="review-data-envio" class="detail-value"></span>
+        </div>
+    </div>
+
+    <div class="review-comment-box">
+        <label class="detail-label">Comentário do Funcionário:</label>
+        <p id="review-comentario"></p>
+    </div>
+
+    <div class="review-rejection-box" id="admin-response-box">
+        <label for="admin-response-text" class="detail-label">Sua Resposta (Opcional):</label>
+        <textarea id="admin-response-text" rows="3" placeholder="Adicione um comentário para o funcionário..."></textarea>
+    </div>
+    <div class="review-actions">
+        <button id="btn-rejeitar" class="btn-action btn-rejeitar">Pedir Ajuste</button>
+        <button id="btn-aprovar" class="btn-action btn-aprovar">Aprovar Relatório</button>
+    </div>
+</div>

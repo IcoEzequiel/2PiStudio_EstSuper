@@ -59,7 +59,7 @@ const FeedbackService = {
             // Filtra por status
             inclusao.where = {
                 status: {
-                    [Op.or]: ['respondido','aprovado']
+                    [Op.or]: ['respondido','aprovado','rejeitado']
                 }
             }
         }
@@ -98,10 +98,16 @@ const FeedbackService = {
 
         if (usuario && usuario.papel === 'administrador') {
             // LÓGICA DO ADMIN: Só pode alterar o status.
-            if (dados.status && ['respondido', 'aprovado'].includes(dados.status)) {
+            if (dados.status && ['aprovado','rejeitado'].includes(dados.status)) {
                 dadosUpdate.status = dados.status;
+                if (dados.status === 'aprovado'){
+                    dadosUpdate.resposta = dados.resposta?.trim() || "O relatório foi aprovado. Bom trabalho!";
+                }
+                if (dados.status === 'rejeitado'){
+                    dadosUpdate.resposta = dados.resposta || 'Por favor, revise seu relatório'
+                }
             } else {
-                throw new Error('Administrador pode apenas alterar o status para "respondido" ou "aprovado".');
+                throw new Error('Administrador pode apenas alterar o status para "aprovado" ou "rejeitado".');
             }
 
         } else {
@@ -122,10 +128,10 @@ const FeedbackService = {
             dadosUpdate.comentario = dados.comentario;
             dadosUpdate.data = new Date();
             dadosUpdate.status = 'respondido';
+            dadosUpdate.resposta = null;
         }
 
         const edit = await repo.update(id, dadosUpdate)
-
         const edit2 = await getComInclude(edit.id)
         const editDTO = FeedbackMapper.toDTO(edit2)
         return editDTO

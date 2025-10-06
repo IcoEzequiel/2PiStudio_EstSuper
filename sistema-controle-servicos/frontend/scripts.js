@@ -187,44 +187,47 @@ async function carregarPagina(pagina) {
 }
 
 async function carregarExibirRelatorios() {
-    // 1. O alvo agora é o CORPO da tabela
     const container = document.getElementById('reports-list-body');
     if (!container) return;
 
-    // Mensagem de "carregando" formatada para uma tabela
-    container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Carregando relatórios...</td></tr>';
+    container.innerHTML = '<tr><td colspan="4" style="text-align: center;">Carregando relatórios...</td></tr>';
 
     try {
-        // 2. A busca de dados continua a mesma
         const relatorios = await request('/feedback');
 
         if (!relatorios || relatorios.length === 0) {
-            container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Nenhum relatório encontrado.</td></tr>';
+            container.innerHTML = '<tr><td colspan="4" style="text-align: center;">Nenhum relatório encontrado.</td></tr>';
             return;
         }
 
-        container.innerHTML = ''; // Limpa a mensagem
+        container.innerHTML = '';
 
-        // 3. A lógica de status e botões continua a mesma
+        // Adiciona o status 'rejeitado' ao mapa
         const statusMap = {
             'respondido': { text: 'Pendente', class: 'badge-yellow' },
-            'aprovado': { text: 'Aprovado', class: 'badge-green' }
+            'aprovado': { text: 'Aprovado', class: 'badge-green' },
+            'rejeitado': { text: 'Ajuste Solicitado', class: 'badge-red' } // Novo status
         };
 
-        // 4. O loop agora gera o HTML de uma LINHA DE TABELA (<tr>)
         relatorios.forEach(rel => {
             const dataFormatada = new Date(rel.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const statusInfo = statusMap[rel.status] || { text: rel.status, class: '' };
 
-            const actionButton = rel.status === 'respondido'
+            // O botão de edição agora aparece para 'respondido' E 'rejeitado'
+            const actionButton = (rel.status === 'respondido' || rel.status === 'rejeitado')
                 ? `<button class="btn-action edit-report-btn" data-feedback-id="${rel.id}">Editar</button>`
                 : `<button class="btn-action view-report-btn" data-feedback-id="${rel.id}">Visualizar</button>`;
 
-            // --- O HTML gerado agora é para <tr> e <td> ---
+            // Cria um elemento para mostrar a resposta do admin, se houver
+            const respostaAdminHtml = rel.resposta 
+                ? `<div class="admin-response"><strong>Admin:</strong> ${rel.resposta}</div>` 
+                : '';
+
             const rowHtml = `
                 <tr>
                     <td>
-                        <div class="project-name">Relatório: ${rel.servico.nome}</div>
+                        <div class="project-name">${rel.servico.nome}</div>
+                        ${respostaAdminHtml}
                     </td>
                     <td>
                         <div class="date-cell">${dataFormatada}</div>
@@ -246,10 +249,8 @@ async function carregarExibirRelatorios() {
     }
 }
 
-
-
 function configurarAcoesRelatorios() {
-    const container = document.getElementById('reports-list');
+    const container = document.getElementById('reports-list-body');
     if (!container) return;
 
     container.addEventListener('click', async (event) => {
@@ -259,14 +260,11 @@ function configurarAcoesRelatorios() {
         if (editButton) {
             const feedbackId = editButton.dataset.feedbackId;
             try {
-                // Busca o feedback para obter o comentário atual
                 const feedback = await request(`/feedback/${feedbackId}`);
+                
+                const reportRow = editButton.closest('tr');
+                const alocacaoInfo = reportRow.querySelector('.project-name').textContent;
 
-                // Pega as informações do card para o título
-                const reportItem = editButton.closest('.report-item');
-                const alocacaoInfo = reportItem.querySelector('.report-title').textContent;
-
-                // Abre o modal de relatório, passando o ID e o texto atual
                 abrirModalRelatorioEspecifico(feedbackId, alocacaoInfo, feedback.comentario);
 
             } catch (err) {
@@ -275,7 +273,6 @@ function configurarAcoesRelatorios() {
         }
 
         if (viewButton) {
-            // Lógica de visualização (por agora, apenas um alerta)
             alert("A funcionalidade de visualização de relatórios aprovados será implementada no futuro.");
         }
     });
@@ -638,79 +635,80 @@ function configurarFormNovoProjeto(projetoParaEditar = null) {
 }
 
 async function carregarExibirAlocacoes() {
-    const container = document.getElementById('allocations-grid'); // O contêiner correto dos cards
+    const container = document.getElementById('allocations-grid');
     if (!container) return;
     container.innerHTML = '<p style="color: var(--text-secondary);">Carregando alocações...</p>';
 
     try {
         const servicos = await request('/servico');
-        const todasAlocacoes = servicos.flatMap(servico =>
-            (servico.alocacoesFuncionario || []).map(aloc => ({
-                ...aloc,
-                servico: { nome: servico.nome, status: servico.status, descricao: servico.descricao }
-            }))
-        );
 
-        console.log('Dados das alocações para renderizar:', todasAlocacoes); // Log para depuração
-
-        if (todasAlocacoes.length === 0) {
+        if (!servicos || servicos.length === 0) {
             container.innerHTML = '<p style="color: var(--text-secondary);">Nenhuma alocação encontrada para você.</p>';
             return;
         }
 
+        container.innerHTML = ''; 
+
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
 
-        todasAlocacoes.sort((a, b) => {
-            const relatorioAFeito = a.feedback && a.feedback.status === 'respondido';
-            const relatorioBFeito = b.feedback && b.feedback.status === 'respondido';
+        servicos.sort((a, b) => {
+            const relatorioAFeito = (a.alocacoesFuncionario || []).some(aloc => aloc.feedback && ['respondido', 'aprovado'].includes(aloc.feedback.status));
+            const relatorioBFeito = (b.alocacoesFuncionario || []).some(aloc => aloc.feedback && ['respondido', 'aprovado'].includes(aloc.feedback.status));
             if (relatorioAFeito && !relatorioBFeito) return 1;
             if (!relatorioAFeito && relatorioBFeito) return -1;
-
-            const dataA = new Date(a.data); // Usando 'data' como na sua lógica original
-            const dataB = new Date(b.data);
+            const dataA = new Date(a.data_inicio);
+            const dataB = new Date(b.data_inicio);
             const diffA = Math.abs(dataA.getTime() - hoje.getTime());
             const diffB = Math.abs(dataB.getTime() - hoje.getTime());
             return diffA - diffB;
         });
 
-        container.innerHTML = '';
-
-        // Mapeamento de status para as classes do badge
         const statusMap = {
             'agendado': { text: 'Agendado', class: 'badge-yellow' },
             'em execução': { text: 'Em Execução', class: 'badge-blue' },
             'concluido': { text: 'Concluído', class: 'badge-green' },
         };
 
-        todasAlocacoes.forEach(aloc => {
-            const dataFormatada = new Date(aloc.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        servicos.forEach(servico => {
+            const primeiraAlocacaoComFeedback = (servico.alocacoesFuncionario || []).find(aloc => aloc.feedback);
+            const feedback = primeiraAlocacaoComFeedback ? primeiraAlocacaoComFeedback.feedback : null;
+            
+            const dataInicioFormatada = new Date(servico.data_inicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const dataFimFormatada = new Date(servico.data_fim).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const periodo = dataInicioFormatada === dataFimFormatada ? dataInicioFormatada : `${dataInicioFormatada} a ${dataFimFormatada}`;
 
-            // Lógica do rodapé (botão ou badge de relatório)
-            const relatorioFeito = aloc.feedback && aloc.feedback.status === 'respondido';
             let footerHtml = '';
-            if (relatorioFeito) {
-                footerHtml = `<span class="report-done-badge"><svg width="16" height="16" viewBox="0 0 24 24" ...></svg>Relatório Feito</span>`;
-            } else if (aloc.servico.status === 'agendado') {
+            const relatorioRejeitado = feedback && feedback.status === 'rejeitado';
+            const relatorioEnviado = feedback && ['respondido', 'aprovado'].includes(feedback.status);
+
+            if (relatorioRejeitado) {
+                footerHtml = `<span class="report-rejected-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                Ajuste Necessário
+                </span>`;
+            } else if (relatorioEnviado) {
+                footerHtml = `<span class="report-done-badge"><svg width="16" height="16" ...></svg>Relatório Feito</span>`;
+            } else if (servico.status === 'agendado') {
                 footerHtml = `<span class="report-pending-badge">Aguardando Início</span>`;
+            } else if (feedback && feedback.id) {
+                footerHtml = `<button class="btn-action btn-report" data-feedback-id="${feedback.id}" data-alocacao-info="${servico.nome} - Período: ${periodo}">Realizar Relatório</button>`;
             } else {
-                footerHtml = `<button class="btn-action btn-report" data-feedback-id="${aloc.feedback?.id}" data-aloc-id="${aloc.id}" data-alocacao-info="${aloc.servico.nome} - ${dataFormatada}">Realizar Relatório</button>`;
+                footerHtml = `<span class="report-pending-badge">Relatório Indisponível</span>`;
             }
 
-            // Lógica do badge do cabeçalho
-            const statusInfo = statusMap[aloc.servico.status] || { text: aloc.servico.status, class: '' };
+            const statusInfo = statusMap[servico.status] || { text: servico.status, class: '' };
             const statusBadgeHtml = `<span class="badge ${statusInfo.class}">${statusInfo.text}</span>`;
 
-            // HTML do card (seguindo o padrão de sucesso)
             const cardHtml = `
                 <div class="allocation-card">
                     <div class="card-header">
-                        <h3 class="card-title">${aloc.servico.nome}</h3>
+                        <h3 class="card-title">${servico.nome}</h3>
                         ${statusBadgeHtml}
                     </div>
                     <div class="card-content">
-                        <span class="card-date">Data: ${dataFormatada}</span>
-                        <p class="card-description">${aloc.servico.descricao || 'Nenhuma descrição para esta tarefa.'}</p>
+                        <span class="card-date">Período: ${periodo}</span>
+                        <p class="card-description">${servico.descricao || 'Nenhuma descrição para este projeto.'}</p>
                     </div>
                     <div class="card-footer">
                         ${footerHtml}
@@ -847,16 +845,17 @@ async function abrirModalRelatorioEspecifico(feedbackId, alocacaoInfo, comentari
 function configurarFormNovoRelatorio(feedbackId = null) {
     const form = document.getElementById('form-novo-relatorio');
     const submitButton = form.querySelector('button[type="submit"]');
-    const selectAlocacao = document.getElementById('relatorio-alocacao');
 
-    form.addEventListener('submit', async (e) => {
+    // **INÍCIO DA CORREÇÃO 1: Usar 'onsubmit' para garantir um único manipulador**
+    // Isto substitui qualquer listener de 'submit' anterior, eliminando o "efeito fantasma".
+    form.onsubmit = async (e) => {
         e.preventDefault();
-
-        // Determina qual feedback ID usar
-        const idParaAtualizar = feedbackId || selectAlocacao.value;
+        
+        // A lógica de envio permanece a mesma, mas agora é a única a ser executada.
+        const idParaAtualizar = feedbackId;
 
         if (!idParaAtualizar) {
-            alert('Por favor, selecione uma alocação para enviar o relatório.');
+            alert('Erro: ID do Feedback não encontrado. Não foi possível enviar o relatório.');
             return;
         }
 
@@ -869,13 +868,14 @@ function configurarFormNovoRelatorio(feedbackId = null) {
             await request(`/feedback/${idParaAtualizar}`, 'PUT', { comentario });
             alert('Relatório enviado com sucesso!');
             fecharModalNovoRelatorio();
-            carregarPagina('alocacoes/alocacoes.html'); // Recarrega a lista para mostrar o status atualizado
+            carregarPagina('alocacoes/alocacoes.html');
         } catch (err) {
             alert(`Erro ao enviar relatório: ${err.message}`);
             submitButton.disabled = false;
             submitButton.textContent = 'Enviar Relatório';
         }
-    });
+    };
+    // **FIM DA CORREÇÃO 1**
 }
 
 // document.addEventListener('click', (event) => {
@@ -964,110 +964,68 @@ function configurarAcoesFeedbacks() {
         if (reviewButton) {
             const feedbackId = reviewButton.dataset.feedbackId;
             // Aqui, futuramente, você abrirá um modal para revisar o feedback
-            alert(`Funcionalidade "Revisar Feedback" para o ID ${feedbackId} a ser implementada.`);
+            abrirModalRevisao(feedbackId);
         }
     });
 }
 
-document.addEventListener('click', (event) => {
-    // Procura se o clique foi num botão "Realizar Relatório"
-    const reportButton = event.target.closest('.btn-report');
+function fecharModalRevisao() {
+    fecharModalGenerico('revisar-feedback-css');
+}
 
-    if (reportButton) {
-        // Pega o ID do feedback guardado no botão
-        const feedbackId = reportButton.dataset.feedbackId;
+async function abrirModalRevisao(feedbackId) {
+    await abrirModalGenerico({
+        htmlPath: 'feedbacks/revisar-feedback.html',
+        cssPath: 'feedbacks/revisar-feedback.css',
+        cssId: 'revisar-feedback-css',
+        closeBtnId: 'close-review-modal-btn',
+        closeFn: fecharModalRevisao
+    });
 
-        const alocItem = reportButton.closest('.allocation-card');
-        if (!alocItem) {
-            console.error("Não foi possível encontrar o card da alocação.");
-            return;
-        }
+    await new Promise(resolve => requestAnimationFrame(resolve));
 
-        const nomeProjeto = alocItem.querySelector('.card-title').textContent;
-        const dataProjeto = alocItem.querySelector('.card-date').textContent;
+    try {
+        const responseText = document.getElementById('admin-response-text');
+        const btnAprovar = document.getElementById('btn-aprovar');
+        const btnRejeitar = document.getElementById('btn-rejeitar');
+        
+        const feedback = await request(`/feedback/${feedbackId}`);
+        
+        document.getElementById('review-funcionario-nome').textContent = feedback.funcionario?.nome || 'N/A';
+        document.getElementById('review-projeto-nome').textContent = feedback.servico?.nome || 'N/A';
+        document.getElementById('review-data-envio').textContent = new Date(feedback.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        document.getElementById('review-comentario').textContent = feedback.comentario;
 
-        // --- ADICIONE ESTA LINHA PARA CORRIGIR O ERRO ---
-        const infoCabecalho = `${nomeProjeto} (${dataProjeto.replace('Data: ', '')})`;
+        // Preenche a caixa de texto com a resposta anterior do admin, se houver
+        responseText.value = feedback.resposta || '';
 
-        // Agora a variável existe e pode ser passada para a função
-        abrirModalRelatorioEspecifico(feedbackId, infoCabecalho);
+        // **CORREÇÃO DA LÓGICA DOS BOTÕES**
+        // Agora, ambos os botões lêem o valor da caixa de texto no momento do clique.
+        btnAprovar.onclick = () => handleFeedbackAction(feedbackId, 'aprovado', responseText.value);
+        btnRejeitar.onclick = () => handleFeedbackAction(feedbackId, 'rejeitado', responseText.value);
+
+    } catch (error) {
+        alert(`Erro ao carregar detalhes do feedback: ${error.message}`);
+        fecharModalRevisao();
     }
-});
+}
 
-// function configurarAcoesDosCards() {
-//     const container = document.getElementById('projects-container');
-//     if (!container) return;
+async function handleFeedbackAction(feedbackId, novoStatus, resposta = null) {
+    // Monta o corpo da requisição com o status e a resposta
+    const body = { 
+        status: novoStatus,
+        resposta: resposta 
+    };
 
-//     container.addEventListener('click', async (event) => {
-//         // Lógica para abrir/fechar o menu dropdown
-//         const menuBtn = event.target.closest('.card-menu-btn');
-//         if (menuBtn) {
-//             event.stopPropagation();
-//             const menu = menuBtn.closest('.dropdown-menu');
-//             const estavaAtivo = menu.classList.contains('active');
-
-//             // Fecha todos os menus
-//             document.querySelectorAll('.dropdown-menu.active').forEach(m => m.classList.remove('active'));
-
-//             // Abre ou fecha o menu atual
-//             if (!estavaAtivo) {
-//                 menu.classList.add('active');
-//             }
-//             return;
-//         }
-
-//         // Lógica para o botão de Editar
-//         const editBtn = event.target.closest('.dropdown-item:not(.text-red)');
-//         if (editBtn) {
-//             const card = editBtn.closest('.project-card');
-//             const projetoId = card.dataset.id;
-//             if (projetoId) {
-//                 abrirModalEdicao(projetoId);
-//             }
-//             return;
-//         }
-
-//         // **INÍCIO DA NOVA LÓGICA PARA DELETAR**
-//         const deleteBtn = event.target.closest('.dropdown-item.text-red');
-//         if (deleteBtn) {
-//             const card = deleteBtn.closest('.project-card');
-//             const projetoId = card.dataset.id;
-
-//             if (projetoId) {
-//                 // Pede confirmação ao utilizador
-//                 const confirmar = confirm('Tem a certeza de que deseja excluir este projeto? Esta ação não pode ser desfeita.');
-
-//                 if (confirmar) {
-//                     try {
-//                         // Envia a requisição DELETE para o backend
-//                         await request(`/servico/${projetoId}`, 'DELETE');
-
-//                         // Remove o card do projeto da tela com uma animação
-//                         card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-//                         card.style.opacity = '0';
-//                         card.style.transform = 'scale(0.95)';
-//                         setTimeout(() => card.remove(), 300);
-
-//                     } catch (err) {
-//                         console.error('Erro ao excluir o projeto:', err);
-//                         alert(`Não foi possível excluir o projeto: ${err.message}`);
-//                     }
-//                 }
-//             }
-//             return;
-//         }
-//         // **FIM DA NOVA LÓGICA**
-//     });
-
-//     // Adiciona um evento para fechar os menus se clicar em qualquer outro lugar da página
-//     window.addEventListener('click', (event) => {
-//         if (!event.target.closest('.dropdown-menu')) {
-//             document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
-//                 menu.classList.remove('active');
-//             });
-//         }
-//     });
-// }
+    try {
+        await request(`/feedback/${feedbackId}`, 'PUT', body);
+        alert(`Feedback ${novoStatus === 'aprovado' ? 'aprovado' : 'marcado para ajuste'} com sucesso!`);
+        fecharModalRevisao();
+        carregarPagina('feedbacks/feedbacks.html'); // Recarrega a lista
+    } catch (error) {
+        alert(`Erro ao atualizar o status do feedback: ${error.message}`);
+    }
+}
 
 function configurarAcoesAlocacoes() {
     const container = document.getElementById('allocations-grid');
@@ -1082,11 +1040,11 @@ function configurarAcoesAlocacoes() {
 
         if (reportButton) {
             // Se for o botão, pega os dados que guardamos nele
-            const { feedbackId, alocId, alocacaoInfo } = reportButton.dataset;
+            const { feedbackId, alocacaoInfo } = reportButton.dataset;
 
             // Chama a função para abrir o modal, passando os dados corretos
             // Usaremos a função mais inteligente que já pre-seleciona a alocação
-            abrirModalNovoRelatorio(alocId);
+            abrirModalRelatorioEspecifico(feedbackId, alocacaoInfo);
         }
     });
 }
