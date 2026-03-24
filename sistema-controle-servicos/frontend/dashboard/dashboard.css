@@ -12,13 +12,31 @@
 .dashboard-container {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 2rem;
+    width: 100%;
+    padding: 1.5rem 2rem;
+    box-sizing: border-box;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .grade-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
+    width: 100%;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .grade-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .grade-cards {
+        grid-template-columns: 1fr;
+    }
 }
 
 .card {
@@ -53,6 +71,14 @@
 
 .barra-card.laranja {
     background: linear-gradient(to right, #f59e0b, #ef4444);
+}
+
+.barra-card.amarelo {
+    background: linear-gradient(to right, #fbbf24, #f59e0b);
+}
+
+.barra-card.ciano {
+    background: linear-gradient(to right, #22d3ee, #06b6d4);
 }
 
 .cabecalho-card {

@@ -1228,7 +1228,7 @@ async function configurarPaginaProjetos() {
             : todosOsProjetos.filter(p => p.status === filtro);
 
         if (projetosFiltrados.length === 0) {
-            container.innerHTML = `<div class="no-projects-message"><h2>Nenhum projeto encontrado para este filtro.</h2></div>`;
+            container.innerHTML = `<div class="no-projects-message"><h2>Nenhum projeto encontrado para este filtro</h2><p>Clique em "<strong>Novo Projeto</strong>" para agendar um novo projeto</p></div>`;
             return;
         }
 

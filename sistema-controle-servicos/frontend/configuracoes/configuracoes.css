@@ -4,21 +4,25 @@
     --green-400: #4ade80;
     --red-400: #f87171;
     --red-hover: #ef4444;
-}
-
-body {
-    background-color: #0f172a;
-    color: #cbd5e1;
-    padding-top: 2rem;
+    --blue-start: #3b82f6;
+    --cyan-end: #06b6d4;
+    --green-start: #22c55e;
+    --emerald-end: #10b981;
+    --purple-start: #a855f7;
+    --pink-end: #ec4899;
+    --orange-start: #f97316;
+    --red-end: #ef4444;
 }
 
 .main-container {
-    max-width: 1200px;
+    /* max-width: 1200px; */
+    width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    padding: 0 1rem;
+    padding: 1.5rem 2rem;
+    box-sizing: border-box;
 }
 
 .header-text {
@@ -40,12 +44,15 @@ body {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    
 }
 
 .grid-container {
     display: grid;
-    grid-template-columns: 1fr;
+    width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.5rem;
+    animation: fadeIn 0.5s ease-out;
 }
 
 @media (min-width: 768px) {
